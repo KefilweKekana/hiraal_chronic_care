@@ -1,0 +1,21 @@
+{
+  "content": null,
+  "creation": "2026-04-19 00:00:00.000000",
+  "doctype": "Page",
+  "icon": "octicon octicon-person",
+  "modified": "2026-04-19 00:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Hiraal EMR",
+  "name": "patient-management",
+  "owner": "Administrator",
+  "page_name": "patient-management",
+  "roles": [
+    {"role": "System Manager"},
+    {"role": "Chronic Care Admin"},
+    {"role": "Chronic Care Nurse"},
+    {"role": "Chronic Care Doctor"}
+  ],
+  "standard": "Yes",
+  "system_page": 0,
+  "title": "Patient Management"
+}

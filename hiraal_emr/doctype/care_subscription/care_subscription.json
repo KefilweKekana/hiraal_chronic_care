@@ -1,0 +1,253 @@
+{
+  "actions": [],
+  "autoname": "naming_series:",
+  "creation": "2026-04-19 00:00:00.000000",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "naming_series",
+    "patient",
+    "patient_name",
+    "patient_phone",
+    "column_break_cs1",
+    "plan",
+    "monthly_fee",
+    "status",
+    "section_dates",
+    "start_date",
+    "next_billing_date",
+    "column_break_dt1",
+    "end_date",
+    "auto_renew",
+    "section_payment",
+    "payment_method",
+    "payment_reference",
+    "column_break_pm1",
+    "last_payment_date",
+    "last_payment_status",
+    "total_collected",
+    "section_retry",
+    "retry_count",
+    "max_retries",
+    "column_break_rt1",
+    "suspended_reason",
+    "amended_from"
+  ],
+  "fields": [
+    {
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "HCC-SUB-.YYYY.-.#####",
+      "default": "HCC-SUB-.YYYY.-.#####",
+      "hidden": 1
+    },
+    {
+      "fieldname": "patient",
+      "fieldtype": "Link",
+      "label": "Patient",
+      "options": "Patient",
+      "reqd": 1,
+      "in_list_view": 1,
+      "in_standard_filter": 1,
+      "bold": 1
+    },
+    {
+      "fieldname": "patient_name",
+      "fieldtype": "Data",
+      "label": "Patient Name",
+      "fetch_from": "patient.patient_name",
+      "read_only": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "patient_phone",
+      "fieldtype": "Data",
+      "label": "Phone",
+      "fetch_from": "patient.mobile",
+      "read_only": 1
+    },
+    {
+      "fieldname": "column_break_cs1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "plan",
+      "fieldtype": "Select",
+      "label": "Plan",
+      "options": "\nStandard Care\nPremium Care",
+      "reqd": 1,
+      "in_list_view": 1,
+      "in_standard_filter": 1,
+      "bold": 1
+    },
+    {
+      "fieldname": "monthly_fee",
+      "fieldtype": "Currency",
+      "label": "Monthly Fee",
+      "default": 5.00,
+      "reqd": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "status",
+      "fieldtype": "Select",
+      "label": "Status",
+      "options": "\nActive\nExpiring Soon\nOverdue\nPast Due\nCancelled\nSuspended",
+      "default": "Active",
+      "reqd": 1,
+      "in_list_view": 1,
+      "in_standard_filter": 1
+    },
+    {
+      "fieldname": "section_dates",
+      "fieldtype": "Section Break",
+      "label": "Billing Dates"
+    },
+    {
+      "fieldname": "start_date",
+      "fieldtype": "Date",
+      "label": "Start Date",
+      "default": "Today",
+      "reqd": 1
+    },
+    {
+      "fieldname": "next_billing_date",
+      "fieldtype": "Date",
+      "label": "Next Billing Date",
+      "reqd": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "column_break_dt1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "end_date",
+      "fieldtype": "Date",
+      "label": "End Date"
+    },
+    {
+      "fieldname": "auto_renew",
+      "fieldtype": "Check",
+      "label": "Auto Renew",
+      "default": 1
+    },
+    {
+      "fieldname": "section_payment",
+      "fieldtype": "Section Break",
+      "label": "Payment Details"
+    },
+    {
+      "fieldname": "payment_method",
+      "fieldtype": "Select",
+      "label": "Payment Method",
+      "options": "\nZaad\neDahab\nVisa/Mastercard\nCash\nBank Transfer",
+      "in_list_view": 1,
+      "in_standard_filter": 1
+    },
+    {
+      "fieldname": "payment_reference",
+      "fieldtype": "Data",
+      "label": "Payment Reference / Card Last 4"
+    },
+    {
+      "fieldname": "column_break_pm1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "last_payment_date",
+      "fieldtype": "Date",
+      "label": "Last Payment Date",
+      "read_only": 1
+    },
+    {
+      "fieldname": "last_payment_status",
+      "fieldtype": "Data",
+      "label": "Last Payment Status",
+      "read_only": 1
+    },
+    {
+      "fieldname": "total_collected",
+      "fieldtype": "Currency",
+      "label": "Total Collected",
+      "read_only": 1
+    },
+    {
+      "fieldname": "section_retry",
+      "fieldtype": "Section Break",
+      "label": "Retry & Suspension",
+      "collapsible": 1
+    },
+    {
+      "fieldname": "retry_count",
+      "fieldtype": "Int",
+      "label": "Retry Count",
+      "default": 0,
+      "read_only": 1
+    },
+    {
+      "fieldname": "max_retries",
+      "fieldtype": "Int",
+      "label": "Max Retries",
+      "default": 3
+    },
+    {
+      "fieldname": "column_break_rt1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "suspended_reason",
+      "fieldtype": "Small Text",
+      "label": "Suspension Reason"
+    },
+    {
+      "fieldname": "amended_from",
+      "fieldtype": "Link",
+      "label": "Amended From",
+      "options": "Care Subscription",
+      "read_only": 1,
+      "hidden": 1,
+      "no_copy": 1
+    }
+  ],
+  "index_web_pages_for_search": 0,
+  "links": [
+    {
+      "link_doctype": "Subscription Payment",
+      "link_fieldname": "subscription"
+    }
+  ],
+  "modified": "2026-04-19 00:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Hiraal EMR",
+  "name": "Care Subscription",
+  "naming_rule": "By \"Naming Series\" field",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "write": 1
+    },
+    {
+      "read": 1,
+      "role": "Chronic Care Nurse"
+    },
+    {
+      "create": 1,
+      "delete": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Chronic Care Admin",
+      "write": 1
+    }
+  ],
+  "sort_field": "next_billing_date",
+  "sort_order": "ASC",
+  "title_field": "patient_name",
+  "track_changes": 1
+}

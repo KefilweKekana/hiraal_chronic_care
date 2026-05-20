@@ -1,0 +1,157 @@
+{
+  "actions": [],
+  "autoname": "naming_series:",
+  "creation": "2026-04-19 00:00:00.000000",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "naming_series",
+    "patient",
+    "patient_name",
+    "family_member_name",
+    "relationship",
+    "column_break_fm1",
+    "phone",
+    "email",
+    "is_active",
+    "section_permissions",
+    "can_view_vitals",
+    "can_view_medications",
+    "can_receive_alerts"
+  ],
+  "fields": [
+    {
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "FM-.YYYY.-.#####",
+      "default": "FM-.YYYY.-.#####",
+      "hidden": 1
+    },
+    {
+      "fieldname": "patient",
+      "fieldtype": "Link",
+      "label": "Patient",
+      "options": "Patient",
+      "reqd": 1,
+      "in_list_view": 1,
+      "in_standard_filter": 1,
+      "bold": 1
+    },
+    {
+      "fieldname": "patient_name",
+      "fieldtype": "Data",
+      "label": "Patient Name",
+      "fetch_from": "patient.patient_name",
+      "read_only": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "family_member_name",
+      "fieldtype": "Data",
+      "label": "Family Member Name",
+      "reqd": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "relationship",
+      "fieldtype": "Select",
+      "label": "Relationship",
+      "options": "\nSpouse\nChild\nSibling\nParent\nOther",
+      "reqd": 1,
+      "in_list_view": 1,
+      "in_standard_filter": 1
+    },
+    {
+      "fieldname": "column_break_fm1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "phone",
+      "fieldtype": "Data",
+      "label": "Phone",
+      "options": "Phone"
+    },
+    {
+      "fieldname": "email",
+      "fieldtype": "Data",
+      "label": "Email",
+      "options": "Email"
+    },
+    {
+      "fieldname": "is_active",
+      "fieldtype": "Check",
+      "label": "Is Active",
+      "default": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "section_permissions",
+      "fieldtype": "Section Break",
+      "label": "Permissions"
+    },
+    {
+      "fieldname": "can_view_vitals",
+      "fieldtype": "Check",
+      "label": "Can View Vitals",
+      "default": 0
+    },
+    {
+      "fieldname": "can_view_medications",
+      "fieldtype": "Check",
+      "label": "Can View Medications",
+      "default": 0
+    },
+    {
+      "fieldname": "can_receive_alerts",
+      "fieldtype": "Check",
+      "label": "Can Receive Alerts",
+      "default": 1
+    }
+  ],
+  "index_web_pages_for_search": 0,
+  "links": [],
+  "modified": "2026-04-19 00:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Hiraal EMR",
+  "name": "Family Member",
+  "naming_rule": "By \"Naming Series\" field",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    },
+    {
+      "create": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Chronic Care Admin",
+      "write": 1
+    },
+    {
+      "create": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Chronic Care Nurse",
+      "write": 1
+    },
+    {
+      "read": 1,
+      "report": 1,
+      "role": "Chronic Care Doctor"
+    }
+  ],
+  "sort_field": "creation",
+  "sort_order": "DESC",
+  "title_field": "family_member_name",
+  "track_changes": 1
+}

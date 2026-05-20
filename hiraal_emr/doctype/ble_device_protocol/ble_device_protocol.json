@@ -1,0 +1,123 @@
+{
+  "actions": [],
+  "autoname": "field:protocol_name",
+  "creation": "2026-05-19 06:00:00.000000",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "protocol_name",
+    "device_type",
+    "delivery_mode",
+    "parser_type",
+    "is_active",
+    "name_keywords",
+    "section_uuids",
+    "service_uuids",
+    "section_characteristics",
+    "characteristics",
+    "section_init",
+    "init_sequence"
+  ],
+  "fields": [
+    {
+      "fieldname": "protocol_name",
+      "fieldtype": "Data",
+      "label": "Protocol Name",
+      "reqd": 1,
+      "unique": 1,
+      "in_list_view": 1,
+      "bold": 1
+    },
+    {
+      "fieldname": "device_type",
+      "fieldtype": "Select",
+      "label": "Device Type",
+      "options": "\nBlood Pressure\nBlood Sugar\nSmart Scale\nPulse Oximeter",
+      "reqd": 1,
+      "in_list_view": 1,
+      "in_standard_filter": 1
+    },
+    {
+      "fieldname": "delivery_mode",
+      "fieldtype": "Select",
+      "label": "Delivery Mode",
+      "options": "\nnotify\nindicate\nread",
+      "default": "notify",
+      "reqd": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "parser_type",
+      "fieldtype": "Select",
+      "label": "Parser Type",
+      "options": "\nstandard_bp\nstandard_glucose\nstandard_weight\nomron_bp\ncustom",
+      "default": "standard_bp",
+      "reqd": 1,
+      "description": "Maps to a built-in parser in the mobile app. 'custom' requires app update."
+    },
+    {
+      "fieldname": "is_active",
+      "fieldtype": "Check",
+      "label": "Is Active",
+      "default": 1,
+      "in_list_view": 1,
+      "in_standard_filter": 1
+    },
+    {
+      "fieldname": "name_keywords",
+      "fieldtype": "Data",
+      "label": "Name Keywords",
+      "description": "Comma-separated keywords to auto-detect from BLE advertisement name (e.g. 'omron,evolv')"
+    },
+    {
+      "fieldname": "section_uuids",
+      "fieldtype": "Section Break",
+      "label": "Service UUIDs"
+    },
+    {
+      "fieldname": "service_uuids",
+      "fieldtype": "Table",
+      "label": "Service UUIDs",
+      "options": "BLE Protocol Service UUID"
+    },
+    {
+      "fieldname": "section_characteristics",
+      "fieldtype": "Section Break",
+      "label": "Characteristics"
+    },
+    {
+      "fieldname": "characteristics",
+      "fieldtype": "Table",
+      "label": "Characteristics",
+      "options": "BLE Protocol Characteristic"
+    },
+    {
+      "fieldname": "section_init",
+      "fieldtype": "Section Break",
+      "label": "Init Sequence"
+    },
+    {
+      "fieldname": "init_sequence",
+      "fieldtype": "Table",
+      "label": "Init Sequence",
+      "options": "BLE Protocol Init Step",
+      "description": "Steps to run after connection (e.g. RACP commands for glucometers)"
+    }
+  ],
+  "index_web_pages_for_search": 0,
+  "links": [],
+  "modified": "2026-05-19 06:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Hiraal EMR",
+  "name": "BLE Device Protocol",
+  "naming_rule": "By fieldname",
+  "owner": "Administrator",
+  "permissions": [
+    {"create": 1, "delete": 1, "read": 1, "write": 1, "role": "System Manager"},
+    {"create": 1, "delete": 1, "read": 1, "write": 1, "role": "Chronic Care Admin"}
+  ],
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "title_field": "protocol_name",
+  "track_changes": 1
+}

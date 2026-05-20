@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include hiraal_emr *.css
+recursive-include hiraal_emr *.csv
+recursive-include hiraal_emr *.html
+recursive-include hiraal_emr *.ico
+recursive-include hiraal_emr *.js
+recursive-include hiraal_emr *.json
+recursive-include hiraal_emr *.md
+recursive-include hiraal_emr *.png
+recursive-include hiraal_emr *.py
+recursive-include hiraal_emr *.svg
+recursive-include hiraal_emr *.txt
+recursive-exclude hiraal_emr *.pyc

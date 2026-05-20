@@ -1,0 +1,18 @@
+.readings-page { padding: 15px; }
+.rd-kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+.rd-kpi-card { background: var(--card-bg); border-radius: 8px; padding: 16px; text-align: center; box-shadow: var(--card-shadow); }
+.rd-kpi-icon { font-size: 20px; margin-bottom: 4px; }
+.rd-kpi-value { font-size: 28px; font-weight: 700; }
+.rd-kpi-label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+.rd-kpi-danger .rd-kpi-value { color: #E74C3C; }
+.rd-source-row { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+.rd-source-card { background: var(--card-bg); border-radius: 8px; padding: 10px 16px; box-shadow: var(--card-shadow); font-size: 13px; display: flex; align-items: center; gap: 8px; }
+.rd-source-card strong { font-size: 16px; margin-left: 4px; }
+.rd-table-wrapper { background: var(--card-bg); border-radius: 8px; box-shadow: var(--card-shadow); overflow: hidden; }
+.rd-table th { font-size: 11px; text-transform: uppercase; color: var(--text-muted); }
+.rd-table td { vertical-align: middle; font-size: 13px; }
+.rd-source-badge { font-size: 12px; }
+@media (max-width: 768px) {
+  .rd-kpi-row { grid-template-columns: repeat(2, 1fr); }
+  .rd-source-row { flex-direction: column; }
+}
