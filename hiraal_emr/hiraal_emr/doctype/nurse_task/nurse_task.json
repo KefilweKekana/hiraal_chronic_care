@@ -1,0 +1,247 @@
+{
+  "actions": [],
+  "autoname": "naming_series:",
+  "creation": "2026-04-19 00:00:00.000000",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "naming_series",
+    "task_type",
+    "patient",
+    "patient_name",
+    "column_break_t1",
+    "priority",
+    "status",
+    "due_date",
+    "due_time",
+    "section_details",
+    "reason",
+    "column_break_d1",
+    "assigned_to",
+    "assigned_to_name",
+    "section_completion",
+    "started_at",
+    "completed_at",
+    "completion_note",
+    "section_related",
+    "related_alert",
+    "related_reading",
+    "column_break_rel1",
+    "related_appointment",
+    "related_lab_test",
+    "amended_from"
+  ],
+  "fields": [
+    {
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "HCC-NT-.YYYY.-.#####",
+      "default": "HCC-NT-.YYYY.-.#####",
+      "hidden": 1
+    },
+    {
+      "fieldname": "task_type",
+      "fieldtype": "Select",
+      "label": "Task Type",
+      "options": "\nCall Patient\nFollow Up\nCheck Medication\nSchedule Visit\nAdd Note\nEscalate to Doctor\nLab Follow Up\nDevice Check\nSubscription Follow Up",
+      "reqd": 1,
+      "in_list_view": 1,
+      "in_standard_filter": 1,
+      "bold": 1
+    },
+    {
+      "fieldname": "patient",
+      "fieldtype": "Link",
+      "label": "Patient",
+      "options": "Patient",
+      "reqd": 1,
+      "in_list_view": 1,
+      "in_standard_filter": 1
+    },
+    {
+      "fieldname": "patient_name",
+      "fieldtype": "Data",
+      "label": "Patient Name",
+      "fetch_from": "patient.patient_name",
+      "read_only": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "column_break_t1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "priority",
+      "fieldtype": "Select",
+      "label": "Priority",
+      "options": "\nVery High\nHigh\nMedium\nLow",
+      "default": "Medium",
+      "reqd": 1,
+      "in_list_view": 1,
+      "in_standard_filter": 1
+    },
+    {
+      "fieldname": "status",
+      "fieldtype": "Select",
+      "label": "Status",
+      "options": "\nPending\nIn Progress\nCompleted\nOverdue\nCancelled",
+      "default": "Pending",
+      "reqd": 1,
+      "in_list_view": 1,
+      "in_standard_filter": 1
+    },
+    {
+      "fieldname": "due_date",
+      "fieldtype": "Date",
+      "label": "Due Date",
+      "default": "Today",
+      "reqd": 1,
+      "in_list_view": 1,
+      "in_standard_filter": 1
+    },
+    {
+      "fieldname": "due_time",
+      "fieldtype": "Time",
+      "label": "Due Time"
+    },
+    {
+      "fieldname": "section_details",
+      "fieldtype": "Section Break",
+      "label": "Details"
+    },
+    {
+      "fieldname": "reason",
+      "fieldtype": "Small Text",
+      "label": "Reason",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "column_break_d1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "assigned_to",
+      "fieldtype": "Link",
+      "label": "Assigned To",
+      "options": "Healthcare Practitioner",
+      "in_list_view": 1,
+      "in_standard_filter": 1
+    },
+    {
+      "fieldname": "assigned_to_name",
+      "fieldtype": "Data",
+      "label": "Assigned Name",
+      "fetch_from": "assigned_to.practitioner_name",
+      "read_only": 1
+    },
+    {
+      "fieldname": "section_completion",
+      "fieldtype": "Section Break",
+      "label": "Completion",
+      "collapsible": 1
+    },
+    {
+      "fieldname": "started_at",
+      "fieldtype": "Datetime",
+      "label": "Started At",
+      "read_only": 1
+    },
+    {
+      "fieldname": "completed_at",
+      "fieldtype": "Datetime",
+      "label": "Completed At",
+      "read_only": 1
+    },
+    {
+      "fieldname": "completion_note",
+      "fieldtype": "Text",
+      "label": "Completion Note"
+    },
+    {
+      "fieldname": "section_related",
+      "fieldtype": "Section Break",
+      "label": "Related Documents",
+      "collapsible": 1
+    },
+    {
+      "fieldname": "related_alert",
+      "fieldtype": "Link",
+      "label": "Related Alert",
+      "options": "Chronic Care Alert"
+    },
+    {
+      "fieldname": "related_reading",
+      "fieldtype": "Link",
+      "label": "Related Reading",
+      "options": "Daily Reading"
+    },
+    {
+      "fieldname": "column_break_rel1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "related_appointment",
+      "fieldtype": "Link",
+      "label": "Related Appointment",
+      "options": "Patient Appointment"
+    },
+    {
+      "fieldname": "related_lab_test",
+      "fieldtype": "Link",
+      "label": "Related Lab Test",
+      "options": "Lab Test"
+    },
+    {
+      "fieldname": "amended_from",
+      "fieldtype": "Link",
+      "label": "Amended From",
+      "options": "Nurse Task",
+      "read_only": 1,
+      "hidden": 1,
+      "no_copy": 1
+    }
+  ],
+  "index_web_pages_for_search": 0,
+  "links": [],
+  "modified": "2026-04-19 00:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Hiraal EMR",
+  "name": "Nurse Task",
+  "naming_rule": "By \"Naming Series\" field",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "write": 1
+    },
+    {
+      "create": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Chronic Care Nurse",
+      "write": 1
+    },
+    {
+      "read": 1,
+      "report": 1,
+      "role": "Chronic Care Doctor"
+    },
+    {
+      "create": 1,
+      "delete": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Chronic Care Admin",
+      "write": 1
+    }
+  ],
+  "sort_field": "due_date",
+  "sort_order": "ASC",
+  "title_field": "patient_name",
+  "track_changes": 1
+}

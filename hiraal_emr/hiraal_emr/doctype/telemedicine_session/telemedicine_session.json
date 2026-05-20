@@ -1,0 +1,178 @@
+{
+  "actions": [],
+  "autoname": "naming_series:",
+  "creation": "2026-04-19 00:00:00.000000",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "naming_series",
+    "patient",
+    "patient_name",
+    "appointment",
+    "practitioner",
+    "practitioner_name",
+    "column_break_tm1",
+    "session_status",
+    "start_time",
+    "end_time",
+    "duration_minutes",
+    "section_meeting",
+    "meeting_url",
+    "meeting_id",
+    "section_notes",
+    "notes"
+  ],
+  "fields": [
+    {
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "TMS-.YYYY.-.#####",
+      "default": "TMS-.YYYY.-.#####",
+      "hidden": 1
+    },
+    {
+      "fieldname": "patient",
+      "fieldtype": "Link",
+      "label": "Patient",
+      "options": "Patient",
+      "reqd": 1,
+      "in_list_view": 1,
+      "in_standard_filter": 1,
+      "bold": 1
+    },
+    {
+      "fieldname": "patient_name",
+      "fieldtype": "Data",
+      "label": "Patient Name",
+      "fetch_from": "patient.patient_name",
+      "read_only": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "appointment",
+      "fieldtype": "Link",
+      "label": "Appointment",
+      "options": "Patient Appointment",
+      "in_standard_filter": 1
+    },
+    {
+      "fieldname": "practitioner",
+      "fieldtype": "Link",
+      "label": "Practitioner",
+      "options": "Healthcare Practitioner",
+      "reqd": 1,
+      "in_list_view": 1,
+      "in_standard_filter": 1
+    },
+    {
+      "fieldname": "practitioner_name",
+      "fieldtype": "Data",
+      "label": "Practitioner Name",
+      "fetch_from": "practitioner.practitioner_name",
+      "read_only": 1
+    },
+    {
+      "fieldname": "column_break_tm1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "session_status",
+      "fieldtype": "Select",
+      "label": "Session Status",
+      "options": "\nScheduled\nIn Progress\nCompleted\nCancelled\nNo Show",
+      "default": "Scheduled",
+      "reqd": 1,
+      "in_list_view": 1,
+      "in_standard_filter": 1
+    },
+    {
+      "fieldname": "start_time",
+      "fieldtype": "Datetime",
+      "label": "Start Time",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "end_time",
+      "fieldtype": "Datetime",
+      "label": "End Time"
+    },
+    {
+      "fieldname": "duration_minutes",
+      "fieldtype": "Int",
+      "label": "Duration (minutes)"
+    },
+    {
+      "fieldname": "section_meeting",
+      "fieldtype": "Section Break",
+      "label": "Meeting Details"
+    },
+    {
+      "fieldname": "meeting_url",
+      "fieldtype": "Data",
+      "label": "Meeting URL"
+    },
+    {
+      "fieldname": "meeting_id",
+      "fieldtype": "Data",
+      "label": "Meeting ID"
+    },
+    {
+      "fieldname": "section_notes",
+      "fieldtype": "Section Break",
+      "label": "Notes"
+    },
+    {
+      "fieldname": "notes",
+      "fieldtype": "Text",
+      "label": "Notes"
+    }
+  ],
+  "index_web_pages_for_search": 0,
+  "links": [],
+  "modified": "2026-04-19 00:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Hiraal EMR",
+  "name": "Telemedicine Session",
+  "naming_rule": "By \"Naming Series\" field",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    },
+    {
+      "create": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Chronic Care Admin",
+      "write": 1
+    },
+    {
+      "create": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Chronic Care Nurse",
+      "write": 1
+    },
+    {
+      "create": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Chronic Care Doctor",
+      "write": 1
+    }
+  ],
+  "sort_field": "start_time",
+  "sort_order": "DESC",
+  "title_field": "patient_name",
+  "track_changes": 1
+}

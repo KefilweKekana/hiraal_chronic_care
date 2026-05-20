@@ -1,0 +1,311 @@
+{
+  "actions": [],
+  "autoname": "naming_series:",
+  "creation": "2026-04-19 00:00:00.000000",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "naming_series",
+    "patient",
+    "patient_name",
+    "patient_id",
+    "column_break_1",
+    "alert_level",
+    "alert_type",
+    "status",
+    "creation_time",
+    "section_reading",
+    "bp_systolic",
+    "bp_diastolic",
+    "column_break_2",
+    "blood_sugar",
+    "blood_sugar_unit",
+    "latest_reading_display",
+    "section_details",
+    "reason",
+    "column_break_3",
+    "assigned_nurse",
+    "assigned_nurse_name",
+    "section_resolution",
+    "resolution_note",
+    "resolved_at",
+    "column_break_4",
+    "escalated_to",
+    "escalated_to_name",
+    "escalation_time",
+    "section_source",
+    "source_reading",
+    "source_device",
+    "amended_from"
+  ],
+  "fields": [
+    {
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Naming Series",
+      "options": "HCC-ALT-.YYYY.-.#####",
+      "default": "HCC-ALT-.YYYY.-.#####",
+      "reqd": 1,
+      "hidden": 1
+    },
+    {
+      "fieldname": "patient",
+      "fieldtype": "Link",
+      "label": "Patient",
+      "options": "Patient",
+      "reqd": 1,
+      "in_list_view": 1,
+      "in_standard_filter": 1,
+      "bold": 1
+    },
+    {
+      "fieldname": "patient_name",
+      "fieldtype": "Data",
+      "label": "Patient Name",
+      "fetch_from": "patient.patient_name",
+      "read_only": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "patient_id",
+      "fieldtype": "Data",
+      "label": "Patient ID",
+      "fetch_from": "patient.name",
+      "read_only": 1
+    },
+    {
+      "fieldname": "column_break_1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "alert_level",
+      "fieldtype": "Select",
+      "label": "Alert Level",
+      "options": "\nVery High\nHigh\nMedium\nLow",
+      "reqd": 1,
+      "in_list_view": 1,
+      "in_standard_filter": 1,
+      "bold": 1
+    },
+    {
+      "fieldname": "alert_type",
+      "fieldtype": "Select",
+      "label": "Alert Type",
+      "options": "\nVery High BP\nHigh BP\nVery High Sugar\nHigh Sugar\nMissed Reading\nMissed Medication\nMedium Risk\nSlightly Elevated\nCritical Combination",
+      "reqd": 1,
+      "in_list_view": 1,
+      "in_standard_filter": 1
+    },
+    {
+      "fieldname": "status",
+      "fieldtype": "Select",
+      "label": "Status",
+      "options": "\nOpen\nIn Review\nResolved\nEscalated",
+      "default": "Open",
+      "reqd": 1,
+      "in_list_view": 1,
+      "in_standard_filter": 1
+    },
+    {
+      "fieldname": "creation_time",
+      "fieldtype": "Datetime",
+      "label": "Alert Time",
+      "default": "Now",
+      "read_only": 1
+    },
+    {
+      "fieldname": "section_reading",
+      "fieldtype": "Section Break",
+      "label": "Latest Reading"
+    },
+    {
+      "fieldname": "bp_systolic",
+      "fieldtype": "Int",
+      "label": "Systolic (mmHg)"
+    },
+    {
+      "fieldname": "bp_diastolic",
+      "fieldtype": "Int",
+      "label": "Diastolic (mmHg)"
+    },
+    {
+      "fieldname": "column_break_2",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "blood_sugar",
+      "fieldtype": "Float",
+      "label": "Blood Sugar"
+    },
+    {
+      "fieldname": "blood_sugar_unit",
+      "fieldtype": "Select",
+      "label": "Sugar Unit",
+      "options": "mg/dL\nmmol/L",
+      "default": "mg/dL"
+    },
+    {
+      "fieldname": "latest_reading_display",
+      "fieldtype": "Data",
+      "label": "Latest Reading",
+      "read_only": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "section_details",
+      "fieldtype": "Section Break",
+      "label": "Details"
+    },
+    {
+      "fieldname": "reason",
+      "fieldtype": "Small Text",
+      "label": "Reason"
+    },
+    {
+      "fieldname": "column_break_3",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "assigned_nurse",
+      "fieldtype": "Link",
+      "label": "Assigned Nurse",
+      "options": "Healthcare Practitioner",
+      "in_list_view": 1,
+      "in_standard_filter": 1
+    },
+    {
+      "fieldname": "assigned_nurse_name",
+      "fieldtype": "Data",
+      "label": "Nurse Name",
+      "fetch_from": "assigned_nurse.practitioner_name",
+      "read_only": 1
+    },
+    {
+      "fieldname": "section_resolution",
+      "fieldtype": "Section Break",
+      "label": "Resolution",
+      "collapsible": 1
+    },
+    {
+      "fieldname": "resolution_note",
+      "fieldtype": "Text",
+      "label": "Resolution Note"
+    },
+    {
+      "fieldname": "resolved_at",
+      "fieldtype": "Datetime",
+      "label": "Resolved At",
+      "read_only": 1
+    },
+    {
+      "fieldname": "column_break_4",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "escalated_to",
+      "fieldtype": "Link",
+      "label": "Escalated To (Doctor)",
+      "options": "Healthcare Practitioner"
+    },
+    {
+      "fieldname": "escalated_to_name",
+      "fieldtype": "Data",
+      "label": "Doctor Name",
+      "fetch_from": "escalated_to.practitioner_name",
+      "read_only": 1
+    },
+    {
+      "fieldname": "escalation_time",
+      "fieldtype": "Datetime",
+      "label": "Escalation Time",
+      "read_only": 1
+    },
+    {
+      "fieldname": "section_source",
+      "fieldtype": "Section Break",
+      "label": "Source",
+      "collapsible": 1
+    },
+    {
+      "fieldname": "source_reading",
+      "fieldtype": "Link",
+      "label": "Source Reading",
+      "options": "Daily Reading"
+    },
+    {
+      "fieldname": "source_device",
+      "fieldtype": "Link",
+      "label": "Source Device",
+      "options": "Patient Device"
+    },
+    {
+      "fieldname": "amended_from",
+      "fieldtype": "Link",
+      "label": "Amended From",
+      "options": "Chronic Care Alert",
+      "read_only": 1,
+      "no_copy": 1,
+      "hidden": 1
+    }
+  ],
+  "index_web_pages_for_search": 0,
+  "is_submittable": 0,
+  "links": [
+    {
+      "link_doctype": "Nurse Task",
+      "link_fieldname": "related_alert"
+    },
+    {
+      "link_doctype": "Doctor Review",
+      "link_fieldname": "related_alert"
+    }
+  ],
+  "modified": "2026-04-19 00:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Hiraal EMR",
+  "name": "Chronic Care Alert",
+  "naming_rule": "By \"Naming Series\" field",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 0,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    },
+    {
+      "create": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Chronic Care Nurse",
+      "write": 1
+    },
+    {
+      "create": 0,
+      "read": 1,
+      "report": 1,
+      "role": "Chronic Care Doctor",
+      "write": 1
+    },
+    {
+      "create": 1,
+      "delete": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Chronic Care Admin",
+      "write": 1
+    }
+  ],
+  "quick_entry": 0,
+  "sort_field": "creation",
+  "sort_order": "DESC",
+  "title_field": "patient_name",
+  "track_changes": 1,
+  "track_seen": 1
+}

@@ -1,0 +1,42 @@
+{
+  "actions": [],
+  "creation": "2026-05-19 06:00:00.000000",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "istable": 1,
+  "field_order": ["service_uuid", "char_uuid", "value_hex"],
+  "fields": [
+    {
+      "fieldname": "service_uuid",
+      "fieldtype": "Data",
+      "label": "Service UUID",
+      "reqd": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "char_uuid",
+      "fieldtype": "Data",
+      "label": "Characteristic UUID",
+      "reqd": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "value_hex",
+      "fieldtype": "Data",
+      "label": "Value (hex)",
+      "description": "Space-separated hex bytes, e.g. '01 01'",
+      "reqd": 1,
+      "in_list_view": 1
+    }
+  ],
+  "index_web_pages_for_search": 0,
+  "links": [],
+  "modified": "2026-05-19 06:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Hiraal EMR",
+  "name": "BLE Protocol Init Step",
+  "owner": "Administrator",
+  "permissions": [],
+  "sort_field": "modified",
+  "sort_order": "DESC"
+}

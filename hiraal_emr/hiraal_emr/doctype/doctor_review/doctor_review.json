@@ -1,0 +1,300 @@
+{
+  "actions": [],
+  "autoname": "naming_series:",
+  "creation": "2026-04-19 00:00:00.000000",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "naming_series",
+    "patient",
+    "patient_name",
+    "conditions",
+    "column_break_dr1",
+    "review_status",
+    "priority",
+    "reason",
+    "section_clinical",
+    "latest_bp",
+    "latest_sugar",
+    "column_break_cl1",
+    "medicine_adherence",
+    "last_submission",
+    "section_trend",
+    "avg_bp_7days",
+    "avg_sugar_7days",
+    "column_break_tr1",
+    "readings_submitted_7days",
+    "high_readings_7days",
+    "missed_days",
+    "section_decision",
+    "assessment",
+    "plan_notes",
+    "column_break_dec1",
+    "follow_up_interval",
+    "next_review_date",
+    "reviewed_by",
+    "reviewed_by_name",
+    "reviewed_at",
+    "section_related",
+    "related_alert",
+    "related_nurse_task",
+    "amended_from"
+  ],
+  "fields": [
+    {
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "HCC-DR-.YYYY.-.#####",
+      "default": "HCC-DR-.YYYY.-.#####",
+      "hidden": 1
+    },
+    {
+      "fieldname": "patient",
+      "fieldtype": "Link",
+      "label": "Patient",
+      "options": "Patient",
+      "reqd": 1,
+      "in_list_view": 1,
+      "in_standard_filter": 1,
+      "bold": 1
+    },
+    {
+      "fieldname": "patient_name",
+      "fieldtype": "Data",
+      "label": "Patient Name",
+      "fetch_from": "patient.patient_name",
+      "read_only": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "conditions",
+      "fieldtype": "Small Text",
+      "label": "Conditions",
+      "read_only": 1
+    },
+    {
+      "fieldname": "column_break_dr1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "review_status",
+      "fieldtype": "Select",
+      "label": "Review Status",
+      "options": "\nAwaiting Review\nIn Review\nReviewed\nPending Plan",
+      "default": "Awaiting Review",
+      "reqd": 1,
+      "in_list_view": 1,
+      "in_standard_filter": 1
+    },
+    {
+      "fieldname": "priority",
+      "fieldtype": "Select",
+      "label": "Priority",
+      "options": "\nVery High\nHigh\nMedium\nLow",
+      "default": "Medium",
+      "in_list_view": 1,
+      "in_standard_filter": 1
+    },
+    {
+      "fieldname": "reason",
+      "fieldtype": "Small Text",
+      "label": "Reason for Review",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "section_clinical",
+      "fieldtype": "Section Break",
+      "label": "Clinical Overview"
+    },
+    {
+      "fieldname": "latest_bp",
+      "fieldtype": "Data",
+      "label": "Latest Blood Pressure",
+      "read_only": 1,
+      "bold": 1
+    },
+    {
+      "fieldname": "latest_sugar",
+      "fieldtype": "Data",
+      "label": "Latest Blood Sugar",
+      "read_only": 1,
+      "bold": 1
+    },
+    {
+      "fieldname": "column_break_cl1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "medicine_adherence",
+      "fieldtype": "Percent",
+      "label": "Medicine Adherence (30 days)",
+      "read_only": 1
+    },
+    {
+      "fieldname": "last_submission",
+      "fieldtype": "Data",
+      "label": "Last Submission",
+      "read_only": 1
+    },
+    {
+      "fieldname": "section_trend",
+      "fieldtype": "Section Break",
+      "label": "7-Day Clinical Summary"
+    },
+    {
+      "fieldname": "avg_bp_7days",
+      "fieldtype": "Data",
+      "label": "Avg BP (7 days)",
+      "read_only": 1
+    },
+    {
+      "fieldname": "avg_sugar_7days",
+      "fieldtype": "Float",
+      "label": "Avg Sugar (7 days)",
+      "read_only": 1,
+      "precision": 1
+    },
+    {
+      "fieldname": "column_break_tr1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "readings_submitted_7days",
+      "fieldtype": "Int",
+      "label": "Readings Submitted",
+      "read_only": 1
+    },
+    {
+      "fieldname": "high_readings_7days",
+      "fieldtype": "Int",
+      "label": "High Readings",
+      "read_only": 1
+    },
+    {
+      "fieldname": "missed_days",
+      "fieldtype": "Int",
+      "label": "Missed Days",
+      "read_only": 1
+    },
+    {
+      "fieldname": "section_decision",
+      "fieldtype": "Section Break",
+      "label": "Doctor Decision"
+    },
+    {
+      "fieldname": "assessment",
+      "fieldtype": "Select",
+      "label": "Assessment",
+      "options": "\nControlled\nUncontrolled BP\nUncontrolled Sugar\nUncontrolled BP & Sugar\nImproving\nDeteriorating\nStable"
+    },
+    {
+      "fieldname": "plan_notes",
+      "fieldtype": "Text",
+      "label": "Plan / Notes"
+    },
+    {
+      "fieldname": "column_break_dec1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "follow_up_interval",
+      "fieldtype": "Select",
+      "label": "Follow Up",
+      "options": "\n1 Week\n2 Weeks\n1 Month\n3 Months"
+    },
+    {
+      "fieldname": "next_review_date",
+      "fieldtype": "Date",
+      "label": "Next Review Date"
+    },
+    {
+      "fieldname": "reviewed_by",
+      "fieldtype": "Link",
+      "label": "Reviewed By",
+      "options": "Healthcare Practitioner",
+      "in_standard_filter": 1
+    },
+    {
+      "fieldname": "reviewed_by_name",
+      "fieldtype": "Data",
+      "label": "Doctor Name",
+      "fetch_from": "reviewed_by.practitioner_name",
+      "read_only": 1
+    },
+    {
+      "fieldname": "reviewed_at",
+      "fieldtype": "Datetime",
+      "label": "Reviewed At",
+      "read_only": 1
+    },
+    {
+      "fieldname": "section_related",
+      "fieldtype": "Section Break",
+      "label": "Related",
+      "collapsible": 1
+    },
+    {
+      "fieldname": "related_alert",
+      "fieldtype": "Link",
+      "label": "Related Alert",
+      "options": "Chronic Care Alert"
+    },
+    {
+      "fieldname": "related_nurse_task",
+      "fieldtype": "Link",
+      "label": "Related Nurse Task",
+      "options": "Nurse Task"
+    },
+    {
+      "fieldname": "amended_from",
+      "fieldtype": "Link",
+      "label": "Amended From",
+      "options": "Doctor Review",
+      "read_only": 1,
+      "hidden": 1,
+      "no_copy": 1
+    }
+  ],
+  "index_web_pages_for_search": 0,
+  "links": [],
+  "modified": "2026-04-19 00:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Hiraal EMR",
+  "name": "Doctor Review",
+  "naming_rule": "By \"Naming Series\" field",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "write": 1
+    },
+    {
+      "read": 1,
+      "role": "Chronic Care Nurse"
+    },
+    {
+      "create": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Chronic Care Doctor",
+      "write": 1
+    },
+    {
+      "create": 1,
+      "delete": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Chronic Care Admin",
+      "write": 1
+    }
+  ],
+  "sort_field": "creation",
+  "sort_order": "DESC",
+  "title_field": "patient_name",
+  "track_changes": 1
+}

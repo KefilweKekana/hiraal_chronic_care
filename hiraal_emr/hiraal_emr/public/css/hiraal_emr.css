@@ -1,0 +1,43 @@
+/* Hiraal EMR — Global Styles
+   Loaded via app_include_css in hooks.py */
+
+/* Sidebar Module Icon */
+[data-page-container="hiraal-emr"] .module-icon {
+  background: #4A90D9;
+}
+
+/* Chronic Care Alert list view colors */
+.list-row[data-alert_level="Very High"] {
+  border-left: 4px solid #E74C3C;
+}
+.list-row[data-alert_level="High"] {
+  border-left: 4px solid #F39C12;
+}
+.list-row[data-alert_level="Medium"] {
+  border-left: 4px solid #F1C40F;
+}
+.list-row[data-alert_level="Low"] {
+  border-left: 4px solid #3498DB;
+}
+
+/* Nurse Task priority badges */
+.nurse-task-priority-very-high { background: #FECDD3; color: #B91C1C; }
+.nurse-task-priority-high { background: #FED7AA; color: #C2410C; }
+.nurse-task-priority-medium { background: #FEF08A; color: #A16207; }
+.nurse-task-priority-low { background: #BFDBFE; color: #1D4ED8; }
+
+/* Dashboard shared styles */
+.hiraal-indicator {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Risk Level Colors */
+.risk-very-high { color: #E74C3C; }
+.risk-high { color: #E67E22; }
+.risk-medium { color: #F39C12; }
+.risk-low { color: #3498DB; }
+.risk-normal { color: #27AE60; }

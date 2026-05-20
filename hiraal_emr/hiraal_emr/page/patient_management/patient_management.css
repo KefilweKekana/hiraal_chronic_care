@@ -1,0 +1,45 @@
+.patient-mgmt-page { padding: 15px; }
+.pm-summary-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+.pm-summary-card { background: var(--card-bg); border-radius: 8px; padding: 16px; text-align: center; box-shadow: var(--card-shadow); }
+.pm-summary-card .pm-summary-value { font-size: 28px; font-weight: 700; }
+.pm-summary-card .pm-summary-label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+.pm-summary-card.risk-high .pm-summary-value { color: #E74C3C; }
+.pm-summary-card.risk-medium .pm-summary-value { color: #F39C12; }
+.pm-summary-card.risk-normal .pm-summary-value { color: #27AE60; }
+.pm-charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.pm-chart-card { background: var(--card-bg); border-radius: 8px; padding: 16px; box-shadow: var(--card-shadow); }
+.pm-chart-card h4 { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+.pm-filters { display: flex; gap: 12px; margin-bottom: 16px; align-items: center; }
+.pm-search { flex: 1; }
+.pm-search-input { max-width: 350px; }
+.pm-filter-group { display: flex; gap: 8px; }
+.pm-filter-group select { width: 150px; }
+.pm-table-wrapper { background: var(--card-bg); border-radius: 8px; box-shadow: var(--card-shadow); overflow: hidden; margin-bottom: 20px; }
+.pm-table th { font-size: 11px; text-transform: uppercase; color: var(--text-muted); }
+.pm-table td { vertical-align: middle; font-size: 13px; }
+.pm-patient-cell { display: flex; align-items: center; gap: 10px; }
+.pm-avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; color: white; }
+.avatar-danger { background: #E74C3C; }
+.avatar-warning { background: #E67E22; }
+.avatar-caution { background: #F39C12; }
+.avatar-info { background: #3498DB; }
+.avatar-success { background: #27AE60; }
+.avatar-default { background: #95A5A6; }
+
+/* Profile Drawer */
+.pm-profile-drawer { position: fixed; top: 60px; right: 0; width: 520px; height: calc(100vh - 60px); background: var(--card-bg); box-shadow: -4px 0 20px rgba(0,0,0,0.15); z-index: 1050; overflow-y: auto; padding: 20px; }
+.pm-profile-header { margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); }
+.pm-profile-header h3 { font-size: 18px; font-weight: 700; margin: 0; }
+.pm-profile-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+.pm-metric { text-align: center; padding: 10px; background: var(--control-bg); border-radius: 6px; }
+.pm-metric-val { font-size: 20px; font-weight: 700; }
+.pm-metric-lbl { font-size: 11px; color: var(--text-muted); }
+.pm-profile-section { margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); }
+.pm-profile-section h4 { font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-muted); text-transform: uppercase; }
+.pm-alert-item, .pm-review-item, .pm-note-item, .pm-device-item { padding: 6px 0; font-size: 13px; }
+@media (max-width: 768px) {
+  .pm-summary-row { grid-template-columns: repeat(2, 1fr); }
+  .pm-charts-row { grid-template-columns: 1fr; }
+  .pm-profile-drawer { width: 100%; }
+  .pm-filters { flex-direction: column; }
+}

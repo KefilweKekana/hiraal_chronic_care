@@ -1,0 +1,173 @@
+{
+  "actions": [],
+  "autoname": "naming_series:",
+  "creation": "2026-04-19 00:00:00.000000",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "naming_series",
+    "patient",
+    "patient_name",
+    "week_starting",
+    "week_ending",
+    "column_break_wh1",
+    "avg_systolic",
+    "avg_diastolic",
+    "avg_blood_sugar",
+    "medication_adherence_percent",
+    "section_readings",
+    "total_readings",
+    "high_readings_count",
+    "column_break_wh2",
+    "status",
+    "doctor_notes"
+  ],
+  "fields": [
+    {
+      "fieldname": "naming_series",
+      "fieldtype": "Select",
+      "label": "Series",
+      "options": "WHS-.YYYY.-.#####",
+      "default": "WHS-.YYYY.-.#####",
+      "hidden": 1
+    },
+    {
+      "fieldname": "patient",
+      "fieldtype": "Link",
+      "label": "Patient",
+      "options": "Patient",
+      "reqd": 1,
+      "in_list_view": 1,
+      "in_standard_filter": 1,
+      "bold": 1
+    },
+    {
+      "fieldname": "patient_name",
+      "fieldtype": "Data",
+      "label": "Patient Name",
+      "fetch_from": "patient.patient_name",
+      "read_only": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "week_starting",
+      "fieldtype": "Date",
+      "label": "Week Starting",
+      "reqd": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "week_ending",
+      "fieldtype": "Date",
+      "label": "Week Ending",
+      "reqd": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "column_break_wh1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "avg_systolic",
+      "fieldtype": "Float",
+      "label": "Avg Systolic",
+      "precision": 1
+    },
+    {
+      "fieldname": "avg_diastolic",
+      "fieldtype": "Float",
+      "label": "Avg Diastolic",
+      "precision": 1
+    },
+    {
+      "fieldname": "avg_blood_sugar",
+      "fieldtype": "Float",
+      "label": "Avg Blood Sugar",
+      "precision": 1
+    },
+    {
+      "fieldname": "medication_adherence_percent",
+      "fieldtype": "Percent",
+      "label": "Medication Adherence %"
+    },
+    {
+      "fieldname": "section_readings",
+      "fieldtype": "Section Break",
+      "label": "Reading Summary"
+    },
+    {
+      "fieldname": "total_readings",
+      "fieldtype": "Int",
+      "label": "Total Readings"
+    },
+    {
+      "fieldname": "high_readings_count",
+      "fieldtype": "Int",
+      "label": "High Readings Count"
+    },
+    {
+      "fieldname": "column_break_wh2",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "status",
+      "fieldtype": "Select",
+      "label": "Status",
+      "options": "\nGood\nStable\nElevated\nHigh",
+      "in_list_view": 1,
+      "in_standard_filter": 1
+    },
+    {
+      "fieldname": "doctor_notes",
+      "fieldtype": "Text",
+      "label": "Doctor Notes"
+    }
+  ],
+  "index_web_pages_for_search": 0,
+  "links": [],
+  "modified": "2026-04-19 00:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Hiraal EMR",
+  "name": "Weekly Health Summary",
+  "naming_rule": "By \"Naming Series\" field",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    },
+    {
+      "create": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Chronic Care Admin",
+      "write": 1
+    },
+    {
+      "create": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Chronic Care Nurse",
+      "write": 1
+    },
+    {
+      "create": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Chronic Care Doctor",
+      "write": 1
+    }
+  ],
+  "sort_field": "week_starting",
+  "sort_order": "DESC",
+  "title_field": "patient_name",
+  "track_changes": 1
+}
