@@ -4,7 +4,7 @@ app_publisher = "Hiraal Health Center"
 app_description = "Chronic Disease Management Platform for Somaliland — Alert Queue, Nurse Tasks, Doctor Review, Subscriptions, Device Management, Analytics"
 app_email = "info@hiraalhealth.so"
 app_license = "MIT"
-required_apps = ["frappe", "erpnext", "health"]
+required_apps = ["frappe", "erpnext", "healthcare"]
 
 # ---------- Website / Portal ----------
 # home_page = "clinic-dashboard"
