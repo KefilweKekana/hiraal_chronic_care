@@ -1,3 +1,52 @@
+// ─── Hiraal Sidebar (inlined — no external dependency) ───
+const HiraalMenu = {
+  sections: [
+    { title: "CLINICAL", items: [
+      { label: "Dashboard", icon: "📊", route: "/app/clinic-dashboard", name: "dashboard" },
+      { label: "Alerts", icon: "🚨", route: "/app/chronic-care-alert", name: "alerts" },
+      { label: "Patients", icon: "👥", route: "/app/patient", name: "patients" },
+      { label: "Daily Readings", icon: "📈", route: "/app/daily-reading", name: "daily-readings" },
+      { label: "Nurse Tasks", icon: "✅", route: "/app/nurse-task", name: "nurse-tasks" },
+      { label: "Doctor Review", icon: "🩺", route: "/app/doctor-review", name: "doctor-review" },
+      { label: "Appointments", icon: "📅", route: "/app/patient-appointment", name: "appointments" },
+      { label: "Lab Requests", icon: "🧪", route: "/app/lab-test", name: "lab-requests" },
+      { label: "Medicine Requests", icon: "💊", route: "/app/medicine-request", name: "medicine-requests" },
+      { label: "Devices", icon: "📱", route: "/app/patient-device", name: "devices" },
+    ]},
+    { title: "BILLING", items: [
+      { label: "Subscriptions", icon: "🔄", route: "/app/care-subscription", name: "subscriptions" },
+      { label: "Payments", icon: "💳", route: "/app/subscription-payment", name: "payments" },
+    ]},
+    { title: "REPORTS", items: [
+      { label: "Reports", icon: "📋", route: "/app/query-report/Patient Summary", name: "reports" },
+      { label: "Analytics", icon: "📉", route: "/app/analytics-dashboard", name: "analytics" },
+    ]},
+    { title: "SETTINGS", items: [
+      { label: "Settings", icon: "⚙️", route: "/app/chronic-care-settings", name: "settings" },
+      { label: "User Management", icon: "👤", route: "/app/user", name: "user-management" },
+    ]},
+  ],
+  renderSidebar(activeName, badges) {
+    badges = badges || {};
+    let h = '<aside class="dashboard-sidebar">';
+    h += '<div class="sidebar-brand"><div class="brand-logo">🏥</div><div class="brand-text"><div class="brand-title">DagaarSoft</div><div class="brand-subtitle">Health Clinic</div></div></div>';
+    h += '<nav class="sidebar-nav">';
+    this.sections.forEach(s => {
+      h += '<div class="sidebar-section"><div class="sidebar-section-title">' + s.title + '</div><ul class="sidebar-menu">';
+      s.items.forEach(i => {
+        const a = i.name === activeName, b = badges[i.name] || 0;
+        h += '<li class="sidebar-menu-item ' + (a ? 'active' : '') + '"><a href="' + i.route + '" class="sidebar-menu-link"><span class="sidebar-icon">' + i.icon + '</span><span class="sidebar-label">' + i.label + '</span>' + (b ? '<span class="sidebar-badge">' + b + '</span>' : '') + '</a></li>';
+      });
+      h += '</ul></div>';
+    });
+    h += '</nav><div class="sidebar-footer"><div class="need-help"><div class="help-icon">💬</div><div class="help-text"><div class="help-title">Need Help?</div><div class="help-link">Contact Support</div><div class="help-email">support@dagaar.so</div></div></div></div></aside>';
+    return h;
+  },
+  wrap(activeName, content, badges) {
+    return '<div class="dashboard-with-sidebar">' + this.renderSidebar(activeName, badges) + '<div class="dashboard-main">' + content + '</div></div>';
+  }
+};
+
 frappe.pages["daily-readings"].on_page_load = function (wrapper) {
   const page = frappe.ui.make_app_page({
     parent: wrapper,
@@ -35,7 +84,7 @@ class DailyReadingsDashboard {
   }
 
   async load_data() {
-    this.container.html(HiraalSidebar.wrapPage("daily-readings", '<div class="empty-state">Loading readings...</div>'));
+    this.container.html(HiraalMenu.wrap("daily-readings", '<div class="empty-state">Loading readings...</div>'));
     try {
       const data = await frappe.xcall("hiraal_emr.api.get_readings_dashboard_data", {
         date: this.selected_date,
@@ -44,7 +93,7 @@ class DailyReadingsDashboard {
       this.render();
     } catch (e) {
       console.error(e);
-      this.container.html(HiraalSidebar.wrapPage("daily-readings", '<div class="empty-state">Error loading readings.</div>'));
+      this.container.html(HiraalMenu.wrap("daily-readings", '<div class="empty-state">Error loading readings.</div>'));
     }
   }
 
@@ -133,7 +182,7 @@ class DailyReadingsDashboard {
       </div>
     `;
 
-    this.container.html(HiraalSidebar.wrapPage("daily-readings", content));
+    this.container.html(HiraalMenu.wrap("daily-readings", content));
   }
 
   source_icon(source) {
