@@ -80,7 +80,10 @@ has_permission = {
 
 # ---------- Web Include ----------
 app_include_css = "/assets/hiraal_emr/css/hiraal_emr.css"
-app_include_js = "/assets/hiraal_emr/js/hiraal_emr.js"
+app_include_js = [
+    "/assets/hiraal_emr/js/hiraal_emr.js",
+    "/assets/hiraal_emr/js/hiraal_sidebar.js",
+]
 
 # ---------- Override Whitelisted Methods ----------
 override_whitelisted_methods = {}

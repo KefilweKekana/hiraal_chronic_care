@@ -25,7 +25,7 @@ class PatientManagement {
   }
 
   async load_data() {
-    this.container.html('<div class="text-muted p-4">Loading patients...</div>');
+    this.container.html(HiraalSidebar.wrapPage("patients", '<div class="empty-state">Loading patients...</div>'));
     try {
       const data = await frappe.xcall("hiraal_emr.api.get_patient_registry_data", {
         risk_filter: this.filters.risk,
@@ -36,7 +36,7 @@ class PatientManagement {
       this.render();
     } catch (e) {
       console.error(e);
-      this.container.html('<p class="text-danger p-4">Error loading patient data.</p>');
+      this.container.html(HiraalSidebar.wrapPage("patients", '<div class="empty-state">Error loading patient data.</div>'));
     }
   }
 
@@ -45,7 +45,7 @@ class PatientManagement {
     const rd = d.risk_distribution || {};
     const sb = d.subscription_breakdown || {};
 
-    this.container.html(`
+    const content = `
       <div class="patient-mgmt-page">
         <!-- Summary Row -->
         <div class="pm-summary-row">
@@ -148,8 +148,9 @@ class PatientManagement {
           <div class="pm-profile-content" id="profile-content"></div>
         </div>
       </div>
-    `);
+    `;
 
+    this.container.html(HiraalSidebar.wrapPage("patients", content));
     this.bind_events();
     this.render_charts(rd, sb);
   }

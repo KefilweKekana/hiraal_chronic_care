@@ -19,20 +19,20 @@ class AnalyticsDashboard {
   }
 
   async load_data() {
-    this.container.html('<div class="text-muted p-4">Loading analytics...</div>');
+    this.container.html(HiraalSidebar.wrapPage("analytics", '<div class="empty-state">Loading analytics...</div>'));
     try {
       const data = await frappe.xcall("hiraal_emr.api.get_analytics_data");
       this.data = data;
       this.render();
     } catch (e) {
       console.error(e);
-      this.container.html('<p class="text-danger p-4">Error loading analytics.</p>');
+      this.container.html(HiraalSidebar.wrapPage("analytics", '<div class="empty-state">Error loading analytics.</div>'));
     }
   }
 
   render() {
     const d = this.data;
-    this.container.html(`
+    const content = `
       <div class="analytics-page" style="padding:15px">
         <!-- Top KPIs -->
         <div class="kpi-row">
@@ -125,8 +125,9 @@ class AnalyticsDashboard {
           </div>
         </div>
       </div>
-    `);
+    `;
 
+    this.container.html(HiraalSidebar.wrapPage("analytics", content));
     this.render_charts();
   }
 

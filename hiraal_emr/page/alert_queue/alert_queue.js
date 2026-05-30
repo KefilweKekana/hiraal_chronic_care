@@ -24,20 +24,21 @@ class AlertQueue {
   }
 
   async load_data() {
-    this.container.html('<div class="text-muted p-4">Loading alerts...</div>');
+    this.container.html(HiraalSidebar.wrapPage("alerts", '<div class="empty-state">Loading alerts...</div>'));
     try {
       const data = await frappe.xcall("hiraal_emr.api.get_alert_queue_data");
       this.data = data;
       this.render();
     } catch (e) {
       console.error(e);
-      this.container.html('<p class="text-danger p-4">Error loading alert data.</p>');
+      this.container.html(HiraalSidebar.wrapPage("alerts", '<div class="empty-state">Error loading alert data.</div>'));
     }
   }
 
   render() {
     const d = this.data;
-    this.container.html(`
+    const badges = { alerts: d.total || 0 };
+    const content = `
       <div class="alert-queue-page">
         <!-- Level Summary Cards -->
         <div class="level-cards">
@@ -155,8 +156,9 @@ class AlertQueue {
           </div>
         </div>
       </div>
-    `);
+    `;
 
+    this.container.html(HiraalSidebar.wrapPage("alerts", content, badges));
     this.bind_events();
   }
 

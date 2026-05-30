@@ -35,7 +35,7 @@ class DailyReadingsDashboard {
   }
 
   async load_data() {
-    this.container.html('<div class="text-muted p-4">Loading readings...</div>');
+    this.container.html(HiraalSidebar.wrapPage("daily-readings", '<div class="empty-state">Loading readings...</div>'));
     try {
       const data = await frappe.xcall("hiraal_emr.api.get_readings_dashboard_data", {
         date: this.selected_date,
@@ -44,13 +44,13 @@ class DailyReadingsDashboard {
       this.render();
     } catch (e) {
       console.error(e);
-      this.container.html('<p class="text-danger p-4">Error loading readings.</p>');
+      this.container.html(HiraalSidebar.wrapPage("daily-readings", '<div class="empty-state">Error loading readings.</div>'));
     }
   }
 
   render() {
     const d = this.data;
-    this.container.html(`
+    const content = `
       <div class="readings-page">
         <!-- KPI Cards -->
         <div class="rd-kpi-row">
@@ -131,7 +131,9 @@ class DailyReadingsDashboard {
           ${!d.readings?.length ? '<p class="text-muted text-center p-4">No readings for this date.</p>' : ""}
         </div>
       </div>
-    `);
+    `;
+
+    this.container.html(HiraalSidebar.wrapPage("daily-readings", content));
   }
 
   source_icon(source) {
