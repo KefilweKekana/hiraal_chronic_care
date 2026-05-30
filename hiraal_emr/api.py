@@ -133,8 +133,10 @@ def get_dashboard_data():
         limit=10,
     )
 
-    # Recent activity (last 10 readings/alerts)
+    # Recent activity (last 10 readings/alerts/tasks)
     recent_activity = []
+
+    # Recent readings
     recent_readings = frappe.get_all(
         "Daily Reading",
         filters={"reading_date": today_str},
@@ -147,9 +149,46 @@ def get_dashboard_data():
         sugar = f"Sugar: {r.blood_sugar}" if r.blood_sugar else ""
         recent_activity.append({
             "icon": "✓",
-            "message": f"New reading from {r.patient_name} — {', '.join(filter(None, [bp, sugar]))}",
+            "icon_class": "success",
+            "message": f"New reading received from <strong>{r.patient_name}</strong> — {', '.join(filter(None, [bp, sugar]))}",
             "time": frappe.utils.pretty_date(r.creation),
         })
+
+    # Recent high alerts
+    recent_alerts = frappe.get_all(
+        "Chronic Care Alert",
+        filters={"creation": [">=", today_str], "status": "Open"},
+        fields=["patient_name", "alert_type", "alert_level", "creation"],
+        order_by="creation desc",
+        limit=3,
+    )
+    for a in recent_alerts:
+        recent_activity.append({
+            "icon": "⚠",
+            "icon_class": "warning" if a.alert_level in ("Very High", "High") else "info",
+            "message": f"High alert for <strong>{a.patient_name}</strong> — {a.alert_type}",
+            "time": frappe.utils.pretty_date(a.creation),
+        })
+
+    # Recent new patients
+    new_patients = frappe.get_all(
+        "Patient",
+        filters={"creation": [">=", add_days(getdate(today_str), -7)]},
+        fields=["patient_name", "creation"],
+        order_by="creation desc",
+        limit=2,
+    )
+    for p in new_patients:
+        recent_activity.append({
+            "icon": "👤",
+            "icon_class": "primary",
+            "message": f"New patient registered: <strong>{p.patient_name}</strong>",
+            "time": frappe.utils.pretty_date(p.creation),
+        })
+
+    # Sort by time and limit
+    recent_activity.sort(key=lambda x: x["time"], reverse=True)
+    recent_activity = recent_activity[:10]
 
     return {
         "active_patients": active_patients,
@@ -192,6 +231,7 @@ def _get_alert_trend_data():
     labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
     high = [0] * 7
     medium = [0] * 7
+    low = [0] * 7
 
     seven_days_ago = add_days(getdate(today()), -6)
     alerts = frappe.get_all(
@@ -203,10 +243,12 @@ def _get_alert_trend_data():
         day_idx = getdate(a.creation).weekday()
         if a.alert_level in ("Very High", "High"):
             high[day_idx] += 1
-        else:
+        elif a.alert_level == "Medium":
             medium[day_idx] += 1
+        else:
+            low[day_idx] += 1
 
-    return {"labels": labels, "high": high, "medium": medium}
+    return {"labels": labels, "high": high, "medium": medium, "low": low}
 
 
 # ──────────────────────────────────────────────
