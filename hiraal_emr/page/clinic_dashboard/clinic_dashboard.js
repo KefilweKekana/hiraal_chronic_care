@@ -35,15 +35,103 @@ class ClinicDashboard {
 
   render() {
     this.container.html(`
-      <div class="clinic-dashboard">
-        <div class="empty-state">${__("Loading dashboard...")}</div>
+      <div class="dashboard-with-sidebar">
+        ${this.render_sidebar()}
+        <div class="dashboard-main">
+          <div class="empty-state">${__("Loading dashboard...")}</div>
+        </div>
       </div>
     `);
   }
 
+  render_sidebar() {
+    const menu_items = [
+      {
+        section: "CLINICAL",
+        items: [
+          { label: "Dashboard", icon: "📊", route: "/app/clinic-dashboard", active: true },
+          { label: "Alerts", icon: "🚨", route: "/app/chronic-care-alert", badge: this.data?.high_risk_alerts },
+          { label: "Patients", icon: "👥", route: "/app/patient" },
+          { label: "Daily Readings", icon: "📈", route: "/app/daily-reading" },
+          { label: "Nurse Tasks", icon: "✅", route: "/app/nurse-task" },
+          { label: "Doctor Review", icon: "🩺", route: "/app/doctor-review" },
+          { label: "Appointments", icon: "📅", route: "/app/patient-appointment" },
+          { label: "Lab Requests", icon: "🧪", route: "/app/lab-test" },
+          { label: "Medicine Requests", icon: "💊", route: "/app/medicine-request" },
+          { label: "Devices", icon: "📱", route: "/app/patient-device" },
+        ]
+      },
+      {
+        section: "BILLING",
+        items: [
+          { label: "Subscriptions", icon: "🔄", route: "/app/care-subscription" },
+          { label: "Payments", icon: "💳", route: "/app/subscription-payment" },
+        ]
+      },
+      {
+        section: "REPORTS",
+        items: [
+          { label: "Reports", icon: "📋", route: "/app/query-report/Patient Summary" },
+          { label: "Analytics", icon: "📉", route: "/app/analytics-dashboard" },
+        ]
+      },
+      {
+        section: "SETTINGS",
+        items: [
+          { label: "Settings", icon: "⚙️", route: "/app/chronic-care-settings" },
+          { label: "User Management", icon: "👤", route: "/app/user" },
+        ]
+      },
+    ];
+
+    return `
+      <aside class="dashboard-sidebar">
+        <div class="sidebar-brand">
+          <div class="brand-logo">🏥</div>
+          <div class="brand-text">
+            <div class="brand-title">DagaarSoft</div>
+            <div class="brand-subtitle">Health Clinic</div>
+          </div>
+        </div>
+        <nav class="sidebar-nav">
+          ${menu_items.map(section => `
+            <div class="sidebar-section">
+              <div class="sidebar-section-title">${section.section}</div>
+              <ul class="sidebar-menu">
+                ${section.items.map(item => `
+                  <li class="sidebar-menu-item ${item.active ? 'active' : ''}">
+                    <a href="${item.route}" class="sidebar-menu-link">
+                      <span class="sidebar-icon">${item.icon}</span>
+                      <span class="sidebar-label">${item.label}</span>
+                      ${item.badge ? `<span class="sidebar-badge">${item.badge}</span>` : ''}
+                    </a>
+                  </li>
+                `).join('')}
+              </ul>
+            </div>
+          `).join('')}
+        </nav>
+        <div class="sidebar-footer">
+          <div class="need-help">
+            <div class="help-icon">💬</div>
+            <div class="help-text">
+              <div class="help-title">Need Help?</div>
+              <div class="help-link">Contact Support</div>
+              <div class="help-email">support@dagaar.so</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    `;
+  }
+
   render_dashboard() {
     const d = this.data;
-    this.container.html(`
+    // Re-render sidebar with updated badge count
+    this.container.find('.dashboard-sidebar').replaceWith(this.render_sidebar());
+    
+    const main = this.container.find('.dashboard-main');
+    main.html(`
       <div class="clinic-dashboard">
         <!-- KPI Cards Row -->
         <div class="kpi-row">
