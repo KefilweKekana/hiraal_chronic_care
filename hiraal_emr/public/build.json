@@ -1,4 +1,5 @@
 {
   "css/hiraal_emr.css": ["public/css/hiraal_emr.css"],
-  "js/hiraal_emr.js": ["public/js/hiraal_emr.js"]
+  "js/hiraal_emr.js": ["public/js/hiraal_emr.js"],
+  "js/hiraal_sidebar.js": ["public/js/hiraal_sidebar.js"]
 }
