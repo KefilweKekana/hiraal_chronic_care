@@ -2,6 +2,8 @@
 // Usage: wrap your page content with HiraalSidebar.render(activeItem, contentHtml)
 
 window.HiraalSidebar = {
+  STORAGE_KEY: 'hiraal_sidebar_collapsed',
+
   menu_items: [
     {
       section: "CLINICAL",
@@ -41,9 +43,47 @@ window.HiraalSidebar = {
     },
   ],
 
+  isCollapsed() {
+    try {
+      return localStorage.getItem(this.STORAGE_KEY) === 'true';
+    } catch (e) {
+      return false;
+    }
+  },
+
+  setCollapsed(collapsed) {
+    try {
+      localStorage.setItem(this.STORAGE_KEY, collapsed ? 'true' : 'false');
+    } catch (e) {}
+  },
+
+  toggle() {
+    const wrapper = document.querySelector('.dashboard-with-sidebar');
+    const sidebar = document.querySelector('.dashboard-sidebar');
+    const toggleBtn = document.querySelector('.sidebar-toggle-btn');
+    if (!wrapper || !sidebar) return;
+
+    const isNowCollapsed = !wrapper.classList.contains('sidebar-collapsed');
+    wrapper.classList.toggle('sidebar-collapsed', isNowCollapsed);
+    sidebar.classList.toggle('collapsed', isNowCollapsed);
+    if (toggleBtn) {
+      toggleBtn.innerHTML = isNowCollapsed ? '→' : '←';
+      toggleBtn.title = isNowCollapsed ? 'Expand sidebar' : 'Collapse sidebar';
+    }
+    this.setCollapsed(isNowCollapsed);
+  },
+
   render(activeItemName, badgeCounts = {}) {
+    const collapsed = this.isCollapsed();
+    const collapsedClass = collapsed ? 'collapsed' : '';
+
     return `
-      <aside class="dashboard-sidebar">
+      <aside class="dashboard-sidebar ${collapsedClass}">
+        <div class="sidebar-toggle">
+          <button class="sidebar-toggle-btn" onclick="HiraalSidebar.toggle()" title="${collapsed ? 'Expand sidebar' : 'Collapse sidebar'}">
+            ${collapsed ? '→' : '←'}
+          </button>
+        </div>
         <div class="sidebar-brand">
           <div class="brand-logo">🏥</div>
           <div class="brand-text">
@@ -61,7 +101,7 @@ window.HiraalSidebar = {
                   const badge = badgeCounts[item.name] || 0;
                   return `
                     <li class="sidebar-menu-item ${isActive ? 'active' : ''}">
-                      <a href="${item.route}" class="sidebar-menu-link">
+                      <a href="${item.route}" class="sidebar-menu-link" title="${item.label}">
                         <span class="sidebar-icon">${item.icon}</span>
                         <span class="sidebar-label">${item.label}</span>
                         ${badge > 0 ? `<span class="sidebar-badge">${badge}</span>` : ''}
@@ -88,8 +128,11 @@ window.HiraalSidebar = {
   },
 
   wrapPage(activeItemName, contentHtml, badgeCounts = {}) {
+    const collapsed = this.isCollapsed();
+    const collapsedClass = collapsed ? 'sidebar-collapsed' : '';
+
     return `
-      <div class="dashboard-with-sidebar">
+      <div class="dashboard-with-sidebar ${collapsedClass}">
         ${this.render(activeItemName, badgeCounts)}
         <div class="dashboard-main">
           ${contentHtml}
