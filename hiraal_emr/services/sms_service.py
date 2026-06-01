@@ -7,7 +7,37 @@ def _get_settings():
 
 
 def send_sms(to: str, message: str) -> dict:
-    """Send SMS via configured provider (Africa's Talking, Twilio, or Telesom)."""
+    """Send SMS.
+
+    Prefers the standalone ``telesom_sms`` app when it is installed: it already
+    holds its own credentials in *Telesom SMS Settings*, so there is no need to
+    duplicate them in Chronic Care Settings or flip an SMS provider there.
+    Enable/disable is controlled by the ``telesom_sms`` app's own settings.
+
+    Falls back to the provider configured in Chronic Care Settings only when the
+    ``telesom_sms`` app is not available.
+    """
+    # 1) Direct integration with the dedicated telesom_sms app.
+    try:
+        from telesom_sms.services.telesom_api import send_single_sms
+    except ImportError:
+        send_single_sms = None
+
+    if send_single_sms is not None:
+        result = send_single_sms(to, message)
+        if result.get("success"):
+            return {
+                "status": "sent",
+                "provider": "Telesom",
+                "detail": result.get("data") or result.get("response"),
+            }
+        return {
+            "status": "error",
+            "provider": "Telesom",
+            "reason": result.get("error", "Unknown Telesom error"),
+        }
+
+    # 2) Fallback: provider configured in Chronic Care Settings.
     settings = _get_settings()
     if not settings.enable_sms_notifications:
         return {"status": "skipped", "reason": "SMS notifications disabled"}
