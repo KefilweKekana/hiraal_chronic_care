@@ -694,7 +694,7 @@ def verify_otp(mobile, otp):
             user_doc.save(ignore_permissions=True)
 
         api_secret = frappe.utils.password.get_decrypted_password(
-            "User", user, "api_secret"
+            "User", user, "api_secret", raise_exception=False
         )
         if not api_secret:
             api_secret = frappe.generate_hash(length=15)
