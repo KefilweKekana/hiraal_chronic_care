@@ -19,6 +19,22 @@ def _log_otp(mobile, result, provided=None, cached=None, remarks=None):
     follows an authentication failure (verify_otp raises AuthenticationError).
     Never lets a logging problem break the OTP flow.
     """
+    # Primary, always-visible sink: the Error Log (its table always exists).
+    # Commit so the entry survives the rollback that verify_otp's frappe.throw
+    # triggers — that rollback is why earlier non-committed logs vanished.
+    try:
+        frappe.log_error(
+            title=f"Hiraal OTP: {result}",
+            message=(
+                f"mobile={mobile!r}\nresult={result}\n"
+                f"provided={provided!r}\ncached={cached!r}\nremarks={remarks}"
+            ),
+        )
+        frappe.db.commit()
+    except Exception:
+        frappe.logger("hiraal_otp").exception("failed to write OTP Error Log")
+
+    # Secondary, best-effort structured sink (only if the doctype is migrated).
     try:
         doc = frappe.new_doc("Hiraal OTP Log")
         doc.mobile = str(mobile or "")
@@ -29,7 +45,7 @@ def _log_otp(mobile, result, provided=None, cached=None, remarks=None):
         doc.insert(ignore_permissions=True)
         frappe.db.commit()
     except Exception:
-        frappe.logger("hiraal_otp").exception("failed to write Hiraal OTP Log")
+        frappe.db.rollback()
 
 
 def generate_otp(mobile: str, length: int = OTP_LENGTH) -> str:
