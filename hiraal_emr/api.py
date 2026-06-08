@@ -612,8 +612,9 @@ def verify_otp(mobile, otp):
     if not patient:
         frappe.throw(_("Patient not found"), frappe.AuthenticationError)
 
-    # Generate API keys for the patient's linked User (v14+ compatible)
-    user = frappe.db.get_value("Patient", patient.name, "user")
+    # Generate API keys for the patient's linked User (v14+ compatible).
+    # The Patient -> User link field is "user_id" (Frappe Healthcare), not "user".
+    user = frappe.db.get_value("Patient", patient.name, "user_id")
     if not user:
         frappe.throw(_("No linked user for this patient"), frappe.AuthenticationError)
 
