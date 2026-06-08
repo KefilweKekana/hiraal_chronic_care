@@ -722,6 +722,25 @@ def verify_otp(mobile, otp):
     return result
 
 
+@frappe.whitelist()
+def get_my_patient():
+    """Return the Patient profile linked to the currently authenticated user.
+
+    Used by the mobile app after OTP login. Scoped to the caller's own record
+    via the session user, so it needs no doctype read permission and isn't
+    affected by how the mobile number was formatted/stored.
+    """
+    user = frappe.session.user
+    if not user or user == "Guest":
+        frappe.throw(_("Not authenticated"), frappe.AuthenticationError)
+
+    name = frappe.db.get_value("Patient", {"user_id": user}, "name")
+    if not name:
+        frappe.throw(_("No patient linked to this account"), frappe.AuthenticationError)
+
+    return frappe.get_doc("Patient", name).as_dict()
+
+
 @frappe.whitelist(allow_guest=False)
 def biometric_token():
     """Exchange a valid biometric session for a fresh JWT/session token."""
