@@ -587,6 +587,16 @@ def resend_otp(mobile):
     return request_otp(mobile)
 
 
+def _otp_step_log(step, detail=""):
+    """Write a committed Error Log entry for a verify_otp step so it survives
+    the request rollback that follows frappe.throw. UAT diagnostics only."""
+    try:
+        frappe.log_error(title=f"Hiraal OTP: {step}", message=detail)
+        frappe.db.commit()
+    except Exception:
+        frappe.logger("hiraal_otp").exception("failed to write OTP step log")
+
+
 @frappe.whitelist(allow_guest=True)
 def verify_otp(mobile, otp):
     """Verify OTP and return auth token for mobile patient."""
@@ -610,29 +620,38 @@ def verify_otp(mobile, otp):
         "Patient", {"mobile": mobile, "status": "Active"}, ["name", "patient_name"], as_dict=True
     )
     if not patient:
+        _otp_step_log("verify -> Patient not found", f"mobile={mobile!r}")
         frappe.throw(_("Patient not found"), frappe.AuthenticationError)
 
     # Generate API keys for the patient's linked User (v14+ compatible).
     # The Patient -> User link field is "user_id" (Frappe Healthcare), not "user".
     user = frappe.db.get_value("Patient", patient.name, "user_id")
     if not user:
+        _otp_step_log("verify -> no user_id", f"mobile={mobile!r} patient={patient.name}")
         frappe.throw(_("No linked user for this patient"), frappe.AuthenticationError)
 
     # Use API key + secret auth instead of deprecated login_as()
-    user_doc = frappe.get_doc("User", user)
-    api_key = user_doc.api_key
-    if not api_key:
-        api_key = frappe.generate_hash(length=15)
-        user_doc.api_key = api_key
-        user_doc.save(ignore_permissions=True)
+    try:
+        user_doc = frappe.get_doc("User", user)
+        api_key = user_doc.api_key
+        if not api_key:
+            api_key = frappe.generate_hash(length=15)
+            user_doc.api_key = api_key
+            user_doc.save(ignore_permissions=True)
 
-    api_secret = frappe.utils.password.get_decrypted_password(
-        "User", user, "api_secret"
-    )
-    if not api_secret:
-        api_secret = frappe.generate_hash(length=15)
-        user_doc.api_secret = api_secret
-        user_doc.save(ignore_permissions=True)
+        api_secret = frappe.utils.password.get_decrypted_password(
+            "User", user, "api_secret"
+        )
+        if not api_secret:
+            api_secret = frappe.generate_hash(length=15)
+            user_doc.api_secret = api_secret
+            user_doc.save(ignore_permissions=True)
+    except Exception:
+        _otp_step_log(
+            "verify -> credential error",
+            f"mobile={mobile!r} patient={patient.name} user={user}\n{frappe.get_traceback()}",
+        )
+        raise
 
     result = {
         "success": True,
@@ -641,6 +660,7 @@ def verify_otp(mobile, otp):
         "api_key": api_key,
         "api_secret": api_secret,
     }
+    _otp_step_log("verify -> success", f"mobile={mobile!r} patient={patient.name} user={user}")
 
     # Cache the successful result so a duplicate/retried verify with the same
     # mobile + code returns the same credentials instead of failing.
