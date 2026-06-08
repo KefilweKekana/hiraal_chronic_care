@@ -9,7 +9,14 @@ from frappe.utils import add_days, getdate, now_datetime, today
 
 from hiraal_emr.services.otp_service import generate_otp, verify_otp as otp_verify
 from hiraal_emr.services.sms_service import send_otp_sms, send_alert_sms
-from hiraal_emr.doctype.audit_log.audit_log import log_action as audit_log
+try:
+    from hiraal_emr.doctype.audit_log.audit_log import log_action as audit_log
+except Exception:
+    # Audit logging must never break module import or site boot. If the
+    # audit_log doctype module isn't importable in an environment, degrade to a
+    # no-op rather than taking down the whole desk with a SessionBootFailed.
+    def audit_log(*args, **kwargs):
+        return None
 
 
 # ──────────────────────────────────────────────
