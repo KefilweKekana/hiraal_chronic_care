@@ -604,6 +604,38 @@ def _otp_step_log(step, detail=""):
         frappe.logger("hiraal_otp").exception("failed to write OTP step log")
 
 
+def _mobile_candidates(mobile):
+    """Common stored formats for a phone number, so patient lookup matches
+    whether it was saved as +252…, 252…, 0…, or the bare national number."""
+    raw = str(mobile or "").strip()
+    digits = "".join(c for c in raw if c.isdigit())
+    nsn = digits[3:] if digits.startswith("252") else digits
+    nsn = nsn.lstrip("0")
+    cands = {raw, digits}
+    if nsn:
+        cands.update({nsn, "0" + nsn, "252" + nsn, "+252" + nsn})
+    return [c for c in cands if c]
+
+
+def _provision_patient_user(patient_name, patient_label, mobile):
+    """Ensure the patient has a linked login User (Website User) so OTP login
+    can issue API credentials. Returns the user's email/name."""
+    email = frappe.db.get_value("Patient", patient_name, "email")
+    if not email:
+        digits = "".join(c for c in str(mobile or "") if c.isdigit()) or patient_name
+        email = f"{digits}@patient.hiraal.local"
+    if not frappe.db.exists("User", email):
+        user_doc = frappe.new_doc("User")
+        user_doc.email = email
+        user_doc.first_name = patient_label or "Patient"
+        user_doc.mobile_no = str(mobile or "")
+        user_doc.send_welcome_email = 0
+        user_doc.user_type = "Website User"
+        user_doc.insert(ignore_permissions=True)
+    frappe.db.set_value("Patient", patient_name, "user_id", email)
+    return email
+
+
 @frappe.whitelist(allow_guest=True)
 def verify_otp(mobile, otp):
     """Verify OTP and return auth token for mobile patient."""
@@ -624,18 +656,33 @@ def verify_otp(mobile, otp):
         frappe.throw(_("Invalid or expired OTP"), frappe.AuthenticationError)
 
     patient = frappe.db.get_value(
-        "Patient", {"mobile": mobile, "status": "Active"}, ["name", "patient_name"], as_dict=True
+        "Patient",
+        {"mobile": ["in", _mobile_candidates(mobile)], "status": "Active"},
+        ["name", "patient_name"],
+        as_dict=True,
     )
     if not patient:
-        _otp_step_log("verify -> Patient not found", f"mobile={mobile!r}")
+        _otp_step_log(
+            "verify -> Patient not found",
+            f"mobile={mobile!r} tried={_mobile_candidates(mobile)}",
+        )
         frappe.throw(_("Patient not found"), frappe.AuthenticationError)
 
     # Generate API keys for the patient's linked User (v14+ compatible).
     # The Patient -> User link field is "user_id" (Frappe Healthcare), not "user".
     user = frappe.db.get_value("Patient", patient.name, "user_id")
     if not user:
-        _otp_step_log("verify -> no user_id", f"mobile={mobile!r} patient={patient.name}")
-        frappe.throw(_("No linked user for this patient"), frappe.AuthenticationError)
+        # Auto-provision a login User so first-time OTP login works without a
+        # clinic having to create a Frappe User per patient by hand.
+        try:
+            user = _provision_patient_user(patient.name, patient.patient_name, mobile)
+            _otp_step_log("verify -> provisioned user", f"patient={patient.name} user={user}")
+        except Exception:
+            _otp_step_log(
+                "verify -> user provision error",
+                f"patient={patient.name}\n{frappe.get_traceback()}",
+            )
+            raise
 
     # Use API key + secret auth instead of deprecated login_as()
     try:
