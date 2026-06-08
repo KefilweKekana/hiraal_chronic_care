@@ -590,6 +590,19 @@ def resend_otp(mobile):
 @frappe.whitelist(allow_guest=True)
 def verify_otp(mobile, otp):
     """Verify OTP and return auth token for mobile patient."""
+    mobile = str(mobile or "").strip()
+    otp = str(otp or "").strip()
+
+    # Idempotency: clients can fire verify twice (auto-submit on the 6th digit
+    # plus a button tap, or a network retry). The first call consumes the
+    # one-time code, so a naive second call fails with "Invalid or expired OTP"
+    # even though login should succeed. Return the cached result for a short
+    # window so duplicate calls resolve identically.
+    result_key = f"hiraal_otp_result_{mobile}_{otp}"
+    cached_result = frappe.cache().get_value(result_key)
+    if cached_result:
+        return cached_result
+
     if not otp_verify(mobile, otp):
         frappe.throw(_("Invalid or expired OTP"), frappe.AuthenticationError)
 
@@ -620,13 +633,18 @@ def verify_otp(mobile, otp):
         user_doc.api_secret = api_secret
         user_doc.save(ignore_permissions=True)
 
-    return {
+    result = {
         "success": True,
         "patient": patient.name,
         "patient_name": patient.patient_name,
         "api_key": api_key,
         "api_secret": api_secret,
     }
+
+    # Cache the successful result so a duplicate/retried verify with the same
+    # mobile + code returns the same credentials instead of failing.
+    frappe.cache().set_value(result_key, result, expires_in_sec=120)
+    return result
 
 
 @frappe.whitelist(allow_guest=False)
