@@ -537,10 +537,15 @@ def on_lab_test_update(doc, method):
 # ──────────────────────────────────────────────
 
 @frappe.whitelist(allow_guest=False)
-def submit_reading(patient, bp_systolic=None, bp_diastolic=None,
+def submit_reading(patient=None, bp_systolic=None, bp_diastolic=None,
                    blood_sugar=None, sugar_unit="mg/dL",
                    medicine_taken=None, note=None, source="App", device_id=None):
-    """API endpoint for mobile app to submit a daily reading."""
+    """API endpoint for mobile app to submit a daily reading.
+
+    ``patient`` is optional: when omitted it resolves to the logged-in user's
+    own patient, so the mobile app doesn't need to pass an ID.
+    """
+    patient = patient or _my_patient_name()
     reading = frappe.new_doc("Daily Reading")
     reading.patient = patient
     reading.bp_systolic = int(bp_systolic) if bp_systolic else None
