@@ -882,6 +882,41 @@ def get_lab_test_templates():
     )
 
 
+@frappe.whitelist()
+def add_my_address(label=None, address_type="Personal", address_line1=None,
+                   city=None, is_primary=0):
+    """Add an address for the logged-in patient and link it to them."""
+    patient = _my_patient_name()
+    doc = frappe.new_doc("Address")
+    doc.address_title = label or patient
+    doc.address_type = address_type or "Personal"
+    doc.address_line1 = address_line1 or "-"
+    doc.city = city or "-"
+    try:
+        doc.is_primary_address = 1 if int(is_primary or 0) else 0
+    except Exception:
+        doc.is_primary_address = 0
+    doc.append("links", {"link_doctype": "Patient", "link_name": patient})
+    doc.insert(ignore_permissions=True)
+    frappe.db.commit()
+    return doc.as_dict()
+
+
+@frappe.whitelist()
+def delete_my_address(name):
+    """Delete one of the logged-in patient's own addresses."""
+    patient = _my_patient_name()
+    owned = frappe.db.exists("Dynamic Link", {
+        "parent": name, "parenttype": "Address",
+        "link_doctype": "Patient", "link_name": patient,
+    })
+    if not owned:
+        frappe.throw(_("Not permitted"), frappe.PermissionError)
+    frappe.delete_doc("Address", name, ignore_permissions=True)
+    frappe.db.commit()
+    return {"success": True}
+
+
 @frappe.whitelist(allow_guest=False)
 def biometric_token():
     """Exchange a valid biometric session for a fresh JWT/session token."""
