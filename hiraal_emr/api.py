@@ -741,6 +741,142 @@ def get_my_patient():
     return frappe.get_doc("Patient", name).as_dict()
 
 
+def _my_patient_name():
+    """Resolve the Patient linked to the currently authenticated user."""
+    user = frappe.session.user
+    if not user or user == "Guest":
+        frappe.throw(_("Not authenticated"), frappe.AuthenticationError)
+    name = frappe.db.get_value("Patient", {"user_id": user}, "name")
+    if not name:
+        frappe.throw(_("No patient linked to this account"), frappe.AuthenticationError)
+    return name
+
+
+def _safe_get_all(doctype, **kwargs):
+    """get_all that degrades to [] instead of 500-ing a screen if a field or
+    doctype is unavailable in this environment."""
+    try:
+        return frappe.get_all(doctype, **kwargs)
+    except Exception:
+        frappe.logger("hiraal_api").exception(f"get_all failed for {doctype}")
+        return []
+
+
+@frappe.whitelist()
+def get_my_records():
+    """Medical history (Patient Encounters) for the logged-in patient."""
+    patient = _my_patient_name()
+    return _safe_get_all(
+        "Patient Encounter",
+        filters={"patient": patient},
+        fields=["name", "encounter_date", "encounter_type",
+                "practitioner", "practitioner_name", "medical_department"],
+        order_by="encounter_date desc",
+        limit_page_length=50,
+    )
+
+
+@frappe.whitelist()
+def get_my_addresses():
+    """Addresses linked to the logged-in patient."""
+    patient = _my_patient_name()
+    links = _safe_get_all(
+        "Dynamic Link",
+        filters={"link_doctype": "Patient", "link_name": patient, "parenttype": "Address"},
+        fields=["parent"],
+    )
+    out = []
+    for link in links:
+        try:
+            out.append(frappe.get_doc("Address", link["parent"]).as_dict())
+        except Exception:
+            pass
+    return out
+
+
+@frappe.whitelist()
+def get_my_readings(limit=60):
+    """Daily Reading history for the logged-in patient."""
+    patient = _my_patient_name()
+    return _safe_get_all(
+        "Daily Reading",
+        filters={"patient": patient},
+        fields=["name", "reference_id", "reading_date", "reading_time",
+                "bp_systolic", "bp_diastolic", "blood_sugar", "blood_sugar_unit",
+                "medicine_taken", "patient_note", "source", "sync_status", "risk_level"],
+        order_by="reading_date desc",
+        limit_page_length=int(limit or 60),
+    )
+
+
+@frappe.whitelist()
+def get_my_activity_counts():
+    """Counts for the profile activity cards."""
+    patient = _my_patient_name()
+    today_d = today()
+    appointments = frappe.db.count(
+        "Patient Appointment",
+        {"patient": patient, "appointment_date": [">=", today_d], "status": "Open"},
+    )
+    lab_tests = frappe.db.count("Lab Test", {"patient": patient, "docstatus": 0})
+    orders = 0
+    try:
+        orders = frappe.db.count("Medicine Request", {"patient": patient, "status": "Pending"})
+    except Exception:
+        pass
+    return {
+        "upcoming_appointments": appointments,
+        "scheduled_lab_tests": lab_tests,
+        "active_orders": orders,
+    }
+
+
+@frappe.whitelist()
+def get_my_notifications(limit=50):
+    """Notifications for the logged-in patient's user account."""
+    return _safe_get_all(
+        "Notification Log",
+        filters={"for_user": frappe.session.user},
+        fields=["name", "subject", "email_content", "type", "creation", "read"],
+        order_by="creation desc",
+        limit_page_length=int(limit or 50),
+    )
+
+
+@frappe.whitelist()
+def mark_my_notification_read(name):
+    """Mark one of the caller's own notifications as read."""
+    if frappe.db.get_value("Notification Log", name, "for_user") != frappe.session.user:
+        frappe.throw(_("Not permitted"), frappe.PermissionError)
+    frappe.db.set_value("Notification Log", name, "read", 1)
+    frappe.db.commit()
+    return {"success": True}
+
+
+@frappe.whitelist()
+def get_doctors():
+    """Active healthcare practitioners for the booking screen."""
+    return _safe_get_all(
+        "Healthcare Practitioner",
+        filters={"status": "Active"},
+        fields=["name", "practitioner_name", "department"],
+        order_by="practitioner_name asc",
+        limit_page_length=100,
+    )
+
+
+@frappe.whitelist()
+def get_lab_test_templates():
+    """Enabled lab test templates for the lab test screen."""
+    return _safe_get_all(
+        "Lab Test Template",
+        filters={"disabled": 0},
+        fields=["name", "lab_test_name", "lab_test_rate", "department"],
+        order_by="lab_test_name asc",
+        limit_page_length=100,
+    )
+
+
 @frappe.whitelist(allow_guest=False)
 def biometric_token():
     """Exchange a valid biometric session for a fresh JWT/session token."""
