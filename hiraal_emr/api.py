@@ -859,14 +859,24 @@ def mark_my_notification_read(name):
 
 @frappe.whitelist()
 def get_doctors():
-    """Active healthcare practitioners for the booking screen."""
-    return _safe_get_all(
+    """Healthcare practitioners for the booking screen.
+
+    No status filter (different setups use different status values), with a
+    bare-fields fallback so a non-standard custom field can't blank the list.
+    """
+    docs = _safe_get_all(
         "Healthcare Practitioner",
-        filters={"status": "Active"},
         fields=["name", "practitioner_name", "department"],
         order_by="practitioner_name asc",
-        limit_page_length=100,
+        limit_page_length=200,
     )
+    if not docs:
+        docs = _safe_get_all(
+            "Healthcare Practitioner",
+            fields=["name", "practitioner_name"],
+            limit_page_length=200,
+        )
+    return docs
 
 
 @frappe.whitelist()
