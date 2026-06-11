@@ -719,7 +719,6 @@ def verify_otp(mobile, otp):
         "api_key": api_key,
         "api_secret": api_secret,
     }
-    _otp_step_log("verify -> success", f"mobile={mobile!r} patient={patient.name} user={user}")
 
     # Cache the successful result so a duplicate/retried verify with the same
     # mobile + code returns the same credentials instead of failing.

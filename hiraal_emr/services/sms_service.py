@@ -251,7 +251,7 @@ def _send_telesom_inline(to, message):
 def send_otp_sms(mobile: str, otp: str) -> dict:
     """Send an OTP SMS in Somali/English."""
     message = (
-        f"Hiraal Chronic Care: Your verification code is {otp}. "
+        f"Hiraal Lifecare: Your verification code is {otp}. "
         f"It expires in 5 minutes. Do not share this code with anyone."
     )
     return send_sms(mobile, message)
