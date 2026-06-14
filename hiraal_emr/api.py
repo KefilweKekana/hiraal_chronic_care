@@ -578,8 +578,10 @@ def submit_reading(patient=None, bp_systolic=None, bp_diastolic=None,
 def request_otp(mobile):
     """Generate and send an OTP to the given mobile number.
 
-    Returns immediately so the UI can show the OTP entry screen.
-    The actual SMS delivery status is logged but does not block the response.
+    Primary delivery is SMS (Telesom). If the SMS send fails and the patient
+    has an email on file, fall back to email via the site's SMTP. Returns
+    which channel delivered the code so the UI can point the user to the right
+    place. The OTP itself is never logged.
     """
     if not mobile or len(str(mobile).strip()) < 6:
         frappe.throw(_("Valid mobile number is required"))
@@ -588,10 +590,67 @@ def request_otp(mobile):
     otp = generate_otp(mobile)
     sms_result = send_otp_sms(mobile, otp)
 
-    # Always return success to the client – we don't want to leak whether
-    # the number exists in the system.  SMS failures are logged server-side.
-    frappe.logger().info(f"OTP {otp} for {mobile}: {sms_result}")
-    return {"success": True, "message": "OTP sent"}
+    channel = "sms"
+    sent_to = None
+    if (sms_result or {}).get("status") != "sent":
+        # SMS delivery failed — fall back to email if we have one for this
+        # patient. SMTP is configured on the site, so the code still arrives.
+        email = _patient_email_for_mobile(mobile)
+        if email and send_otp_email(email, otp):
+            channel = "email"
+            sent_to = _mask_email(email)
+
+    # Never log the OTP itself — only the delivery outcome.
+    frappe.logger("hiraal_otp").info(
+        f"OTP request {mobile}: sms={(sms_result or {}).get('status')} channel={channel}"
+    )
+
+    # Always report success so we don't leak whether a number is registered.
+    return {"success": True, "message": "OTP sent", "channel": channel, "sent_to": sent_to}
+
+
+def _patient_email_for_mobile(mobile):
+    """Email on file for the Active patient matching this mobile, if any."""
+    try:
+        return frappe.db.get_value(
+            "Patient",
+            {"mobile": ["in", _mobile_candidates(mobile)], "status": "Active"},
+            "email",
+        )
+    except Exception:
+        return None
+
+
+def _mask_email(email):
+    """Mask an email for display: 'name@host.com' -> 'n***@host.com'."""
+    try:
+        local, _, domain = str(email).partition("@")
+        if not domain:
+            return None
+        return f"{(local[:1] or '*')}***@{domain}"
+    except Exception:
+        return None
+
+
+def send_otp_email(email, otp):
+    """Send the OTP by email as an SMS fallback. Sent synchronously so a
+    delivery failure surfaces immediately and we can report the real channel.
+    Returns True only if the mail was handed off without error."""
+    try:
+        frappe.sendmail(
+            recipients=[email],
+            subject=_("Your Hiraal Lifecare verification code"),
+            message=(
+                f"<p>Your Hiraal Lifecare verification code is "
+                f"<strong>{otp}</strong>.</p>"
+                f"<p>It expires in 5 minutes. Do not share this code with anyone.</p>"
+            ),
+            now=True,
+        )
+        return True
+    except Exception:
+        frappe.log_error(title="Hiraal OTP email failed", message=frappe.get_traceback())
+        return False
 
 
 @frappe.whitelist(allow_guest=True)
