@@ -538,7 +538,7 @@ def on_lab_test_update(doc, method):
 
 @frappe.whitelist(allow_guest=False)
 def submit_reading(patient=None, bp_systolic=None, bp_diastolic=None,
-                   blood_sugar=None, sugar_unit="mg/dL",
+                   blood_sugar=None, sugar_unit="mg/dL", weight=None,
                    medicine_taken=None, note=None, source="App", device_id=None):
     """API endpoint for mobile app to submit a daily reading.
 
@@ -552,6 +552,7 @@ def submit_reading(patient=None, bp_systolic=None, bp_diastolic=None,
     reading.bp_diastolic = int(bp_diastolic) if bp_diastolic else None
     reading.blood_sugar = float(blood_sugar) if blood_sugar else None
     reading.blood_sugar_unit = sugar_unit
+    reading.weight = float(weight) if weight else None
     reading.medicine_taken = medicine_taken
     reading.patient_note = note
     reading.source = source
@@ -806,7 +807,7 @@ def get_my_readings(limit=60):
         "Daily Reading",
         filters={"patient": patient},
         fields=["name", "reference_id", "reading_date", "reading_time",
-                "bp_systolic", "bp_diastolic", "blood_sugar", "blood_sugar_unit",
+                "bp_systolic", "bp_diastolic", "blood_sugar", "blood_sugar_unit", "weight",
                 "medicine_taken", "patient_note", "source", "sync_status", "risk_level"],
         order_by="reading_date desc",
         limit_page_length=int(limit or 60),
