@@ -41,7 +41,7 @@ class DailyReading(Document):
     def evaluate_and_alert(self):
         """Trigger alert creation if reading is abnormal."""
         if self.risk_level in ("High", "Critical"):
-            from hiraal_emr.hiraal_emr.doctype.chronic_care_alert.chronic_care_alert import (
+            from hiraal_emr.doctype.chronic_care_alert.chronic_care_alert import (
                 evaluate_reading,
             )
 
