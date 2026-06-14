@@ -8,7 +8,7 @@ from frappe import _
 from frappe.utils import add_days, getdate, now_datetime, today
 
 from hiraal_emr.services.otp_service import generate_otp, verify_otp as otp_verify
-from hiraal_emr.services.sms_service import send_otp_sms, send_alert_sms
+from hiraal_emr.services.sms_service import send_otp_sms, send_alert_sms, send_sms
 try:
     from hiraal_emr.doctype.audit_log.audit_log import log_action as audit_log
 except Exception:
@@ -1201,6 +1201,76 @@ def cancel_my_order(name, reason=None):
     frappe.db.commit()
     audit_log("Update", "Medicine Request", name, "Patient cancelled order via app")
     return {"success": True, "status": "Cancelled"}
+
+
+# Patient-friendly message per order status. Used by the on_update doc event.
+_MEDICINE_STATUS_MESSAGES = {
+    "Approved": "Hiraal Lifecare: Your medicine order {name} has been approved and will be prepared shortly.",
+    "Preparing": "Hiraal Lifecare: Your pharmacy is now preparing medicine order {name}.",
+    "Ready": "Hiraal Lifecare: Your medicine order {name} is ready and will be dispatched soon.",
+    "Dispatched": "Hiraal Lifecare: Your medicine order {name} is out for delivery.",
+    "Delivered": "Hiraal Lifecare: Your medicine order {name} has been delivered. Take care!",
+    "Cancelled": "Hiraal Lifecare: Your medicine order {name} has been cancelled.",
+}
+# Statuses important enough to also send a (paid) SMS, not just an in-app alert.
+_MEDICINE_SMS_STATUSES = {"Dispatched", "Delivered", "Cancelled"}
+
+
+def on_medicine_request_update(doc, method=None):
+    """Notify the patient when their medicine order's status changes.
+
+    In-app notification for every meaningful transition; an SMS for the key
+    milestones (out-for-delivery / delivered / cancelled). Best-effort — a
+    notification failure must never block the pharmacy's status update."""
+    try:
+        if not doc.has_value_changed("status"):
+            return
+        template = _MEDICINE_STATUS_MESSAGES.get(doc.status)
+        if not template:
+            return
+        message = template.format(name=doc.name)
+        notify_patient(
+            doc.patient,
+            subject=f"Order {doc.name}: {doc.status}",
+            message=message,
+            sms=doc.status in _MEDICINE_SMS_STATUSES,
+            document_type="Medicine Request",
+            document_name=doc.name,
+        )
+    except Exception:
+        frappe.logger("hiraal_orders").exception("medicine status notify failed")
+
+
+def notify_patient(patient, subject, message, sms=False,
+                   document_type=None, document_name=None):
+    """Best-effort patient notification: an in-app Notification Log entry (read
+    by the app's notification centre) plus an optional SMS. Never raises."""
+    if not patient:
+        return
+    info = frappe.db.get_value(
+        "Patient", patient, ["user_id", "mobile"], as_dict=True
+    ) or {}
+
+    if info.get("user_id"):
+        try:
+            note = frappe.new_doc("Notification Log")
+            note.subject = subject
+            note.email_content = message
+            note.for_user = info["user_id"]
+            note.type = "Alert"
+            if document_type:
+                note.document_type = document_type
+            if document_name:
+                note.document_name = document_name
+            note.insert(ignore_permissions=True)
+        except Exception:
+            frappe.logger("hiraal_orders").exception("notification log insert failed")
+
+    if sms and info.get("mobile"):
+        try:
+            send_sms(info["mobile"], message)
+        except Exception:
+            frappe.logger("hiraal_orders").exception("order status SMS failed")
 
 
 @frappe.whitelist(allow_guest=False)

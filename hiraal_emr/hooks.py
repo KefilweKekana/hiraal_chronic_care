@@ -52,6 +52,9 @@ doc_events = {
         "after_insert": "hiraal_emr.doctype.audit_log.audit_log.log_action",
         "on_update": "hiraal_emr.doctype.audit_log.audit_log.log_action",
     },
+    "Medicine Request": {
+        "on_update": "hiraal_emr.api.on_medicine_request_update",
+    },
 }
 
 # ---------- Scheduled Tasks ----------
