@@ -1105,28 +1105,102 @@ def request_lab_test(patient, template, practitioner=None, note=None):
 
 
 @frappe.whitelist(allow_guest=False)
-def order_medicine(patient, items, delivery_address=None, payment_method=None):
-    """Place a medicine delivery order from the mobile app."""
+def order_medicine(patient=None, items=None, delivery_address=None,
+                   payment_method=None, priority=None):
+    """Place a medicine delivery order from the mobile app.
+
+    ``patient`` is optional; when omitted it resolves to the logged-in user's
+    own patient so the app never has to pass an ID it might not have.
+    """
     import json
+    patient = patient or _my_patient_name()
     if isinstance(items, str):
-        items = json.loads(items)
+        items = json.loads(items or "[]")
+    items = items or []
 
     order = frappe.new_doc("Medicine Request")
     order.patient = patient
     order.delivery_address = delivery_address
+    order.delivery_type = "Delivery" if delivery_address else "Pickup"
     order.payment_method = payment_method or "Zaad"
+    order.payment_status = "Unpaid"
+    order.priority = priority or "Normal"
     order.status = "Pending"
 
+    count = 0
     for item in items:
+        name = (item.get("name") or item.get("medicine_name") or "").strip()
+        if not name:
+            continue
         order.append("medicines", {
-            "medicine_name": item.get("name"),
-            "quantity": int(item.get("quantity", 1)),
+            "medicine_name": name,
+            "quantity": int(item.get("quantity", 1) or 1),
             "dosage": item.get("dosage"),
         })
+        count += 1
+    order.total_items = count
 
     order.insert(ignore_permissions=True)
     audit_log("Create", "Medicine Request", order.name, "Patient ordered medicine via app")
     return {"success": True, "order": order.name, "status": order.status}
+
+
+# Patient-facing lifecycle stages, in order. "Cancelled" is terminal and
+# handled separately by the app.
+_MEDICINE_ORDER_STAGES = [
+    "Pending", "Approved", "Preparing", "Ready", "Dispatched", "Delivered",
+]
+# Stages from which a patient may still cancel their own order.
+_MEDICINE_CANCELLABLE = {"Pending", "Approved"}
+
+
+@frappe.whitelist()
+def get_my_orders(limit=30):
+    """Medicine orders for the logged-in patient, newest first, with their
+    current status, delivery timeline, and line items — so the app can show
+    real order tracking."""
+    patient = _my_patient_name()
+    orders = _safe_get_all(
+        "Medicine Request",
+        filters={"patient": patient},
+        fields=[
+            "name", "status", "priority", "total_items",
+            "delivery_type", "delivery_address", "estimated_delivery",
+            "preparation_started", "dispatched_at", "delivered_at",
+            "payment_method", "payment_status", "amount",
+            "pharmacist_note", "cancellation_reason", "creation",
+        ],
+        order_by="creation desc",
+        limit_page_length=int(limit or 30),
+    )
+    for o in orders:
+        o["medicines"] = _safe_get_all(
+            "Medicine Request Item",
+            filters={"parent": o["name"], "parenttype": "Medicine Request"},
+            fields=["medicine_name", "quantity", "dosage"],
+            order_by="idx asc",
+        )
+        o["cancellable"] = 1 if o.get("status") in _MEDICINE_CANCELLABLE else 0
+    return orders
+
+
+@frappe.whitelist()
+def cancel_my_order(name, reason=None):
+    """Let a patient cancel their own order while it's still cancellable."""
+    patient = _my_patient_name()
+    owner = frappe.db.get_value("Medicine Request", name, "patient")
+    if owner != patient:
+        frappe.throw(_("Not permitted"), frappe.PermissionError)
+    status = frappe.db.get_value("Medicine Request", name, "status")
+    if status not in _MEDICINE_CANCELLABLE:
+        frappe.throw(_("This order can no longer be cancelled"))
+    doc = frappe.get_doc("Medicine Request", name)
+    doc.status = "Cancelled"
+    doc.cancellation_reason = reason or "Cancelled by patient"
+    doc.save(ignore_permissions=True)
+    frappe.db.commit()
+    audit_log("Update", "Medicine Request", name, "Patient cancelled order via app")
+    return {"success": True, "status": "Cancelled"}
 
 
 @frappe.whitelist(allow_guest=False)
