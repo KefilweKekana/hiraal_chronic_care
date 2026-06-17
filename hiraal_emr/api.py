@@ -1245,6 +1245,49 @@ def _send_sms_bg(mobile, message):
         frappe.logger("hiraal_telemed").exception("background SMS failed")
 
 
+_CLINICAL_ROLES = {
+    "System Manager", "Chronic Care Admin", "Chronic Care Doctor",
+    "Chronic Care Nurse", "Healthcare Practitioner",
+}
+
+
+def _is_clinical_user():
+    """True for clinic staff/clinicians; False for patient Website Users."""
+    return bool(set(frappe.get_roles()) & _CLINICAL_ROLES)
+
+
+@frappe.whitelist()
+def get_waiting_telemedicine_sessions():
+    """Clinic-side feed for the Telemedicine Waiting Room desk page: video
+    visits needing a clinician now — every session currently In Progress (a
+    patient has joined and is waiting) plus today's still-Scheduled visits.
+
+    Gated to clinical roles so a patient Website User can't read the clinic-wide
+    list of who's waiting."""
+    if not _is_clinical_user():
+        return []
+
+    rows = _safe_get_all(
+        "Telemedicine Session",
+        filters={"session_status": ["in", ["In Progress", "Scheduled"]]},
+        fields=["name", "patient", "patient_name", "practitioner",
+                "practitioner_name", "session_status", "start_time", "meeting_url"],
+        order_by="start_time asc",
+        limit_page_length=100,
+    )
+
+    today_str = str(today())
+    out = [
+        r for r in rows
+        if r.get("session_status") == "In Progress"
+        or (r.get("session_status") == "Scheduled"
+            and str(r.get("start_time") or "").startswith(today_str))
+    ]
+    # Patients who've actually joined (In Progress) float to the top.
+    out.sort(key=lambda r: 0 if r.get("session_status") == "In Progress" else 1)
+    return out
+
+
 @frappe.whitelist(allow_guest=False)
 def request_lab_test(patient, template, practitioner=None, note=None):
     """Request a lab test from the mobile app."""
