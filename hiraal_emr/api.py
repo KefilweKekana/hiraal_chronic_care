@@ -575,38 +575,55 @@ def submit_reading(patient=None, bp_systolic=None, bp_diastolic=None,
 # ──────────────────────────────────────────────
 
 @frappe.whitelist(allow_guest=True)
-def request_otp(mobile):
+def request_otp(mobile, channel="sms"):
     """Generate and send an OTP to the given mobile number.
 
-    Primary delivery is SMS (Telesom). If the SMS send fails and the patient
-    has an email on file, fall back to email via the site's SMTP. Returns
-    which channel delivered the code so the UI can point the user to the right
-    place. The OTP itself is never logged.
+    ``channel`` is the patient's chosen delivery method:
+      - "email": send the code to the email on the patient's record (via the
+        site's SMTP). If no email is on file, fall back to SMS so the user is
+        never stranded.
+      - "sms" (default): send by SMS (Telesom); if the SMS send fails and the
+        patient has an email on file, fall back to email.
+
+    Returns the channel that actually delivered the code plus a masked
+    destination, so the app can point the user to the right inbox. The OTP
+    itself is never logged.
     """
     if not mobile or len(str(mobile).strip()) < 6:
         frappe.throw(_("Valid mobile number is required"))
 
     mobile = str(mobile).strip()
+    requested = (channel or "sms").strip().lower()
     otp = generate_otp(mobile)
-    sms_result = send_otp_sms(mobile, otp)
 
-    channel = "sms"
+    used = "sms"
     sent_to = None
-    if (sms_result or {}).get("status") != "sent":
-        # SMS delivery failed — fall back to email if we have one for this
-        # patient. SMTP is configured on the site, so the code still arrives.
+
+    if requested == "email":
         email = _patient_email_for_mobile(mobile)
         if email and send_otp_email(email, otp):
-            channel = "email"
+            used = "email"
             sent_to = _mask_email(email)
+        else:
+            # No email on file (or the send failed) — fall back to SMS.
+            send_otp_sms(mobile, otp)
+            used = "sms"
+    else:
+        sms_result = send_otp_sms(mobile, otp)
+        if (sms_result or {}).get("status") != "sent":
+            # SMS failed — fall back to email if we have one on file.
+            email = _patient_email_for_mobile(mobile)
+            if email and send_otp_email(email, otp):
+                used = "email"
+                sent_to = _mask_email(email)
 
     # Never log the OTP itself — only the delivery outcome.
     frappe.logger("hiraal_otp").info(
-        f"OTP request {mobile}: sms={(sms_result or {}).get('status')} channel={channel}"
+        f"OTP request {mobile}: requested={requested} delivered={used}"
     )
 
     # Always report success so we don't leak whether a number is registered.
-    return {"success": True, "message": "OTP sent", "channel": channel, "sent_to": sent_to}
+    return {"success": True, "message": "OTP sent", "channel": used, "sent_to": sent_to}
 
 
 def _patient_email_for_mobile(mobile):
@@ -654,9 +671,9 @@ def send_otp_email(email, otp):
 
 
 @frappe.whitelist(allow_guest=True)
-def resend_otp(mobile):
-    """Resend OTP to the given mobile number."""
-    return request_otp(mobile)
+def resend_otp(mobile, channel="sms"):
+    """Resend OTP to the given mobile number via the chosen channel."""
+    return request_otp(mobile, channel=channel)
 
 
 def _otp_step_log(step, detail=""):
