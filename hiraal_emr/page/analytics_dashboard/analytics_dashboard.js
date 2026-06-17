@@ -12,6 +12,7 @@ const HiraalMenu = {
       { label: "Lab Requests", icon: "🧪", route: "/app/lab-test", name: "lab-requests" },
       { label: "Medicine Requests", icon: "💊", route: "/app/medicine-request", name: "medicine-requests" },
       { label: "Devices", icon: "📱", route: "/app/patient-device", name: "devices" },
+      { label: "Telemedicine", icon: "📹", route: "/app/telemedicine-waiting-room", name: "telemedicine" },
     ]},
     { title: "BILLING", items: [
       { label: "Subscriptions", icon: "🔄", route: "/app/care-subscription", name: "subscriptions" },
