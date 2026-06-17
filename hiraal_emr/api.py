@@ -1173,24 +1173,26 @@ def join_my_telemedicine_session(name):
     if not sess or sess.patient != patient:
         frappe.throw(_("Not permitted"), frappe.PermissionError)
 
-    # Advance to In Progress, but don't clobber a finished/cancelled call.
-    if sess.session_status in (None, "", "Scheduled", "No Show"):
+    # Only the first join (from a not-yet-started state) advances the status and
+    # alerts the doctor — so repeated taps / a rejoin don't spam them.
+    first_join = sess.session_status in (None, "", "Scheduled", "No Show")
+    if first_join:
         try:
             frappe.db.set_value("Telemedicine Session", name, "session_status", "In Progress")
             frappe.db.commit()
         except Exception:
             frappe.logger("hiraal_telemed").exception("set In Progress failed")
 
-    patient_label = frappe.db.get_value("Patient", patient, "patient_name") or patient
-    message = (
-        f"Hiraal Lifecare: {patient_label} has joined the video visit and is "
-        f"waiting for you. Join: {sess.meeting_url or ''}"
-    )
-    _notify_practitioner(
-        sess.practitioner,
-        subject=f"Patient waiting: {patient_label}",
-        message=message,
-    )
+        patient_label = frappe.db.get_value("Patient", patient, "patient_name") or patient
+        message = (
+            f"Hiraal Lifecare: {patient_label} has joined the video visit and is "
+            f"waiting for you. Join: {sess.meeting_url or ''}"
+        )
+        _notify_practitioner(
+            sess.practitioner,
+            subject=f"Patient waiting: {patient_label}",
+            message=message,
+        )
 
     return {"success": True, "meeting_url": sess.meeting_url, "status": "In Progress"}
 
