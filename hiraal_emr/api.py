@@ -1159,6 +1159,90 @@ def get_my_telemedicine_sessions(limit=20):
     )
 
 
+@frappe.whitelist()
+def join_my_telemedicine_session(name):
+    """Called when the patient taps 'Join' on a video visit. Marks the session
+    In Progress and alerts the assigned doctor (in-app immediately, SMS in the
+    background) so they know to join. Returns the meeting link."""
+    patient = _my_patient_name()
+    sess = frappe.db.get_value(
+        "Telemedicine Session", name,
+        ["patient", "practitioner", "meeting_url", "session_status"],
+        as_dict=True,
+    )
+    if not sess or sess.patient != patient:
+        frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+    # Advance to In Progress, but don't clobber a finished/cancelled call.
+    if sess.session_status in (None, "", "Scheduled", "No Show"):
+        try:
+            frappe.db.set_value("Telemedicine Session", name, "session_status", "In Progress")
+            frappe.db.commit()
+        except Exception:
+            frappe.logger("hiraal_telemed").exception("set In Progress failed")
+
+    patient_label = frappe.db.get_value("Patient", patient, "patient_name") or patient
+    message = (
+        f"Hiraal Lifecare: {patient_label} has joined the video visit and is "
+        f"waiting for you. Join: {sess.meeting_url or ''}"
+    )
+    _notify_practitioner(
+        sess.practitioner,
+        subject=f"Patient waiting: {patient_label}",
+        message=message,
+    )
+
+    return {"success": True, "meeting_url": sess.meeting_url, "status": "In Progress"}
+
+
+def _notify_practitioner(practitioner, subject, message):
+    """Best-effort alert to a Healthcare Practitioner: an in-app Notification
+    Log now, plus an SMS enqueued in the background so a slow gateway never
+    delays the patient joining the call. Never raises."""
+    if not practitioner:
+        return
+    info = frappe.db.get_value(
+        "Healthcare Practitioner", practitioner,
+        ["user_id", "mobile_phone"], as_dict=True,
+    ) or {}
+    user = info.get("user_id")
+    mobile = info.get("mobile_phone")
+    if not mobile and user:
+        mobile = frappe.db.get_value("User", user, "mobile_no")
+
+    if user:
+        try:
+            note = frappe.new_doc("Notification Log")
+            note.subject = subject
+            note.email_content = message
+            note.for_user = user
+            note.type = "Alert"
+            note.document_type = "Telemedicine Session"
+            note.insert(ignore_permissions=True)
+            frappe.db.commit()
+        except Exception:
+            frappe.logger("hiraal_telemed").exception("practitioner notification log failed")
+
+    if mobile:
+        try:
+            frappe.enqueue(
+                "hiraal_emr.api._send_sms_bg",
+                queue="short",
+                mobile=mobile,
+                message=message,
+            )
+        except Exception:
+            frappe.logger("hiraal_telemed").exception("practitioner SMS enqueue failed")
+
+
+def _send_sms_bg(mobile, message):
+    """Background SMS send for non-latency-critical alerts."""
+    try:
+        send_sms(mobile, message)
+    except Exception:
+        frappe.logger("hiraal_telemed").exception("background SMS failed")
+
+
 @frappe.whitelist(allow_guest=False)
 def request_lab_test(patient, template, practitioner=None, note=None):
     """Request a lab test from the mobile app."""
