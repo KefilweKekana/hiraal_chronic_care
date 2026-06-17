@@ -1086,19 +1086,77 @@ def pair_device(patient, device_id, device_type, device_name=None,
     return {"success": True, "device": dev.name, "status": dev.status}
 
 
+def _telemed_room_url(appointment_name):
+    """A unique, hard-to-guess Jitsi Meet room URL for a video visit. The same
+    URL is shared by patient and clinician so both land in the same room."""
+    token = frappe.generate_hash(length=12)
+    safe = "".join(c for c in str(appointment_name) if c.isalnum())
+    return f"https://meet.jit.si/HiraalCare-{safe}-{token}"
+
+
 @frappe.whitelist(allow_guest=False)
 def book_appointment(patient, practitioner, appointment_date,
-                     appointment_time=None, appointment_type="Chronic Care Follow Up"):
-    """Book a patient appointment from the mobile app."""
+                     appointment_time=None, appointment_type="Chronic Care Follow Up",
+                     notes=None, is_video=0):
+    """Book a patient appointment from the mobile app.
+
+    ``notes`` carries the patient's reason for the visit so the clinician sees
+    why the appointment was requested (previously collected in the app but
+    dropped on the way to the server). When ``is_video`` is set, a Telemedicine
+    Session with a Jitsi meeting link is created and the link is returned so the
+    app can offer a "Join Video Call" button."""
     appt = frappe.new_doc("Patient Appointment")
     appt.patient = patient
     appt.practitioner = practitioner
     appt.appointment_date = appointment_date
     appt.appointment_time = appointment_time
     appt.appointment_type = appointment_type
+    if notes:
+        meta = frappe.get_meta("Patient Appointment")
+        if meta.has_field("notes"):
+            appt.notes = notes
+        elif meta.has_field("custom_reason"):
+            appt.custom_reason = notes
     appt.insert(ignore_permissions=True)
 
-    return {"success": True, "appointment": appt.name, "status": appt.status}
+    meeting_url = None
+    if int(is_video or 0):
+        # Video visit — provision a telemedicine session with a join link.
+        meeting_url = _telemed_room_url(appt.name)
+        try:
+            session = frappe.new_doc("Telemedicine Session")
+            session.patient = patient
+            session.practitioner = practitioner
+            session.appointment = appt.name
+            session.start_time = f"{appointment_date} {appointment_time or '00:00:00'}"
+            session.meeting_url = meeting_url
+            session.session_status = "Scheduled"
+            session.insert(ignore_permissions=True)
+        except Exception:
+            frappe.logger("hiraal_telemed").exception("telemedicine session create failed")
+
+    return {
+        "success": True,
+        "appointment": appt.name,
+        "status": appt.status,
+        "meeting_url": meeting_url,
+    }
+
+
+@frappe.whitelist()
+def get_my_telemedicine_sessions(limit=20):
+    """Video (telemedicine) sessions for the logged-in patient, with their
+    join URLs and status — powers the app's 'Video Visits' screen."""
+    patient = _my_patient_name()
+    return _safe_get_all(
+        "Telemedicine Session",
+        filters={"patient": patient},
+        fields=["name", "appointment", "practitioner", "practitioner_name",
+                "session_status", "start_time", "end_time", "meeting_url",
+                "duration_minutes", "notes"],
+        order_by="start_time desc",
+        limit_page_length=int(limit or 20),
+    )
 
 
 @frappe.whitelist(allow_guest=False)
