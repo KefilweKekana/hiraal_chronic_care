@@ -1,3 +1,4 @@
+(function () {
 // ─── Hiraal Sidebar (inlined — no external dependency) ───
 const HiraalMenu = {
   sections: [
@@ -162,3 +163,4 @@ class ClinicDashboard {
     new frappe.Chart(el[0], { data: { labels: this.data.alert_trend_data.labels || ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], datasets: [{name:"High Risk", values: this.data.alert_trend_data.high || [0,0,0,0,0,0,0]}, {name:"Medium Risk", values: this.data.alert_trend_data.medium || [0,0,0,0,0,0,0]}, {name:"Low Risk", values: this.data.alert_trend_data.low || [0,0,0,0,0,0,0]}] }, type: "line", height: 180, colors: ["#DC2626", "#D97706", "#22C55E"], lineOptions: { regionFill: 1, hideDots: 0 }, axisOptions: { xAxisMode: "tick", xIsSeries: true } });
   }
 }
+})();

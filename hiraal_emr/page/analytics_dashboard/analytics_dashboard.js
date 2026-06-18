@@ -1,3 +1,4 @@
+(function () {
 // ─── Hiraal Sidebar (inlined — no external dependency) ───
 const HiraalMenu = {
   sections: [
@@ -224,3 +225,4 @@ class AnalyticsDashboard {
     }
   }
 }
+})();

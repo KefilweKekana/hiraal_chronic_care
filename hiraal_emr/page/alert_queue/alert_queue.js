@@ -1,3 +1,4 @@
+(function () {
 // ─── Hiraal Sidebar (inlined — no external dependency) ───
 const HiraalMenu = {
   sections: [
@@ -265,3 +266,4 @@ class AlertQueue {
     return {"Very High": "red", "High": "orange", "Medium": "yellow", "Low": "blue"}[level] || "grey";
   }
 }
+})();

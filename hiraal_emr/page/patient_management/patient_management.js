@@ -1,3 +1,4 @@
+(function () {
 // ─── Hiraal Sidebar (inlined — no external dependency) ───
 const HiraalMenu = {
   sections: [
@@ -380,3 +381,4 @@ class PatientManagement {
     return { "Very High": "red", "High": "orange", "Medium": "yellow", "Low": "blue", "Normal": "green" }[level] || "grey";
   }
 }
+})();

@@ -1,3 +1,4 @@
+(function () {
 // ─── Hiraal Sidebar (inlined — no external dependency) ───
 const HiraalMenu = {
   sections: [
@@ -194,3 +195,4 @@ class DailyReadingsDashboard {
     return {"Very High": "red", "High": "orange", "Medium": "yellow", "Low": "blue", "Normal": "green"}[level] || "green";
   }
 }
+})();

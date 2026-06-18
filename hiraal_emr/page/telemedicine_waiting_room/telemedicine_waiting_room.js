@@ -1,3 +1,4 @@
+(function () {
 // ─── Hiraal Sidebar (inlined — kept identical to the other desk pages) ───
 const HiraalMenu = {
   sections: [
@@ -182,3 +183,4 @@ class TelemedWaitingRoom {
     return colors[Math.abs(hash) % colors.length];
   }
 }
+})();
