@@ -67,6 +67,7 @@ scheduler_events = {
     "hourly": [
         "hiraal_emr.tasks.escalate_unresolved_alerts",
         "hiraal_emr.tasks.check_device_connectivity",
+        "hiraal_emr.api.auto_close_stale_telemedicine",
     ],
     "weekly": [
         "hiraal_emr.tasks.generate_weekly_summaries",

@@ -5,7 +5,7 @@ and document event hooks.
 
 import frappe
 from frappe import _
-from frappe.utils import add_days, getdate, now_datetime, today
+from frappe.utils import add_days, add_to_date, get_datetime, getdate, now_datetime, today
 
 from hiraal_emr.services.otp_service import generate_otp, verify_otp as otp_verify
 from hiraal_emr.services.sms_service import send_otp_sms, send_alert_sms, send_sms
@@ -1181,7 +1181,11 @@ def join_my_telemedicine_session(name):
     first_join = sess.session_status in (None, "", "Scheduled", "No Show")
     if first_join:
         try:
-            frappe.db.set_value("Telemedicine Session", name, "session_status", "In Progress")
+            # Stamp the actual call start so duration is accurate on completion.
+            frappe.db.set_value("Telemedicine Session", name, {
+                "session_status": "In Progress",
+                "start_time": now_datetime(),
+            })
             frappe.db.commit()
         except Exception:
             frappe.logger("hiraal_telemed").exception("set In Progress failed")
@@ -1198,6 +1202,67 @@ def join_my_telemedicine_session(name):
         )
 
     return {"success": True, "meeting_url": sess.meeting_url, "status": "In Progress"}
+
+
+@frappe.whitelist()
+def complete_telemedicine_session(name):
+    """Mark a video visit finished: set Completed, stamp the end time, and
+    compute the call duration from the start time. Either clinic staff or the
+    session's own patient may end the call."""
+    sess = frappe.db.get_value(
+        "Telemedicine Session", name,
+        ["start_time", "session_status", "patient"], as_dict=True,
+    )
+    if not sess:
+        frappe.throw(_("Session not found"))
+
+    allowed = _is_clinical_user()
+    if not allowed:
+        try:
+            allowed = sess.patient and sess.patient == _my_patient_name()
+        except Exception:
+            allowed = False
+    if not allowed:
+        frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+    if sess.session_status in ("Completed", "Cancelled"):
+        return {"success": True, "status": sess.session_status}
+
+    end = now_datetime()
+    values = {"session_status": "Completed", "end_time": end}
+    if sess.start_time:
+        mins = int(round((end - get_datetime(sess.start_time)).total_seconds() / 60.0))
+        if 0 <= mins <= 600:  # sanity cap (10h)
+            values["duration_minutes"] = mins
+    frappe.db.set_value("Telemedicine Session", name, values)
+    frappe.db.commit()
+    return {
+        "success": True,
+        "status": "Completed",
+        "duration_minutes": values.get("duration_minutes"),
+    }
+
+
+def auto_close_stale_telemedicine():
+    """Scheduled safety net: close video sessions left In Progress for too long
+    (the clinician forgot to end them). Marks Completed + stamps the end time
+    but does not invent a duration."""
+    cutoff = add_to_date(now_datetime(), hours=-3)
+    stale = frappe.get_all(
+        "Telemedicine Session",
+        filters={"session_status": "In Progress", "start_time": ["<", cutoff]},
+        pluck="name",
+    )
+    for sname in stale:
+        try:
+            frappe.db.set_value(
+                "Telemedicine Session", sname,
+                {"session_status": "Completed", "end_time": now_datetime()},
+            )
+        except Exception:
+            frappe.logger("hiraal_telemed").exception("auto-close failed")
+    if stale:
+        frappe.db.commit()
 
 
 def _notify_practitioner(practitioner, subject, message):

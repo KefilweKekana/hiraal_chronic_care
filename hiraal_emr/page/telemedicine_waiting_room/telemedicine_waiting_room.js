@@ -113,13 +113,16 @@ class TelemedWaitingRoom {
         const join = url
           ? '<button class="btn btn-primary btn-sm telemed-join" data-url="' + esc(url) + '">Join Call</button>'
           : '<span style="color:#94A3B8;font-size:12px;">No link</span>';
+        const done = isWaiting
+          ? ' <button class="btn btn-default btn-sm telemed-done" data-name="' + esc(r.name) + '">Mark Done</button>'
+          : "";
         table +=
           '<tr><td><div class="patient-cell"><div class="patient-avatar" style="background:' +
           this.avatar_color(name) + '">' + this.initials(name) +
           '</div><div class="patient-info"><div class="name">' + esc(name) +
           '</div><div class="id">' + esc(r.patient || "") + "</div></div></div></td><td>" +
           esc(r.practitioner_name || r.practitioner || "Unassigned") +
-          '</td><td class="time-cell">' + esc(when) + "</td><td>" + pill + "</td><td>" + join + "</td></tr>";
+          '</td><td class="time-cell">' + esc(when) + "</td><td>" + pill + "</td><td>" + join + done + "</td></tr>";
       });
       table += "</tbody></table>";
     }
@@ -142,6 +145,22 @@ class TelemedWaitingRoom {
     this.container.find("button.telemed-join").on("click", function () {
       const u = $(this).attr("data-url");
       if (u) window.open(u, "_blank", "noopener");
+    });
+    const self = this;
+    this.container.find("button.telemed-done").on("click", function () {
+      const n = $(this).attr("data-name");
+      if (!n) return;
+      frappe.confirm("End this video visit and mark it completed?", function () {
+        frappe
+          .xcall("hiraal_emr.api.complete_telemedicine_session", { name: n })
+          .then(function (r) {
+            frappe.show_alert({
+              message: "Visit completed" + (r && r.duration_minutes != null ? " (" + r.duration_minutes + " min)" : ""),
+              indicator: "green",
+            });
+            self.load();
+          });
+      });
     });
   }
 
