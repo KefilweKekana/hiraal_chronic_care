@@ -575,54 +575,47 @@ def submit_reading(patient=None, bp_systolic=None, bp_diastolic=None,
 # ──────────────────────────────────────────────
 
 @frappe.whitelist(allow_guest=True)
-def request_otp(mobile, channel="sms"):
-    """Generate and send an OTP to the given mobile number.
+def request_otp(mobile=None, channel="sms", email=None):
+    """Generate and send an OTP via the chosen channel.
 
-    ``channel`` is the patient's chosen delivery method:
-      - "email": send the code to the email on the patient's record (via the
-        site's SMTP). If no email is on file, fall back to SMS so the user is
-        never stranded.
-      - "sms" (default): send by SMS (Telesom); if the SMS send fails and the
-        patient has an email on file, fall back to email.
+    - channel="email": the patient signs in with their email. The code is sent
+      to that email — but only if it belongs to a registered patient (we never
+      email login codes to arbitrary addresses), and login later resolves the
+      patient by that email. The OTP is keyed by the email.
+    - channel="sms" (default): the code is sent by SMS to the mobile; if the SMS
+      send fails and the patient has an email on file, it falls back to email.
 
-    Returns the channel that actually delivered the code plus a masked
-    destination, so the app can point the user to the right inbox. The OTP
-    itself is never logged.
+    Always reports success so we don't reveal who is registered. The OTP itself
+    is never logged.
     """
+    channel = (channel or "sms").strip().lower()
+
+    if channel == "email":
+        email = (email or "").strip().lower()
+        if "@" not in email or "." not in email.rsplit("@", 1)[-1]:
+            frappe.throw(_("A valid email is required"))
+        otp = generate_otp(email)
+        # Only actually deliver to a registered patient's email address.
+        if frappe.db.exists("Patient", {"email": email, "status": "Active"}):
+            send_otp_email(email, otp)
+        frappe.logger("hiraal_otp").info("OTP request via email")
+        return {"success": True, "message": "OTP sent", "channel": "email", "sent_to": _mask_email(email)}
+
+    # ── SMS path ──
     if not mobile or len(str(mobile).strip()) < 6:
         frappe.throw(_("Valid mobile number is required"))
-
     mobile = str(mobile).strip()
-    requested = (channel or "sms").strip().lower()
     otp = generate_otp(mobile)
-
     used = "sms"
     sent_to = None
-
-    if requested == "email":
-        email = _patient_email_for_mobile(mobile)
-        if email and send_otp_email(email, otp):
+    sms_result = send_otp_sms(mobile, otp)
+    if (sms_result or {}).get("status") != "sent":
+        # SMS failed — fall back to the email on file, if any.
+        on_file = _patient_email_for_mobile(mobile)
+        if on_file and send_otp_email(on_file, otp):
             used = "email"
-            sent_to = _mask_email(email)
-        else:
-            # No email on file (or the send failed) — fall back to SMS.
-            send_otp_sms(mobile, otp)
-            used = "sms"
-    else:
-        sms_result = send_otp_sms(mobile, otp)
-        if (sms_result or {}).get("status") != "sent":
-            # SMS failed — fall back to email if we have one on file.
-            email = _patient_email_for_mobile(mobile)
-            if email and send_otp_email(email, otp):
-                used = "email"
-                sent_to = _mask_email(email)
-
-    # Never log the OTP itself — only the delivery outcome.
-    frappe.logger("hiraal_otp").info(
-        f"OTP request {mobile}: requested={requested} delivered={used}"
-    )
-
-    # Always report success so we don't leak whether a number is registered.
+            sent_to = _mask_email(on_file)
+    frappe.logger("hiraal_otp").info(f"OTP request {mobile}: delivered={used}")
     return {"success": True, "message": "OTP sent", "channel": used, "sent_to": sent_to}
 
 
@@ -671,9 +664,9 @@ def send_otp_email(email, otp):
 
 
 @frappe.whitelist(allow_guest=True)
-def resend_otp(mobile, channel="sms"):
-    """Resend OTP to the given mobile number via the chosen channel."""
-    return request_otp(mobile, channel=channel)
+def resend_otp(mobile=None, channel="sms", email=None):
+    """Resend OTP via the chosen channel (SMS to mobile, or email login)."""
+    return request_otp(mobile=mobile, channel=channel, email=email)
 
 
 def _otp_step_log(step, detail=""):
@@ -718,17 +711,69 @@ def _provision_patient_user(patient_name, patient_label, mobile):
     return email
 
 
-@frappe.whitelist(allow_guest=True)
-def verify_otp(mobile, otp):
-    """Verify OTP and return auth token for mobile patient."""
-    mobile = str(mobile or "").strip()
-    otp = str(otp or "").strip()
+def _issue_login(patient, contact_mobile=None):
+    """Provision the patient's login User if needed and return API credentials.
+    Shared by both the SMS and email verify paths."""
+    user = frappe.db.get_value("Patient", patient.name, "user_id")
+    if not user:
+        # Auto-provision a login User so first-time OTP login works without a
+        # clinic having to create a Frappe User per patient by hand.
+        user = _provision_patient_user(patient.name, patient.patient_name, contact_mobile)
 
-    # Idempotency: clients can fire verify twice (auto-submit on the 6th digit
-    # plus a button tap, or a network retry). The first call consumes the
-    # one-time code, so a naive second call fails with "Invalid or expired OTP"
-    # even though login should succeed. Return the cached result for a short
-    # window so duplicate calls resolve identically.
+    user_doc = frappe.get_doc("User", user)
+    api_key = user_doc.api_key
+    if not api_key:
+        api_key = frappe.generate_hash(length=15)
+        user_doc.api_key = api_key
+        user_doc.save(ignore_permissions=True)
+    api_secret = frappe.utils.password.get_decrypted_password(
+        "User", user, "api_secret", raise_exception=False
+    )
+    if not api_secret:
+        api_secret = frappe.generate_hash(length=15)
+        user_doc.api_secret = api_secret
+        user_doc.save(ignore_permissions=True)
+
+    return {
+        "success": True,
+        "patient": patient.name,
+        "patient_name": patient.patient_name,
+        "api_key": api_key,
+        "api_secret": api_secret,
+    }
+
+
+@frappe.whitelist(allow_guest=True)
+def verify_otp(mobile=None, otp=None, email=None, channel="sms"):
+    """Verify an OTP and return the patient's API credentials.
+
+    Supports both sign-in methods: SMS (resolve patient by mobile) and email
+    (resolve patient by email). Idempotent within a short window so a duplicate
+    submit returns the same credentials instead of failing.
+    """
+    otp = str(otp or "").strip()
+    channel = (channel or "sms").strip().lower()
+
+    if channel == "email":
+        email = (email or "").strip().lower()
+        result_key = f"hiraal_otp_result_email|{email}|{otp}"
+        cached = frappe.cache().get_value(result_key)
+        if cached:
+            return cached
+        if not otp_verify(email, otp):
+            frappe.throw(_("Invalid or expired OTP"), frappe.AuthenticationError)
+        patient = frappe.db.get_value(
+            "Patient", {"email": email, "status": "Active"},
+            ["name", "patient_name"], as_dict=True,
+        )
+        if not patient:
+            frappe.throw(_("No patient is registered with this email"), frappe.AuthenticationError)
+        result = _issue_login(patient, contact_mobile=None)
+        frappe.cache().set_value(result_key, result, expires_in_sec=120)
+        return result
+
+    # ── SMS / mobile path ──
+    mobile = str(mobile or "").strip()
     result_key = f"hiraal_otp_result_{mobile}_{otp}"
     cached_result = frappe.cache().get_value(result_key)
     if cached_result:
@@ -744,61 +789,15 @@ def verify_otp(mobile, otp):
         as_dict=True,
     )
     if not patient:
-        _otp_step_log(
-            "verify -> Patient not found",
-            f"mobile={mobile!r} tried={_mobile_candidates(mobile)}",
-        )
+        _otp_step_log("verify -> Patient not found", f"mobile={mobile!r}")
         frappe.throw(_("Patient not found"), frappe.AuthenticationError)
 
-    # Generate API keys for the patient's linked User (v14+ compatible).
-    # The Patient -> User link field is "user_id" (Frappe Healthcare), not "user".
-    user = frappe.db.get_value("Patient", patient.name, "user_id")
-    if not user:
-        # Auto-provision a login User so first-time OTP login works without a
-        # clinic having to create a Frappe User per patient by hand.
-        try:
-            user = _provision_patient_user(patient.name, patient.patient_name, mobile)
-            _otp_step_log("verify -> provisioned user", f"patient={patient.name} user={user}")
-        except Exception:
-            _otp_step_log(
-                "verify -> user provision error",
-                f"patient={patient.name}\n{frappe.get_traceback()}",
-            )
-            raise
-
-    # Use API key + secret auth instead of deprecated login_as()
     try:
-        user_doc = frappe.get_doc("User", user)
-        api_key = user_doc.api_key
-        if not api_key:
-            api_key = frappe.generate_hash(length=15)
-            user_doc.api_key = api_key
-            user_doc.save(ignore_permissions=True)
-
-        api_secret = frappe.utils.password.get_decrypted_password(
-            "User", user, "api_secret", raise_exception=False
-        )
-        if not api_secret:
-            api_secret = frappe.generate_hash(length=15)
-            user_doc.api_secret = api_secret
-            user_doc.save(ignore_permissions=True)
+        result = _issue_login(patient, contact_mobile=mobile)
     except Exception:
-        _otp_step_log(
-            "verify -> credential error",
-            f"mobile={mobile!r} patient={patient.name} user={user}\n{frappe.get_traceback()}",
-        )
+        _otp_step_log("verify -> credential error", f"patient={patient.name}\n{frappe.get_traceback()}")
         raise
 
-    result = {
-        "success": True,
-        "patient": patient.name,
-        "patient_name": patient.patient_name,
-        "api_key": api_key,
-        "api_secret": api_secret,
-    }
-
-    # Cache the successful result so a duplicate/retried verify with the same
-    # mobile + code returns the same credentials instead of failing.
     frappe.cache().set_value(result_key, result, expires_in_sec=120)
     return result
 
