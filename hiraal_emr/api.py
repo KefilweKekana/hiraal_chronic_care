@@ -5,7 +5,7 @@ and document event hooks.
 
 import frappe
 from frappe import _
-from frappe.utils import add_days, add_to_date, get_datetime, getdate, now_datetime, today
+from frappe.utils import add_days, add_months, add_to_date, flt, get_datetime, getdate, now_datetime, today
 
 from hiraal_emr.services.otp_service import generate_otp, verify_otp as otp_verify
 from hiraal_emr.services.sms_service import send_otp_sms, send_alert_sms, send_sms
@@ -1669,6 +1669,139 @@ def pay_subscription(patient, payment_method="Zaad", reference=None):
 
     audit_log("Update", "Care Subscription", doc.name, f"Payment processed via {payment_method}")
     return {"success": True, "subscription": doc.name, "status": doc.status}
+
+
+# ──────────────────────────────────────────────
+#  Mobile-money payments (WaafiPay / eDahab via the mobile_payments app)
+# ──────────────────────────────────────────────
+
+def _mobile_payments_pos():
+    """The installed mobile_payments POS API, or None if the app isn't present."""
+    try:
+        from mobile_payments.api import pos
+        return pos
+    except Exception:
+        return None
+
+
+def _as_admin(fn, *args, **kwargs):
+    """Run a gateway call with elevated rights, then restore the session user.
+    The caller is always resolved/scoped to the patient *before* this is used."""
+    original = frappe.session.user
+    try:
+        frappe.set_user("Administrator")
+        return fn(*args, **kwargs)
+    finally:
+        frappe.set_user(original)
+
+
+@frappe.whitelist()
+def get_payment_methods():
+    """Mobile-money methods available for the app's payment screen
+    (WaafiPay ZAAD/SAHAL/EVCPlus, eDahab). Empty when the gateway is off."""
+    _my_patient_name()  # require a logged-in patient
+    pos = _mobile_payments_pos()
+    if not pos:
+        return {"enabled": False, "methods": []}
+    try:
+        return _as_admin(pos.get_mobile_payment_methods)
+    except Exception:
+        frappe.logger("hiraal_pay").exception("get_payment_methods failed")
+        return {"enabled": False, "methods": []}
+
+
+def _my_active_subscription(patient):
+    return frappe.db.get_value(
+        "Care Subscription",
+        {"patient": patient, "status": ["in", ["Active", "Overdue", "Past Due", "Pending"]]},
+        ["name", "monthly_fee"], as_dict=True, order_by="creation desc",
+    )
+
+
+@frappe.whitelist()
+def pay_my_subscription(provider, method, phone):
+    """Start a mobile-money charge for the logged-in patient's care subscription.
+    Sends a USSD prompt to ``phone``; returns a transaction_log to poll with
+    check_my_payment."""
+    patient = _my_patient_name()
+    sub = _my_active_subscription(patient)
+    if not sub:
+        frappe.throw(_("No subscription found for your account"))
+    amount = flt(sub.monthly_fee)
+    if amount <= 0:
+        frappe.throw(_("Your subscription amount is not set"))
+
+    pos = _mobile_payments_pos()
+    if not pos:
+        frappe.throw(_("Payment gateway is not available"))
+
+    result = _as_admin(
+        pos.initiate_pos_payment,
+        provider=provider, method=method, phone=phone, amount=amount, currency="USD",
+    ) or {}
+    if not result.get("success"):
+        frappe.throw(result.get("message") or _("Could not start the payment"))
+
+    return {
+        "success": True,
+        "transaction_log": result.get("transaction_log"),
+        "amount": amount,
+        "subscription": sub.name,
+        "message": result.get("message"),
+    }
+
+
+@frappe.whitelist()
+def check_my_payment(transaction_log):
+    """Poll a subscription payment. On completion, mark the patient's
+    subscription paid and record a Subscription Payment (once)."""
+    patient = _my_patient_name()
+    pos = _mobile_payments_pos()
+    if not pos:
+        frappe.throw(_("Payment gateway is not available"))
+    result = _as_admin(pos.check_pos_payment_status, transaction_log) or {}
+    status = result.get("status") or "Pending"
+    if status == "Completed":
+        _mark_subscription_paid(patient, transaction_log)
+    return {"status": status}
+
+
+def _mark_subscription_paid(patient, reference):
+    """Mirror Care Subscription.process_payment()'s success branch after the
+    real gateway confirms payment. Idempotent per transaction reference."""
+    if frappe.db.exists("Subscription Payment", {"reference_id": reference}):
+        return
+    sub_name = frappe.db.get_value(
+        "Care Subscription",
+        {"patient": patient, "status": ["in", ["Active", "Overdue", "Past Due", "Pending"]]},
+        "name", order_by="creation desc",
+    )
+    if not sub_name:
+        return
+    sub = frappe.get_doc("Care Subscription", sub_name)
+    amount = flt(sub.monthly_fee)
+    base_date = getdate(sub.next_billing_date) if sub.next_billing_date else getdate(today())
+
+    pay = frappe.new_doc("Subscription Payment")
+    pay.subscription = sub.name
+    pay.patient = patient
+    pay.amount = amount
+    pay.payment_date = now_datetime()
+    pay.payment_method = sub.payment_method or "Mobile Money"
+    pay.status = "Success"
+    pay.reference_id = reference
+    pay.transaction_id = reference
+    pay.insert(ignore_permissions=True)
+
+    sub.db_set("last_payment_date", today())
+    sub.db_set("last_payment_status", "Success")
+    sub.db_set("payment_reference", reference)
+    sub.db_set("next_billing_date", add_months(base_date, 1))
+    sub.db_set("retry_count", 0)
+    sub.db_set("total_collected", flt(sub.total_collected) + amount)
+    sub.db_set("status", "Active")
+    frappe.db.commit()
+    audit_log("Update", "Care Subscription", sub.name, "Subscription paid via mobile money")
 
 
 @frappe.whitelist(allow_guest=False)
