@@ -1105,13 +1105,17 @@ def book_appointment(patient, practitioner, appointment_date,
     Session with a Jitsi meeting link is created and the link is returned so the
     app can offer a "Join Video Call" button."""
     appt = frappe.new_doc("Patient Appointment")
+    meta = frappe.get_meta("Patient Appointment")
     appt.patient = patient
     appt.practitioner = practitioner
+    # Frappe Healthcare requires "Appointment For" (Visit Details) — we always
+    # book against a practitioner.
+    if meta.has_field("appointment_for"):
+        appt.appointment_for = "Practitioner"
     appt.appointment_date = appointment_date
     appt.appointment_time = appointment_time
     appt.appointment_type = appointment_type
     if notes:
-        meta = frappe.get_meta("Patient Appointment")
         if meta.has_field("notes"):
             appt.notes = notes
         elif meta.has_field("custom_reason"):
