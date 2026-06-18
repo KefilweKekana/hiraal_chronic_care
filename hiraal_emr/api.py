@@ -1223,6 +1223,7 @@ def _notify_practitioner(practitioner, subject, message):
             frappe.db.commit()
         except Exception:
             frappe.logger("hiraal_telemed").exception("practitioner notification log failed")
+        send_push_to_user(user, subject, message, {"type": "telemedicine"})
 
     if mobile:
         try:
@@ -1242,6 +1243,107 @@ def _send_sms_bg(mobile, message):
         send_sms(mobile, message)
     except Exception:
         frappe.logger("hiraal_telemed").exception("background SMS failed")
+
+
+# ──────────────────────────────────────────────
+#  Push notifications (Firebase Cloud Messaging, HTTP v1)
+# ──────────────────────────────────────────────
+
+@frappe.whitelist()
+def register_push_token(token, platform="Android"):
+    """Register/refresh this device's FCM token for the logged-in patient so we
+    can push to it. Called by the app after login and on token refresh."""
+    user = frappe.session.user
+    if not user or user == "Guest":
+        frappe.throw(_("Not authenticated"), frappe.AuthenticationError)
+    token = (token or "").strip()
+    if not token:
+        return {"success": False}
+
+    import hashlib
+    key = hashlib.md5(token.encode("utf-8")).hexdigest()
+    values = {
+        "user": user,
+        "patient": frappe.db.get_value("Patient", {"user_id": user}, "name"),
+        "platform": platform or "Android",
+        "enabled": 1,
+        "token": token,
+        "last_seen": now_datetime(),
+    }
+    if frappe.db.exists("Hiraal Push Token", key):
+        doc = frappe.get_doc("Hiraal Push Token", key)
+        doc.update(values)
+        doc.save(ignore_permissions=True)
+    else:
+        doc = frappe.new_doc("Hiraal Push Token")
+        doc.token_key = key
+        doc.update(values)
+        doc.insert(ignore_permissions=True)
+    frappe.db.commit()
+    return {"success": True}
+
+
+def send_push_to_user(user, title, body, data=None):
+    """Best-effort FCM push to all of a user's registered devices. A no-op when
+    FCM isn't configured yet. Never raises."""
+    if not user:
+        return
+    try:
+        tokens = frappe.get_all(
+            "Hiraal Push Token", filters={"user": user, "enabled": 1}, pluck="token"
+        )
+        tokens = [t for t in tokens if t]
+        if tokens:
+            _fcm_send(tokens, title, body, data or {})
+    except Exception:
+        frappe.logger("hiraal_push").exception("send_push_to_user failed")
+
+
+def _fcm_access_token():
+    """OAuth2 access token + project id for FCM HTTP v1, from the service-account
+    JSON whose path is set in site_config.json as 'hiraal_fcm_service_account'."""
+    path = frappe.conf.get("hiraal_fcm_service_account")
+    if not path:
+        return None, None
+    try:
+        from google.oauth2 import service_account
+        from google.auth.transport.requests import Request
+        creds = service_account.Credentials.from_service_account_file(
+            path, scopes=["https://www.googleapis.com/auth/firebase.messaging"]
+        )
+        creds.refresh(Request())
+        return creds.token, creds.project_id
+    except Exception:
+        frappe.logger("hiraal_push").exception(
+            "FCM access token failed (install google-auth + set hiraal_fcm_service_account)"
+        )
+        return None, None
+
+
+def _fcm_send(tokens, title, body, data):
+    import requests
+    access_token, project_id = _fcm_access_token()
+    if not access_token or not project_id:
+        return  # FCM not configured — silently skip.
+    url = f"https://fcm.googleapis.com/v1/projects/{project_id}/messages:send"
+    headers = {"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"}
+    str_data = {str(k): str(v) for k, v in (data or {}).items()}
+    for token in tokens:
+        payload = {
+            "message": {
+                "token": token,
+                "notification": {"title": title, "body": body},
+                "data": str_data,
+                "android": {"priority": "high"},
+            }
+        }
+        try:
+            r = requests.post(url, headers=headers, json=payload, timeout=10)
+            if r.status_code in (400, 403, 404) and "not-registered" in r.text.lower().replace("_", "-"):
+                # Stale token — stop pushing to it.
+                frappe.db.set_value("Hiraal Push Token", {"token": token}, "enabled", 0)
+        except Exception:
+            frappe.logger("hiraal_push").exception("FCM send failed")
 
 
 _CLINICAL_ROLES = {
@@ -1468,6 +1570,7 @@ def notify_patient(patient, subject, message, sms=False,
             note.insert(ignore_permissions=True)
         except Exception:
             frappe.logger("hiraal_orders").exception("notification log insert failed")
+        send_push_to_user(info["user_id"], subject, message, {"type": document_type or "alert"})
 
     if sms and info.get("mobile"):
         try:
