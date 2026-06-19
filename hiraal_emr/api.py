@@ -1415,6 +1415,79 @@ def _fcm_send(tokens, title, body, data):
             frappe.logger("hiraal_push").exception("FCM send failed")
 
 
+@frappe.whitelist()
+def fcm_diagnostics(user=None, send_test=0):
+    """Admin-only push diagnostics — pinpoints which link in the FCM chain is
+    broken. Check, in order: google-auth installed, service account configured,
+    OAuth access token obtainable, the push-token doctype migrated, and how many
+    device tokens are registered for ``user``. With send_test=1 it fires a real
+    test push to the first token and returns FCM's raw HTTP response.
+
+    Call as Administrator, e.g. in the browser:
+      /api/method/hiraal_emr.api.fcm_diagnostics?user=<login-email>&send_test=1
+    """
+    import os
+    if "System Manager" not in frappe.get_roles():
+        frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+    out = {}
+
+    # 1) google-auth library present?
+    try:
+        from google.oauth2 import service_account  # noqa: F401
+        from google.auth.transport.requests import Request  # noqa: F401
+        out["google_auth_installed"] = True
+    except Exception as e:
+        out["google_auth_installed"] = False
+        out["google_auth_error"] = str(e)
+
+    # 2) service-account JSON configured + present on disk?
+    path = frappe.conf.get("hiraal_fcm_service_account")
+    out["service_account_path_set"] = bool(path)
+    out["service_account_file_exists"] = bool(path and os.path.exists(path))
+
+    # 3) can we actually mint an OAuth token + read the project id?
+    access_token, project_id = _fcm_access_token()
+    out["access_token_ok"] = bool(access_token)
+    out["project_id"] = project_id
+
+    # 4) is the push-token doctype migrated, and how many devices are registered?
+    out["push_token_doctype_exists"] = bool(frappe.db.exists("DocType", "Hiraal Push Token"))
+    target = user or frappe.session.user
+    out["user"] = target
+    tokens = []
+    if out["push_token_doctype_exists"]:
+        try:
+            tokens = frappe.get_all(
+                "Hiraal Push Token",
+                filters={"user": target, "enabled": 1}, pluck="token",
+            )
+        except Exception as e:
+            out["token_query_error"] = str(e)
+    out["registered_token_count"] = len(tokens)
+
+    # 5) optional: fire one real test push and report FCM's response verbatim.
+    if int(send_test or 0) and tokens and access_token and project_id:
+        import requests
+        url = f"https://fcm.googleapis.com/v1/projects/{project_id}/messages:send"
+        headers = {"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"}
+        payload = {"message": {
+            "token": tokens[0],
+            "notification": {"title": "Hiraal Lifecare", "body": "Push test ✅"},
+            "android": {"priority": "high"},
+        }}
+        try:
+            r = requests.post(url, headers=headers, json=payload, timeout=10)
+            out["test_send_status"] = r.status_code
+            out["test_send_body"] = r.text[:600]
+        except Exception as e:
+            out["test_send_error"] = str(e)
+    elif int(send_test or 0):
+        out["test_send_skipped"] = "Missing a token, access token, or project id (see above)."
+
+    return out
+
+
 _CLINICAL_ROLES = {
     "System Manager", "Chronic Care Admin", "Chronic Care Doctor",
     "Chronic Care Nurse", "Healthcare Practitioner",
