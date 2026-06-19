@@ -1480,8 +1480,13 @@ def request_lab_test(patient, template, practitioner=None, note=None):
 
 @frappe.whitelist(allow_guest=False)
 def order_medicine(patient=None, items=None, delivery_address=None,
-                   payment_method=None, priority=None):
+                   payment_method=None, priority=None, note=None):
     """Place a medicine delivery order from the mobile app.
+
+    The patient uploads a prescription image (see ``attach_my_prescription``);
+    the pharmacy then reviews it, fills in the medicines + pricing, and moves the
+    order through the lifecycle. ``items`` stays optional/legacy — a fresh
+    prescription order normally starts with no lines and status "Received".
 
     ``patient`` is optional; when omitted it resolves to the logged-in user's
     own patient so the app never has to pass an ID it might not have.
@@ -1499,7 +1504,9 @@ def order_medicine(patient=None, items=None, delivery_address=None,
     order.payment_method = payment_method or "Zaad"
     order.payment_status = "Unpaid"
     order.priority = priority or "Normal"
-    order.status = "Pending"
+    order.status = "Received"
+    if note:
+        order.pharmacist_note = note
 
     count = 0
     for item in items:
@@ -1519,13 +1526,54 @@ def order_medicine(patient=None, items=None, delivery_address=None,
     return {"success": True, "order": order.name, "status": order.status}
 
 
+def _my_order_or_throw(order):
+    """Resolve a Medicine Request the logged-in patient owns, or 403."""
+    patient = _my_patient_name()
+    owner = frappe.db.get_value("Medicine Request", order, "patient")
+    if not owner:
+        frappe.throw(_("Order not found"), frappe.DoesNotExistError)
+    if owner != patient:
+        frappe.throw(_("Not permitted"), frappe.PermissionError)
+    return patient
+
+
+@frappe.whitelist()
+def attach_my_prescription(order, filename, content_base64):
+    """Attach a prescription image (base64) to the patient's own order and set
+    it as the order's prescription. Used right after order_medicine."""
+    import base64
+    _my_order_or_throw(order)
+    try:
+        content = base64.b64decode(content_base64)
+    except Exception:
+        frappe.throw(_("Could not read the prescription image"))
+
+    safe_name = (filename or "prescription.jpg").split("/")[-1].split("\\")[-1]
+    file_doc = frappe.get_doc({
+        "doctype": "File",
+        "file_name": f"{order}-{safe_name}",
+        "attached_to_doctype": "Medicine Request",
+        "attached_to_name": order,
+        "is_private": 1,
+        "content": content,
+    })
+    file_doc.save(ignore_permissions=True)
+
+    frappe.db.set_value("Medicine Request", order, "prescription", file_doc.file_url)
+    frappe.db.commit()
+    audit_log("Update", "Medicine Request", order, "Patient uploaded prescription via app")
+    return {"success": True, "file_url": file_doc.file_url}
+
+
 # Patient-facing lifecycle stages, in order. "Cancelled" is terminal and
 # handled separately by the app.
 _MEDICINE_ORDER_STAGES = [
-    "Pending", "Approved", "Preparing", "Ready", "Dispatched", "Delivered",
+    "Received", "Under Review", "Awaiting Payment", "Paid",
+    "Preparing", "Out for Delivery", "Delivered",
 ]
-# Stages from which a patient may still cancel their own order.
-_MEDICINE_CANCELLABLE = {"Pending", "Approved"}
+# Stages from which a patient may still cancel their own order — before they've
+# paid. Once "Paid"/"Preparing" the pharmacy is already acting on it.
+_MEDICINE_CANCELLABLE = {"Received", "Under Review", "Awaiting Payment"}
 
 
 @frappe.whitelist()
@@ -1541,7 +1589,9 @@ def get_my_orders(limit=30):
             "name", "status", "priority", "total_items",
             "delivery_type", "delivery_address", "estimated_delivery",
             "preparation_started", "dispatched_at", "delivered_at",
-            "payment_method", "payment_status", "amount",
+            "payment_method", "payment_status", "payment_reference",
+            "amount", "delivery_fee", "tax", "total",
+            "prescription", "received_confirmed",
             "pharmacist_note", "cancellation_reason", "creation",
         ],
         order_by="creation desc",
@@ -1551,10 +1601,13 @@ def get_my_orders(limit=30):
         o["medicines"] = _safe_get_all(
             "Medicine Request Item",
             filters={"parent": o["name"], "parenttype": "Medicine Request"},
-            fields=["medicine_name", "quantity", "dosage"],
+            fields=["medicine_name", "quantity", "dosage", "frequency",
+                    "unit_price", "total_price", "in_stock"],
             order_by="idx asc",
         )
         o["cancellable"] = 1 if o.get("status") in _MEDICINE_CANCELLABLE else 0
+        # The patient can pay only once the pharmacy has priced & requested it.
+        o["payable"] = 1 if o.get("status") == "Awaiting Payment" else 0
     return orders
 
 
@@ -1577,17 +1630,91 @@ def cancel_my_order(name, reason=None):
     return {"success": True, "status": "Cancelled"}
 
 
+@frappe.whitelist()
+def pay_my_order(order, provider, method, phone):
+    """Start a mobile-money charge for a priced medicine order (Zaad / eDahab).
+    Only valid while the order is "Awaiting Payment"; charges the order total
+    (medicines + delivery_fee + tax). Returns a transaction_log to poll with
+    check_my_order_payment."""
+    _my_order_or_throw(order)
+    info = frappe.db.get_value(
+        "Medicine Request", order, ["status", "total"], as_dict=True
+    ) or {}
+    if info.get("status") != "Awaiting Payment":
+        frappe.throw(_("This order is not awaiting payment"))
+    amount = flt(info.get("total"))
+    if amount <= 0:
+        frappe.throw(_("This order has no amount to pay yet"))
+
+    pos = _mobile_payments_pos()
+    if not pos:
+        frappe.throw(_("Payment gateway is not available"))
+
+    result = _as_admin(
+        pos.initiate_pos_payment,
+        provider=provider, method=method, phone=phone, amount=amount, currency="USD",
+    ) or {}
+    if not result.get("success"):
+        frappe.throw(result.get("message") or _("Could not start the payment"))
+
+    return {
+        "success": True,
+        "transaction_log": result.get("transaction_log"),
+        "amount": amount,
+        "order": order,
+        "message": result.get("message"),
+    }
+
+
+@frappe.whitelist()
+def check_my_order_payment(order, transaction_log):
+    """Poll a medicine-order payment. On completion, mark the order Paid and
+    record the payment reference. Idempotent."""
+    _my_order_or_throw(order)
+    pos = _mobile_payments_pos()
+    if not pos:
+        frappe.throw(_("Payment gateway is not available"))
+    result = _as_admin(pos.check_pos_payment_status, transaction_log) or {}
+    status = result.get("status") or "Pending"
+    if status == "Completed":
+        cur = frappe.db.get_value("Medicine Request", order, "payment_status")
+        if cur != "Paid":
+            doc = frappe.get_doc("Medicine Request", order)
+            doc.payment_status = "Paid"
+            doc.payment_reference = transaction_log
+            if doc.status == "Awaiting Payment":
+                doc.status = "Paid"
+            doc.save(ignore_permissions=True)
+            frappe.db.commit()
+            audit_log("Update", "Medicine Request", order, "Order paid via mobile money")
+    return {"status": status}
+
+
+@frappe.whitelist()
+def confirm_my_order_received(order):
+    """Let the patient confirm they received a delivered order."""
+    _my_order_or_throw(order)
+    status = frappe.db.get_value("Medicine Request", order, "status")
+    if status != "Delivered":
+        frappe.throw(_("This order has not been delivered yet"))
+    frappe.db.set_value("Medicine Request", order, "received_confirmed", 1)
+    frappe.db.commit()
+    audit_log("Update", "Medicine Request", order, "Patient confirmed receipt of order")
+    return {"success": True}
+
+
 # Patient-friendly message per order status. Used by the on_update doc event.
 _MEDICINE_STATUS_MESSAGES = {
-    "Approved": "Hiraal Lifecare: Your medicine order {name} has been approved and will be prepared shortly.",
-    "Preparing": "Hiraal Lifecare: Your pharmacy is now preparing medicine order {name}.",
-    "Ready": "Hiraal Lifecare: Your medicine order {name} is ready and will be dispatched soon.",
-    "Dispatched": "Hiraal Lifecare: Your medicine order {name} is out for delivery.",
-    "Delivered": "Hiraal Lifecare: Your medicine order {name} has been delivered. Take care!",
-    "Cancelled": "Hiraal Lifecare: Your medicine order {name} has been cancelled.",
+    "Under Review": "Hiraal Pharma: Your prescription for order {name} is being reviewed by our pharmacist.",
+    "Awaiting Payment": "Hiraal Pharma: Order {name} is priced and ready. Please confirm & pay in the app to proceed.",
+    "Paid": "Hiraal Pharma: Payment received for order {name}. We're preparing your medicines.",
+    "Preparing": "Hiraal Pharma: Your pharmacy is now preparing medicine order {name}.",
+    "Out for Delivery": "Hiraal Pharma: Your medicine order {name} is out for delivery.",
+    "Delivered": "Hiraal Pharma: Your medicine order {name} has been delivered. Please confirm receipt in the app. Take care!",
+    "Cancelled": "Hiraal Pharma: Your medicine order {name} has been cancelled.",
 }
 # Statuses important enough to also send a (paid) SMS, not just an in-app alert.
-_MEDICINE_SMS_STATUSES = {"Dispatched", "Delivered", "Cancelled"}
+_MEDICINE_SMS_STATUSES = {"Awaiting Payment", "Out for Delivery", "Delivered", "Cancelled"}
 
 
 def on_medicine_request_update(doc, method=None):

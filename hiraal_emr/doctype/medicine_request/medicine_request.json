@@ -1,251 +1,318 @@
 {
-  "actions": [],
-  "allow_rename": 0,
-  "autoname": "MED-.YYYY.-.#####",
-  "creation": "2026-04-19 00:00:00.000000",
-  "doctype": "DocType",
-  "engine": "InnoDB",
-  "field_order": [
-    "patient_section",
-    "patient",
-    "patient_name",
-    "column_break_1",
-    "status",
-    "priority",
-    "order_section",
-    "medicines",
-    "column_break_2",
-    "total_items",
-    "delivery_section",
-    "delivery_type",
-    "delivery_address",
-    "column_break_3",
-    "estimated_delivery",
-    "actual_delivery",
-    "pharmacy_section",
-    "assigned_pharmacy",
-    "pharmacist",
-    "column_break_4",
-    "preparation_started",
-    "dispatched_at",
-    "delivered_at",
-    "payment_section",
-    "payment_method",
-    "payment_status",
-    "column_break_5",
-    "payment_reference",
-    "amount",
-    "notes_section",
-    "patient_note",
-    "pharmacist_note",
-    "cancellation_reason"
-  ],
-  "fields": [
-    {
-      "fieldname": "patient_section",
-      "fieldtype": "Section Break",
-      "label": "Patient Information"
-    },
-    {
-      "fieldname": "patient",
-      "fieldtype": "Link",
-      "in_list_view": 1,
-      "in_standard_filter": 1,
-      "label": "Patient",
-      "options": "Patient",
-      "reqd": 1
-    },
-    {
-      "fetch_from": "patient.patient_name",
-      "fieldname": "patient_name",
-      "fieldtype": "Data",
-      "in_list_view": 1,
-      "label": "Patient Name",
-      "read_only": 1
-    },
-    {
-      "fieldname": "column_break_1",
-      "fieldtype": "Column Break"
-    },
-    {
-      "default": "Pending",
-      "fieldname": "status",
-      "fieldtype": "Select",
-      "in_list_view": 1,
-      "in_standard_filter": 1,
-      "label": "Status",
-      "options": "Pending\nApproved\nPreparing\nReady\nDispatched\nDelivered\nCancelled",
-      "reqd": 1
-    },
-    {
-      "default": "Normal",
-      "fieldname": "priority",
-      "fieldtype": "Select",
-      "in_list_view": 1,
-      "in_standard_filter": 1,
-      "label": "Priority",
-      "options": "Normal\nUrgent\nSame Day"
-    },
-    {
-      "fieldname": "order_section",
-      "fieldtype": "Section Break",
-      "label": "Medicines"
-    },
-    {
-      "fieldname": "medicines",
-      "fieldtype": "Table",
-      "label": "Medicines",
-      "options": "Medicine Request Item",
-      "reqd": 1
-    },
-    {
-      "fieldname": "column_break_2",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "total_items",
-      "fieldtype": "Int",
-      "label": "Total Items",
-      "read_only": 1
-    },
-    {
-      "fieldname": "delivery_section",
-      "fieldtype": "Section Break",
-      "label": "Delivery"
-    },
-    {
-      "default": "Delivery",
-      "fieldname": "delivery_type",
-      "fieldtype": "Select",
-      "label": "Delivery Type",
-      "options": "Delivery\nPickup"
-    },
-    {
-      "fieldname": "delivery_address",
-      "fieldtype": "Small Text",
-      "label": "Delivery Address"
-    },
-    {
-      "fieldname": "column_break_3",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "estimated_delivery",
-      "fieldtype": "Datetime",
-      "label": "Estimated Delivery"
-    },
-    {
-      "fieldname": "actual_delivery",
-      "fieldtype": "Datetime",
-      "label": "Actual Delivery"
-    },
-    {
-      "fieldname": "pharmacy_section",
-      "fieldtype": "Section Break",
-      "label": "Pharmacy"
-    },
-    {
-      "fieldname": "assigned_pharmacy",
-      "fieldtype": "Data",
-      "label": "Assigned Pharmacy"
-    },
-    {
-      "fieldname": "pharmacist",
-      "fieldtype": "Link",
-      "label": "Pharmacist",
-      "options": "User"
-    },
-    {
-      "fieldname": "column_break_4",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "preparation_started",
-      "fieldtype": "Datetime",
-      "label": "Preparation Started"
-    },
-    {
-      "fieldname": "dispatched_at",
-      "fieldtype": "Datetime",
-      "label": "Dispatched At"
-    },
-    {
-      "fieldname": "delivered_at",
-      "fieldtype": "Datetime",
-      "label": "Delivered At"
-    },
-    {
-      "fieldname": "payment_section",
-      "fieldtype": "Section Break",
-      "label": "Payment"
-    },
-    {
-      "default": "Zaad",
-      "fieldname": "payment_method",
-      "fieldtype": "Select",
-      "label": "Payment Method",
-      "options": "Zaad\neDahab\nVisa\nCash\nBank Transfer"
-    },
-    {
-      "default": "Unpaid",
-      "fieldname": "payment_status",
-      "fieldtype": "Select",
-      "label": "Payment Status",
-      "options": "Unpaid\nPaid\nRefunded"
-    },
-    {
-      "fieldname": "column_break_5",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "payment_reference",
-      "fieldtype": "Data",
-      "label": "Payment Reference"
-    },
-    {
-      "fieldname": "amount",
-      "fieldtype": "Currency",
-      "label": "Total Amount"
-    },
-    {
-      "fieldname": "notes_section",
-      "fieldtype": "Section Break",
-      "label": "Notes"
-    },
-    {
-      "fieldname": "patient_note",
-      "fieldtype": "Small Text",
-      "label": "Patient Note"
-    },
-    {
-      "fieldname": "pharmacist_note",
-      "fieldtype": "Small Text",
-      "label": "Pharmacist Note"
-    },
-    {
-      "fieldname": "cancellation_reason",
-      "fieldtype": "Small Text",
-      "label": "Cancellation Reason",
-      "depends_on": "eval:doc.status=='Cancelled'"
-    }
-  ],
-  "index_web_pages_for_search": 0,
-  "links": [],
-  "modified": "2026-04-19 00:00:00.000000",
-  "modified_by": "Administrator",
-  "module": "Hiraal EMR",
-  "name": "Medicine Request",
-  "naming_rule": "Expression (old style)",
-  "owner": "Administrator",
-  "permissions": [
-    {"create": 1, "delete": 1, "email": 1, "export": 1, "print": 1, "read": 1, "report": 1, "role": "System Manager", "share": 1, "write": 1},
-    {"create": 1, "email": 1, "export": 1, "print": 1, "read": 1, "report": 1, "role": "Chronic Care Admin", "share": 1, "write": 1},
-    {"create": 1, "read": 1, "role": "Chronic Care Pharmacist", "write": 1},
-    {"create": 1, "read": 1, "role": "Chronic Care Nurse", "write": 1},
-    {"read": 1, "role": "Chronic Care Doctor"}
-  ],
-  "sort_field": "creation",
-  "sort_order": "DESC",
-  "title_field": "patient_name",
-  "track_changes": 1
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "MED-.YYYY.-.#####",
+ "creation": "2026-04-19 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "patient_section",
+  "patient",
+  "patient_name",
+  "column_break_1",
+  "status",
+  "priority",
+  "order_section",
+  "medicines",
+  "column_break_2",
+  "total_items",
+  "prescription",
+  "delivery_section",
+  "delivery_type",
+  "delivery_address",
+  "column_break_3",
+  "estimated_delivery",
+  "actual_delivery",
+  "received_confirmed",
+  "pharmacy_section",
+  "assigned_pharmacy",
+  "pharmacist",
+  "column_break_4",
+  "preparation_started",
+  "dispatched_at",
+  "delivered_at",
+  "payment_section",
+  "payment_method",
+  "payment_status",
+  "column_break_5",
+  "payment_reference",
+  "amount",
+  "delivery_fee",
+  "tax",
+  "total",
+  "notes_section",
+  "patient_note",
+  "pharmacist_note",
+  "cancellation_reason"
+ ],
+ "fields": [
+  {
+   "fieldname": "patient_section",
+   "fieldtype": "Section Break",
+   "label": "Patient Information"
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Patient",
+   "options": "Patient",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "patient.patient_name",
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Patient Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Received",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Received\nUnder Review\nAwaiting Payment\nPaid\nPreparing\nOut for Delivery\nDelivered\nCancelled",
+   "reqd": 1
+  },
+  {
+   "default": "Normal",
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Priority",
+   "options": "Normal\nUrgent\nSame Day"
+  },
+  {
+   "fieldname": "order_section",
+   "fieldtype": "Section Break",
+   "label": "Medicines"
+  },
+  {
+   "fieldname": "medicines",
+   "fieldtype": "Table",
+   "label": "Medicines",
+   "options": "Medicine Request Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_items",
+   "fieldtype": "Int",
+   "label": "Total Items",
+   "read_only": 1
+  },
+  {
+   "fieldname": "prescription",
+   "fieldtype": "Attach Image",
+   "label": "Prescription"
+  },
+  {
+   "fieldname": "delivery_section",
+   "fieldtype": "Section Break",
+   "label": "Delivery"
+  },
+  {
+   "default": "Delivery",
+   "fieldname": "delivery_type",
+   "fieldtype": "Select",
+   "label": "Delivery Type",
+   "options": "Delivery\nPickup"
+  },
+  {
+   "fieldname": "delivery_address",
+   "fieldtype": "Small Text",
+   "label": "Delivery Address"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "estimated_delivery",
+   "fieldtype": "Datetime",
+   "label": "Estimated Delivery"
+  },
+  {
+   "fieldname": "actual_delivery",
+   "fieldtype": "Datetime",
+   "label": "Actual Delivery"
+  },
+  {
+   "fieldname": "received_confirmed",
+   "fieldtype": "Check",
+   "label": "Received Confirmed by Patient",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pharmacy_section",
+   "fieldtype": "Section Break",
+   "label": "Pharmacy"
+  },
+  {
+   "fieldname": "assigned_pharmacy",
+   "fieldtype": "Data",
+   "label": "Assigned Pharmacy"
+  },
+  {
+   "fieldname": "pharmacist",
+   "fieldtype": "Link",
+   "label": "Pharmacist",
+   "options": "User"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "preparation_started",
+   "fieldtype": "Datetime",
+   "label": "Preparation Started"
+  },
+  {
+   "fieldname": "dispatched_at",
+   "fieldtype": "Datetime",
+   "label": "Dispatched At"
+  },
+  {
+   "fieldname": "delivered_at",
+   "fieldtype": "Datetime",
+   "label": "Delivered At"
+  },
+  {
+   "fieldname": "payment_section",
+   "fieldtype": "Section Break",
+   "label": "Payment"
+  },
+  {
+   "default": "Zaad",
+   "fieldname": "payment_method",
+   "fieldtype": "Select",
+   "label": "Payment Method",
+   "options": "Zaad\neDahab\nVisa\nCash\nBank Transfer"
+  },
+  {
+   "default": "Unpaid",
+   "fieldname": "payment_status",
+   "fieldtype": "Select",
+   "label": "Payment Status",
+   "options": "Unpaid\nPaid\nRefunded"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "payment_reference",
+   "fieldtype": "Data",
+   "label": "Payment Reference"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Total Amount"
+  },
+  {
+   "fieldname": "delivery_fee",
+   "fieldtype": "Currency",
+   "label": "Delivery Fee"
+  },
+  {
+   "fieldname": "tax",
+   "fieldtype": "Currency",
+   "label": "Tax"
+  },
+  {
+   "fieldname": "total",
+   "fieldtype": "Currency",
+   "label": "Total",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "notes_section",
+   "fieldtype": "Section Break",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "patient_note",
+   "fieldtype": "Small Text",
+   "label": "Patient Note"
+  },
+  {
+   "fieldname": "pharmacist_note",
+   "fieldtype": "Small Text",
+   "label": "Pharmacist Note"
+  },
+  {
+   "fieldname": "cancellation_reason",
+   "fieldtype": "Small Text",
+   "label": "Cancellation Reason",
+   "depends_on": "eval:doc.status=='Cancelled'"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-04-19 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Hiraal EMR",
+ "name": "Medicine Request",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Chronic Care Admin",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Chronic Care Pharmacist",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Chronic Care Nurse",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Chronic Care Doctor"
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "title_field": "patient_name",
+ "track_changes": 1
 }
