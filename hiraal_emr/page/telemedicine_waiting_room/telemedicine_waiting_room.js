@@ -5,9 +5,13 @@ frappe.pages["telemedicine-waiting-room"].on_page_load = function (wrapper) {
     title: "Telemedicine Waiting Room",
     single_column: true,
   });
-  HiraalShell.mount(page, wrapper);
   page.main.html('<div id="telemed-root"></div>');
-  new TelemedWaitingRoom(page);
+  const boot = function () {
+    HiraalShell.mount(page, wrapper);
+    new TelemedWaitingRoom(page);
+  };
+  if (window.HiraalShell) boot();
+  else frappe.require("/assets/hiraal_emr/js/hiraal_sidebar.js", boot);
 };
 
 class TelemedWaitingRoom {

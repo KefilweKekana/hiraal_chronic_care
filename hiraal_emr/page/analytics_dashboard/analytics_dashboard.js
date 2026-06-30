@@ -5,9 +5,13 @@ frappe.pages["analytics-dashboard"].on_page_load = function (wrapper) {
     title: "Analytics",
     single_column: true,
   });
-  HiraalShell.mount(page, wrapper);
   page.main.html('<div id="analytics-root"></div>');
-  new AnalyticsDashboard(page);
+  const boot = function () {
+    HiraalShell.mount(page, wrapper);
+    new AnalyticsDashboard(page);
+  };
+  if (window.HiraalShell) boot();
+  else frappe.require("/assets/hiraal_emr/js/hiraal_sidebar.js", boot);
 };
 
 class AnalyticsDashboard {
