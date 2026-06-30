@@ -100,8 +100,7 @@
    "fieldname": "medicines",
    "fieldtype": "Table",
    "label": "Medicines",
-   "options": "Medicine Request Item",
-   "reqd": 1
+   "options": "Medicine Request Item"
   },
   {
    "fieldname": "column_break_2",
