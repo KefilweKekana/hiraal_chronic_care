@@ -171,4 +171,21 @@
   window.HiraalShell = Shell;
   // Backwards-compatible alias for any older references.
   window.HiraalSidebar = Shell;
+
+  // Immersive mode: on the full-screen clinic pages, hide Frappe's global
+  // navbar so only the design's own top bar shows (matches the handoff).
+  // Toggles a body class on every route change; restored when you leave.
+  if (!window.__hiraalImmersiveBound) {
+    window.__hiraalImmersiveBound = true;
+    const IMMERSIVE = ["clinic-dashboard", "telemedicine-waiting-room", "analytics-dashboard"];
+    const toggleImmersive = function () {
+      try {
+        const r = (frappe.get_route_str() || "").split("/")[0];
+        $(document.body).toggleClass("hiraal-immersive", IMMERSIVE.indexOf(r) !== -1);
+      } catch (e) {}
+    };
+    try { frappe.router.on("change", toggleImmersive); } catch (e) {}
+    $(document).on("page-change", toggleImmersive);
+    toggleImmersive();
+  }
 })();

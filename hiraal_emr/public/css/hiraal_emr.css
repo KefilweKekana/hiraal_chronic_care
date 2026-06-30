@@ -373,6 +373,10 @@
   }
 }
 
+/* Immersive clinic pages: hide Frappe's global navbar so only the design's
+   own top bar shows (toggled by a body class in hiraal_sidebar.js). */
+body.hiraal-immersive .navbar { display: none !important; }
+
 /* ============================================================
    "Calm Clinical" design system (shared across all Hiraal desk
    pages via HiraalShell). Scoped under .hiraal-dash.

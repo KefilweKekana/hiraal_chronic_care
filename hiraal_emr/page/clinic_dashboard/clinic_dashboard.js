@@ -47,6 +47,8 @@ const NAV = [
 
 frappe.pages["clinic-dashboard"].on_page_load = function (wrapper) {
   ensureFonts();
+  // Load the shared shell so the immersive navbar toggle binds on this page too.
+  if (!window.HiraalShell) frappe.require("/assets/hiraal_emr/js/hiraal_sidebar.js", function () {});
   const page = frappe.ui.make_app_page({
     parent: wrapper,
     title: "Clinic Dashboard",
