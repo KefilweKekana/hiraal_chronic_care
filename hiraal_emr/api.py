@@ -1937,12 +1937,80 @@ def get_payment_methods():
         return {"enabled": False, "methods": []}
 
 
+# Subscription statuses that represent a live/payable subscription (a brand-new
+# unpaid one starts "Overdue" since the doctype has no "Pending" status).
+_SUB_PAYABLE_STATUSES = ["Active", "Overdue", "Past Due", "Expiring Soon"]
+
+# Plan catalog (scope §5.1 — Standard & Premium both $5/mo; Premium 5G hub is a
+# +$10 device add-on, not a subscription-fee difference).
+_SUBSCRIPTION_PLANS = [
+    {"name": "Standard Care", "monthly_fee": 5.0, "features": [
+        "Daily vitals monitoring", "Nurse & doctor review",
+        "Medicine delivery", "Telemedicine visits"]},
+    {"name": "Premium Care", "monthly_fee": 5.0, "features": [
+        "Everything in Standard Care", "Priority alerts & review",
+        "Optional 5G home hub (+$10)", "Extended support"]},
+]
+_PLAN_FEES = {p["name"]: p["monthly_fee"] for p in _SUBSCRIPTION_PLANS}
+
+
 def _my_active_subscription(patient):
     return frappe.db.get_value(
         "Care Subscription",
-        {"patient": patient, "status": ["in", ["Active", "Overdue", "Past Due", "Pending"]]},
+        {"patient": patient, "status": ["in", _SUB_PAYABLE_STATUSES]},
         ["name", "monthly_fee"], as_dict=True, order_by="creation desc",
     )
+
+
+@frappe.whitelist()
+def get_my_subscription():
+    """The logged-in patient's current Care Subscription (or null), the plan
+    catalog, and recent payment history — for the app's Subscriptions screen."""
+    patient = _my_patient_name()
+    sub = frappe.db.get_value(
+        "Care Subscription",
+        {"patient": patient, "status": ["in", _SUB_PAYABLE_STATUSES + ["Suspended"]]},
+        ["name", "plan", "monthly_fee", "status", "start_date", "next_billing_date",
+         "last_payment_date", "last_payment_status", "auto_renew", "total_collected"],
+        as_dict=True, order_by="creation desc",
+    )
+    history = []
+    if frappe.db.exists("DocType", "Subscription Payment"):
+        history = _safe_get_all(
+            "Subscription Payment",
+            filters={"patient": patient},
+            fields=["amount", "payment_date", "payment_method", "status", "reference_id"],
+            order_by="payment_date desc", limit_page_length=10,
+        )
+    return {"subscription": sub, "plans": _SUBSCRIPTION_PLANS, "history": history}
+
+
+@frappe.whitelist()
+def subscribe_my_plan(plan):
+    """Create a Care Subscription for the logged-in patient on the chosen plan,
+    due immediately. The app then calls pay_my_subscription to activate it.
+    If the patient already has a live subscription, returns that one instead."""
+    patient = _my_patient_name()
+    fee = _PLAN_FEES.get(plan)
+    if fee is None:
+        frappe.throw(_("Unknown plan"))
+    existing = _my_active_subscription(patient)
+    if existing:
+        return {"subscription": existing.name, "monthly_fee": flt(existing.monthly_fee),
+                "plan": plan, "status": "existing"}
+    sub = frappe.new_doc("Care Subscription")
+    sub.patient = patient
+    sub.patient_phone = frappe.db.get_value("Patient", patient, "mobile")
+    sub.plan = plan
+    sub.monthly_fee = fee
+    sub.status = "Overdue"          # unpaid; becomes Active once paid
+    sub.start_date = today()
+    sub.next_billing_date = today()
+    sub.auto_renew = 1
+    sub.insert(ignore_permissions=True)
+    frappe.db.commit()
+    audit_log("Create", "Care Subscription", sub.name, f"Patient subscribed to {plan} via app")
+    return {"subscription": sub.name, "monthly_fee": fee, "plan": plan, "status": sub.status}
 
 
 @frappe.whitelist()
@@ -2000,7 +2068,7 @@ def _mark_subscription_paid(patient, reference):
         return
     sub_name = frappe.db.get_value(
         "Care Subscription",
-        {"patient": patient, "status": ["in", ["Active", "Overdue", "Past Due", "Pending"]]},
+        {"patient": patient, "status": ["in", _SUB_PAYABLE_STATUSES]},
         "name", order_by="creation desc",
     )
     if not sub_name:
