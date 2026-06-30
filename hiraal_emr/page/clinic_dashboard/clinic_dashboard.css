@@ -3,6 +3,9 @@
    Scoped under .hiraal-dash so it never leaks into other desk pages.
    ============================================================ */
 
+/* Immersive: hide Frappe's global navbar on this page (matches the design). */
+body.hiraal-immersive .navbar { display: none !important; }
+
 /* Give the page a clean canvas: hide Frappe's default page head + padding. */
 [data-page-route="clinic-dashboard"] .page-head,
 .page-clinic-dashboard .page-head { display: none !important; }

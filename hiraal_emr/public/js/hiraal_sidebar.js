@@ -37,15 +37,27 @@
     LOGO,
     NAV,
 
+    // Bump CSS_VER whenever hiraal_emr.css changes so browsers refetch it.
+    CSS_VER: "6",
     ensureFonts() {
-      if (document.getElementById("hiraal-dash-fonts")) return;
-      const l = document.createElement("link");
-      l.id = "hiraal-dash-fonts";
-      l.rel = "stylesheet";
-      l.href =
-        "https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700" +
-        "&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap";
-      document.head.appendChild(l);
+      if (!document.getElementById("hiraal-dash-fonts")) {
+        const l = document.createElement("link");
+        l.id = "hiraal-dash-fonts";
+        l.rel = "stylesheet";
+        l.href =
+          "https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700" +
+          "&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap";
+        document.head.appendChild(l);
+      }
+      // Inject the design stylesheet fresh (cache-busted) so the page never
+      // depends on a stale app_include copy of hiraal_emr.css.
+      if (!document.getElementById("hiraal-dash-css")) {
+        const c = document.createElement("link");
+        c.id = "hiraal-dash-css";
+        c.rel = "stylesheet";
+        c.href = "/assets/hiraal_emr/css/hiraal_emr.css?hv=" + this.CSS_VER;
+        document.head.appendChild(c);
+      }
     },
 
     // Hide Frappe's default page head so the design owns the canvas.
