@@ -1,63 +1,57 @@
 (function () {
-// ─── Hiraal Sidebar (inlined — no external dependency) ───
-const HiraalMenu = {
-  sections: [
-    { title: "CLINICAL", items: [
-      { label: "Dashboard", icon: "📊", route: "/app/clinic-dashboard", name: "dashboard" },
-      { label: "Alerts", icon: "🚨", route: "/app/chronic-care-alert", name: "alerts" },
-      { label: "Patients", icon: "👥", route: "/app/patient", name: "patients" },
-      { label: "Daily Readings", icon: "📈", route: "/app/daily-reading", name: "daily-readings" },
-      { label: "Nurse Tasks", icon: "✅", route: "/app/nurse-task", name: "nurse-tasks" },
-      { label: "Doctor Review", icon: "🩺", route: "/app/doctor-review", name: "doctor-review" },
-      { label: "Appointments", icon: "📅", route: "/app/patient-appointment", name: "appointments" },
-      { label: "Lab Requests", icon: "🧪", route: "/app/lab-test", name: "lab-requests" },
-      { label: "Medicine Requests", icon: "💊", route: "/app/medicine-request", name: "medicine-requests" },
-      { label: "Devices", icon: "📱", route: "/app/patient-device", name: "devices" },
-      { label: "Telemedicine", icon: "📹", route: "/app/telemedicine-waiting-room", name: "telemedicine" },
-    ]},
-    { title: "BILLING", items: [
-      { label: "Subscriptions", icon: "🔄", route: "/app/care-subscription", name: "subscriptions" },
-      { label: "Payments", icon: "💳", route: "/app/subscription-payment", name: "payments" },
-    ]},
-    { title: "REPORTS", items: [
-      { label: "Reports", icon: "📋", route: "/app/query-report/Patient Summary", name: "reports" },
-      { label: "Analytics", icon: "📉", route: "/app/analytics-dashboard", name: "analytics" },
-    ]},
-    { title: "SETTINGS", items: [
-      { label: "Settings", icon: "⚙️", route: "/app/chronic-care-settings", name: "settings" },
-      { label: "User Management", icon: "👤", route: "/app/user", name: "user-management" },
-    ]},
-  ],
-  renderSidebar(activeName, badges) {
-    badges = badges || {};
-    let h = '<aside class="dashboard-sidebar">';
-    h += '<div class="sidebar-brand"><div class="brand-logo">🏥</div><div class="brand-text"><div class="brand-title">DagaarSoft</div><div class="brand-subtitle">Health Clinic</div></div></div>';
-    h += '<nav class="sidebar-nav">';
-    this.sections.forEach(s => {
-      h += '<div class="sidebar-section"><div class="sidebar-section-title">' + s.title + '</div><ul class="sidebar-menu">';
-      s.items.forEach(i => {
-        const a = i.name === activeName, b = badges[i.name] || 0;
-        h += '<li class="sidebar-menu-item ' + (a ? 'active' : '') + '"><a href="' + i.route + '" class="sidebar-menu-link"><span class="sidebar-icon">' + i.icon + '</span><span class="sidebar-label">' + i.label + '</span>' + (b ? '<span class="sidebar-badge">' + b + '</span>' : '') + '</a></li>';
-      });
-      h += '</ul></div>';
-    });
-    h += '</nav><div class="sidebar-footer"><div class="need-help"><div class="help-icon">💬</div><div class="help-text"><div class="help-title">Need Help?</div><div class="help-link">Contact Support</div><div class="help-email">support@dagaar.so</div></div></div></div></aside>';
-    return h;
-  },
-  wrap(activeName, content, badges) {
-    return '<div class="dashboard-with-sidebar">' + this.renderSidebar(activeName, badges) + '<div class="dashboard-main">' + content + '</div></div>';
-  }
-};
+// ─── Calm Clinical dashboard (design handoff 1A) ───
+// Full app frame (top bar + sidebar + main) rendered inside the desk page,
+// wired to the real hiraal_emr.api.get_dashboard_data. No mock data.
+
+function ensureFonts() {
+  if (document.getElementById("hiraal-dash-fonts")) return;
+  const l = document.createElement("link");
+  l.id = "hiraal-dash-fonts";
+  l.rel = "stylesheet";
+  l.href =
+    "https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700" +
+    "&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap";
+  document.head.appendChild(l);
+}
+
+// Sidebar nav model — groups, labels, icons, routes (Dashboard is active here).
+const NAV = [
+  { items: [
+    { label: "Dashboard", icon: "dashboard", route: "/app/clinic-dashboard", name: "dashboard" },
+    { label: "Alerts", icon: "notifications_active", route: "/app/chronic-care-alert", name: "alerts" },
+    { label: "Patients", icon: "groups", route: "/app/patient", name: "patients" },
+    { label: "Daily Readings", icon: "vital_signs", route: "/app/daily-reading", name: "daily-readings" },
+    { label: "Nurse Tasks", icon: "task_alt", route: "/app/nurse-task", name: "nurse-tasks" },
+    { label: "Doctor Review", icon: "stethoscope", route: "/app/doctor-review", name: "doctor-review" },
+    { label: "Appointments", icon: "calendar_month", route: "/app/patient-appointment", name: "appointments" },
+    { label: "Lab Requests", icon: "science", route: "/app/lab-test", name: "lab-requests" },
+    { label: "Medicine Requests", icon: "medication", route: "/app/medicine-request", name: "medicine-requests" },
+    { label: "Devices", icon: "devices", route: "/app/patient-device", name: "devices" },
+    { label: "Telemedicine", icon: "video_camera_front", route: "/app/telemedicine-waiting-room", name: "telemedicine" },
+  ]},
+  { label: "BILLING", items: [
+    { label: "Subscriptions", icon: "card_membership", route: "/app/care-subscription", name: "subscriptions" },
+    { label: "Payments", icon: "payments", route: "/app/subscription-payment", name: "payments" },
+  ]},
+  { label: "REPORTS", items: [
+    { label: "Reports", icon: "description", route: "/app/query-report/Patient Summary", name: "reports" },
+    { label: "Analytics", icon: "analytics", route: "/app/analytics-dashboard", name: "analytics" },
+  ]},
+  { label: "SETTINGS", items: [
+    { label: "Settings", icon: "settings", route: "/app/chronic-care-settings", name: "settings" },
+    { label: "User Management", icon: "manage_accounts", route: "/app/user", name: "user-management" },
+  ]},
+];
 
 frappe.pages["clinic-dashboard"].on_page_load = function (wrapper) {
+  ensureFonts();
   const page = frappe.ui.make_app_page({
     parent: wrapper,
     title: "Clinic Dashboard",
-    subtitle: "Overview of patient monitoring and clinic operations",
     single_column: true,
   });
-  page.set_indicator(frappe.datetime.str_to_user(frappe.datetime.get_today()), "blue");
-  page.set_secondary_action("Refresh", () => this.load_data(), "refresh");
+  // Clean canvas — the design provides its own header/frame.
+  $(wrapper).find(".page-head").hide();
   page.main.html('<div id="clinic-dashboard-root"></div>');
   new ClinicDashboard(page);
 };
@@ -66,101 +60,316 @@ class ClinicDashboard {
   constructor(page) {
     this.page = page;
     this.container = page.main.find("#clinic-dashboard-root");
-    this.render();
+    this.renderShell('<div class="hd-loading">Loading dashboard…</div>');
     this.load_data();
   }
 
   async load_data() {
     try {
-      const data = await frappe.xcall("hiraal_emr.api.get_dashboard_data");
-      this.data = data;
+      this.data = await frappe.xcall("hiraal_emr.api.get_dashboard_data");
       this.render_dashboard();
     } catch (e) {
       console.error("Dashboard load error:", e);
-      this.container.html(HiraalMenu.wrap("dashboard", '<div class="empty-state">Error loading dashboard data.</div>'));
+      this.renderShell('<div class="hd-loading">Could not load dashboard data.</div>');
     }
   }
 
-  render() {
-    this.container.html(HiraalMenu.wrap("dashboard", '<div class="clinic-dashboard"><div class="empty-state">' + __("Loading dashboard...") + '</div></div>'));
+  // ── helpers ─────────────────────────────────────────────
+  esc(s) {
+    return (s == null ? "" : String(s)).replace(/[&<>"']/g, (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+  n(v) { return v == null ? 0 : v; }
+  initials(name) {
+    if (!name) return "?";
+    return name.trim().split(/\s+/).map((p) => p[0]).join("").toUpperCase().slice(0, 2);
+  }
+  avatarColor(name) {
+    const colors = ["#0c6b62", "#2563EB", "#16A34A", "#D97706", "#9333EA", "#0D9488", "#DB2777", "#c05a3f"];
+    let h = 0;
+    for (let i = 0; i < (name || "").length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
+    return colors[Math.abs(h) % colors.length];
+  }
+  alertClass(level) {
+    return { "Very High": "very-high", High: "high", Medium: "medium", Low: "low" }[level] || "low";
+  }
+  msr(name) { return '<span class="msr">' + name + "</span>"; }
+
+  // ── shell (topbar + sidebar + main slot) ────────────────
+  renderShell(mainHtml) {
+    this.container.html(
+      '<div class="hiraal-dash"><div class="hiraal-dash-wrap"><div class="hd-frame">' +
+        this.topbar() +
+        '<div class="hd-body">' + this.sidebar() + '<main class="hd-main">' + mainHtml + "</main></div>" +
+      "</div></div></div>"
+    );
   }
 
+  topbar() {
+    return (
+      '<div class="hd-topbar">' +
+        '<div class="hd-brand"><div class="hd-brand-logo">' + this.msr("health_and_safety") +
+          '</div><span class="hd-brand-name">DagaarSoft</span></div>' +
+        '<div class="hd-search">' + this.msr("search") +
+          '<span class="hd-search-text">Search or type a command</span>' +
+          '<span class="hd-search-chip">⌘G</span></div>' +
+        '<div class="hd-top-right">' + this.msr("notifications") +
+          '<span class="hd-help-link">Help</span>' +
+          '<div class="hd-avatar">' + (this.initials(frappe.session.user_fullname) || "A") + "</div></div>" +
+      "</div>"
+    );
+  }
+
+  sidebar() {
+    let nav = "";
+    NAV.forEach((group) => {
+      if (group.label) nav += '<div class="hd-nav-label">' + group.label + "</div>";
+      group.items.forEach((i) => {
+        const active = i.name === "dashboard" ? " active" : "";
+        nav += '<a class="hd-nav-item' + active + '" href="' + i.route + '">' +
+          this.msr(i.icon) + "<span>" + i.label + "</span></a>";
+      });
+    });
+    return (
+      '<aside class="hd-sidebar">' +
+        '<div class="hd-side-head"><div class="hd-side-logo">' + this.msr("local_hospital") +
+          '</div><div><div class="hd-side-title">DagaarSoft</div>' +
+          '<div class="hd-side-sub">Health Clinic</div></div></div>' +
+        '<nav class="hd-nav">' + nav + "</nav>" +
+        '<div class="hd-help"><div class="hd-help-card">' +
+          '<div class="hd-help-title">' + this.msr("support_agent") + "Need help?</div>" +
+          '<div class="hd-help-contact">Contact Support</div>' +
+          '<div class="hd-help-email">support@dagaar.so</div></div></div>' +
+      "</aside>"
+    );
+  }
+
+  // ── main content ────────────────────────────────────────
   render_dashboard() {
-    const d = this.data;
-    const badges = { alerts: d.high_risk_alerts || 0 };
-    const content = '<div class="clinic-dashboard">' +
-      '<div class="kpi-row">' +
-        this.kpi_card({label: "Active Patients", value: d.active_patients, subtitle: "↑ " + d.new_patients_month + " this month", icon: "👥", icon_class: "blue"}) +
-        this.kpi_card({label: "Today's Submissions", value: d.todays_submissions, subtitle: "↑ " + Math.abs(d.submissions_change) + "% from yesterday", icon: "📊", icon_class: "green"}) +
-        this.kpi_card({label: "High-Risk Alerts", value: d.high_risk_alerts, subtitle: "↑ " + d.new_alerts + " new", icon: "⚠️", icon_class: "red"}) +
-        this.kpi_card({label: "Missed Submissions", value: d.missed_submissions, subtitle: "↑ 5% from yesterday", icon: "⏰", icon_class: "amber"}) +
-        this.kpi_card({label: "Unpaid Subscriptions", value: d.unpaid_subscriptions, subtitle: "", action: '<a href="/app/care-subscription?status=Overdue" class="kpi-action">View Details →</a>', icon: "💳", icon_class: "purple"}) +
-      '</div>' +
-      '<div class="dashboard-grid">' +
-        '<div class="dashboard-card alerts-card">' +
-          '<div class="card-header"><h3>High Priority Alerts <span class="alert-badge">' + d.high_risk_alerts + '</span></h3><a href="/app/chronic-care-alert?alert_level=Very+High&status=Open" class="view-all">View All</a></div>' +
-          '<div class="card-body">' +
-            '<table class="alerts-table"><thead><tr><th>Patient</th><th>Latest Reading</th><th>Reason</th><th>Time</th><th>Assigned</th></tr></thead><tbody>' +
-              (d.priority_alerts || []).map(a => '<tr><td><div class="patient-cell"><div class="patient-avatar" style="background: ' + this.avatar_color(a.patient_name) + '">' + this.initials(a.patient_name) + '</div><div class="patient-info"><div class="name">' + a.patient_name + '</div><div class="id">' + a.patient + '</div></div></div></td><td><span class="reading-value">' + (a.latest_reading_display || "—") + '</span></td><td><span class="alert-reason ' + this.alert_class(a.alert_level) + '"><span class="dot"></span>' + a.alert_type + '</span></td><td class="time-cell">' + frappe.datetime.prettyDate(a.creation) + '</td><td class="assigned-cell">' + (a.assigned_nurse_name || "—") + '</td></tr>').join("") +
-            '</tbody></table>' +
-            (!d.priority_alerts?.length ? '<div class="empty-state">No high priority alerts right now.</div>' : "") +
-            '<div class="alert-warning-banner"><span>⚠️</span><span>These patients need immediate attention. Please follow up.</span></div>' +
-          '</div>' +
-        '</div>' +
-        '<div class="dashboard-card chart-card">' +
-          '<div class="card-header"><h3>Alert Trends (This Week)</h3></div>' +
-          '<div class="card-body">' +
-            '<div class="chart-legend"><div class="legend-item"><span class="legend-dot" style="background:#DC2626"></span> High Risk</div><div class="legend-item"><span class="legend-dot" style="background:#D97706"></span> Medium Risk</div><div class="legend-item"><span class="legend-dot" style="background:#22C55E"></span> Low Risk</div></div>' +
-            '<div id="alert-trends-chart" style="height: 180px;"></div>' +
-            '<div class="trend-stats"><div class="trend-stat"><div class="stat-value">' + (d.alerts_this_week || 0) + '</div><div class="stat-label">This Week</div><div class="stat-change">Total Alerts</div></div><div class="trend-stat"><div class="stat-value">' + (d.alerts_last_week || 0) + '</div><div class="stat-label">Last Week</div><div class="stat-change">Total Alerts</div></div><div class="trend-stat"><div class="stat-value">' + this.week_change_pct(d.alerts_this_week, d.alerts_last_week) + '</div><div class="stat-label">Change</div><div class="stat-change">' + ((d.alerts_this_week || 0) >= (d.alerts_last_week || 0) ? "↑" : "↓") + ' From Last Week</div></div></div>' +
-          '</div>' +
-        '</div>' +
-      '</div>' +
-      '<div class="quick-access-row">' +
-        this.quick_card({label: "Appointments Today", value: d.appointments_today, subtitle: d.appointments_upcoming + " upcoming", link: "/app/patient-appointment?appointment_date=Today", icon: "📅", icon_class: "blue"}) +
-        this.quick_card({label: "Lab Requests", value: d.lab_requests_total, subtitle: d.lab_requests_pending + " pending", link: "/app/lab-test", icon: "🧪", icon_class: "indigo"}) +
-        this.quick_card({label: "Medicine Requests", value: d.medicine_requests_total, subtitle: d.medicine_requests_pending + " pending", link: "/app/medication-request", icon: "💊", icon_class: "pink"}) +
-        this.quick_card({label: "Nurse Tasks", value: d.nurse_tasks_total, subtitle: d.nurse_tasks_pending + " pending", link: "/app/nurse-task", icon: "✅", icon_class: "teal"}) +
-        this.quick_card({label: "Patients at Risk", value: d.patients_at_risk, subtitle: d.patients_high_risk + " high risk", link: "/app/chronic-care-alert?alert_level=Very+High", icon: "🛡️", icon_class: "rose"}) +
-      '</div>' +
-      '<div class="bottom-grid">' +
-        '<div class="dashboard-card">' +
-          '<div class="card-header"><h3>Today\'s Appointments</h3><a href="/app/patient-appointment?appointment_date=Today" class="view-all">View Calendar</a></div>' +
-          '<div class="card-body">' +
-            '<table class="appointments-table"><thead><tr><th>Time</th><th>Patient</th><th>Type</th><th>Provider</th><th>Status</th></tr></thead><tbody>' +
-              (d.todays_appointments || []).map(a => '<tr><td><span class="time-badge">' + (a.appointment_time || "—") + '</span></td><td><div class="patient-cell"><div class="patient-avatar" style="background: ' + this.avatar_color(a.patient_name) + '">' + this.initials(a.patient_name) + '</div><div class="patient-info"><div class="name">' + a.patient_name + '</div><div class="id">' + a.patient + '</div></div></div></td><td>' + (a.appointment_type || "Visit") + '</td><td>' + (a.practitioner_name || "—") + '</td><td><span class="status-pill ' + (a.status?.toLowerCase() || "") + '">' + a.status + '</span></td></tr>').join("") +
-            '</tbody></table>' +
-            (!d.todays_appointments?.length ? '<div class="empty-state">No appointments today.</div>' : "") +
-            '<a href="/app/patient-appointment" class="view-all-link">View All Appointments →</a>' +
-          '</div>' +
-        '</div>' +
-        '<div class="dashboard-card">' +
-          '<div class="card-header"><h3>Recent Activity</h3><a href="#" class="view-all">View All</a></div>' +
-          '<div class="card-body"><div class="activity-feed">' +
-            (d.recent_activity || []).map(a => '<div class="activity-item"><div class="activity-icon ' + (a.icon_class || "info") + '">' + (a.icon || "ℹ️") + '</div><div class="activity-content"><div class="activity-title">' + a.message + '</div><div class="activity-meta">' + a.time + '</div></div></div>').join("") +
-            (!d.recent_activity?.length ? '<div class="empty-state">No recent activity.</div>' : "") +
-          '</div></div>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
-    this.container.html(HiraalMenu.wrap("dashboard", content, badges));
-    this.render_alert_chart();
+    const d = this.data || {};
+    const today = frappe.datetime.str_to_user(frappe.datetime.get_today());
+
+    const main =
+      '<div class="hd-page-head">' +
+        '<h1 class="hd-h1">Clinic Dashboard</h1>' +
+        '<span class="hd-datechip">' + today + "</span>" +
+        '<button class="hd-refresh" data-refresh>' + this.msr("refresh") + "Refresh</button>" +
+      "</div>" +
+      this.kpiRow(d) +
+      '<div class="hd-2col">' + this.alertsPanel(d) + this.trendsPanel(d) + "</div>" +
+      this.secondaryRow(d) +
+      '<div class="hd-2col-13">' + this.appointmentsPanel(d) + this.activityPanel(d) + "</div>";
+
+    this.renderShell(main);
+    this.container.find("[data-refresh]").on("click", () => {
+      this.renderShell('<div class="hd-loading">Refreshing…</div>');
+      this.load_data();
+    });
+    this.renderChart();
   }
 
-  kpi_card({label, value, subtitle, icon, icon_class, action = ""}) {
-    return '<div class="kpi-card"><div class="kpi-icon ' + icon_class + '">' + icon + '</div><div class="kpi-body"><div class="kpi-value">' + (value ?? 0) + '</div><div class="kpi-label">' + label + '</div>' + (subtitle ? '<div class="kpi-subtitle">' + subtitle + '</div>' : "") + action + '</div></div>';
+  kpiCard({ value, label, icon, chip, delta, deltaClass }) {
+    return (
+      '<div class="hd-kpi"><div class="hd-kpi-icon ' + chip + '">' + this.msr(icon) + "</div>" +
+      '<div class="hd-kpi-value">' + this.n(value) + "</div>" +
+      '<div class="hd-kpi-label">' + label + "</div>" +
+      (delta ? '<div class="hd-kpi-delta ' + (deltaClass || "muted") + '">' + delta + "</div>" : "") +
+      "</div>"
+    );
   }
-  quick_card({label, value, subtitle, link, icon, icon_class}) {
-    return '<a href="' + link + '" class="quick-card"><div class="quick-icon ' + icon_class + '">' + icon + '</div><div class="quick-body"><div class="quick-value">' + (value ?? 0) + '</div><div class="quick-label">' + label + '</div><div class="quick-subtitle">' + (subtitle || "") + '</div></div></a>';
+
+  kpiRow(d) {
+    // Today's submissions delta — honest, from the real submissions_change %.
+    const sc = this.n(d.submissions_change);
+    let subDelta, subClass;
+    if (sc > 0) { subDelta = "↑ " + sc + "% from yesterday"; subClass = "good"; }
+    else if (sc < 0) { subDelta = "↓ " + Math.abs(sc) + "% from yesterday"; subClass = "muted"; }
+    else { subDelta = "Same as yesterday"; subClass = "muted"; }
+
+    return (
+      '<div class="hd-kpi-row">' +
+        this.kpiCard({ value: d.active_patients, label: "Active Patients", icon: "groups", chip: "chip-teal",
+          delta: "↑ " + this.n(d.new_patients_month) + " this month", deltaClass: "good" }) +
+        this.kpiCard({ value: d.todays_submissions, label: "Today's Submissions", icon: "assignment", chip: "chip-neutral",
+          delta: subDelta, deltaClass: subClass }) +
+        this.kpiCard({ value: d.high_risk_alerts, label: "High-Risk Alerts", icon: "warning", chip: "chip-danger",
+          delta: this.n(d.new_alerts) + " new", deltaClass: "muted" }) +
+        this.kpiCard({ value: d.missed_submissions, label: "Missed Submissions", icon: "schedule", chip: "chip-amber",
+          delta: "of " + this.n(d.active_patients) + " active patients", deltaClass: "amber" }) +
+        this.kpiCard({ value: d.unpaid_subscriptions, label: "Unpaid Subscriptions", icon: "credit_card", chip: "chip-neutral",
+          delta: '<a href="/app/care-subscription?status=Overdue">View Details →</a>', deltaClass: "teal" }) +
+      "</div>"
+    );
   }
-  alert_class(level) { return {"Very High": "very-high", "High": "high", "Medium": "medium", "Low": "low"}[level] || "low"; }
-  initials(name) { if (!name) return "?"; return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2); }
-  avatar_color(name) { const colors = ["#2563EB", "#16A34A", "#DC2626", "#D97706", "#9333EA", "#0D9488", "#DB2777", "#4F46E5"]; let hash = 0; for (let i = 0; i < (name || "").length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash); return colors[Math.abs(hash) % colors.length]; }
-  week_change_pct(tw, lw) { const a = tw || 0, b = lw || 1; const p = Math.round(((a - b) / b) * 100); return (p >= 0 ? "+" : "") + p + "%"; }
-  render_alert_chart() {
-    if (!this.data?.alert_trend_data) return;
-    const el = this.container.find("#alert-trends-chart"); if (!el.length) return;
-    new frappe.Chart(el[0], { data: { labels: this.data.alert_trend_data.labels || ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], datasets: [{name:"High Risk", values: this.data.alert_trend_data.high || [0,0,0,0,0,0,0]}, {name:"Medium Risk", values: this.data.alert_trend_data.medium || [0,0,0,0,0,0,0]}, {name:"Low Risk", values: this.data.alert_trend_data.low || [0,0,0,0,0,0,0]}] }, type: "line", height: 180, colors: ["#DC2626", "#D97706", "#22C55E"], lineOptions: { regionFill: 1, hideDots: 0 }, axisOptions: { xAxisMode: "tick", xIsSeries: true } });
+
+  alertsPanel(d) {
+    const alerts = d.priority_alerts || [];
+    let body;
+    if (!alerts.length) {
+      body =
+        '<div class="hd-empty"><div class="hd-empty-icon chip-green">' + this.msr("check_circle") + "</div>" +
+        '<div class="hd-empty-text">No high priority alerts right now</div></div>';
+    } else {
+      const cols = "grid-template-columns:1.4fr 1.4fr 1.2fr 0.8fr 1fr";
+      let rows = "";
+      alerts.forEach((a) => {
+        rows +=
+          '<div class="hd-trow" style="' + cols + '">' +
+            '<span class="hd-pt-cell"><span class="hd-pt-avatar" style="background:' + this.avatarColor(a.patient_name) + '">' +
+              this.initials(a.patient_name) + '</span><span><span class="hd-pt-name">' + this.esc(a.patient_name) +
+              '</span><br><span class="hd-pt-id">' + this.esc(a.patient) + "</span></span></span>" +
+            "<span>" + this.esc(a.latest_reading_display || "—") + "</span>" +
+            '<span><span class="hd-reason ' + this.alertClass(a.alert_level) + '"><span class="dot"></span>' +
+              this.esc(a.alert_type) + "</span></span>" +
+            '<span class="hd-cell-muted">' + frappe.datetime.prettyDate(a.creation) + "</span>" +
+            '<span class="hd-cell-muted">' + this.esc(a.assigned_nurse_name || "—") + "</span>" +
+          "</div>";
+      });
+      body =
+        '<div class="hd-thead" style="' + cols + '"><span>PATIENT</span><span>LATEST READING</span>' +
+        "<span>REASON</span><span>TIME</span><span>ASSIGNED</span></div>" + rows;
+    }
+    const warn =
+      '<div class="hd-warn">' + this.msr("notifications_active") +
+      "Patients flagged at-risk need a follow-up review soon.</div>";
+
+    return (
+      '<div class="hd-panel">' +
+        '<div class="hd-panel-head"><h2 class="hd-panel-title">High Priority Alerts</h2>' +
+          '<span class="hd-badge">' + this.n(d.high_risk_alerts) + "</span>" +
+          '<a class="hd-link right" href="/app/chronic-care-alert?alert_level=Very%20High&status=Open">View All</a></div>' +
+        body + warn +
+      "</div>"
+    );
+  }
+
+  trendsPanel(d) {
+    const tw = this.n(d.alerts_this_week), lw = this.n(d.alerts_last_week);
+    const pct = Math.round(((tw - lw) / Math.max(lw, 1)) * 100);
+    const down = tw <= lw;
+    const changeTxt = (pct >= 0 ? "+" : "") + pct + "%";
+    return (
+      '<div class="hd-panel">' +
+        '<div class="hd-panel-head sb"><h2 class="hd-panel-title">Alert Trends</h2>' +
+          '<span class="hd-subtle">This week</span></div>' +
+        '<div class="hd-legend">' +
+          '<span class="item"><span class="ldot" style="background:#c0413f"></span>High</span>' +
+          '<span class="item"><span class="ldot" style="background:#d99b2c"></span>Medium</span>' +
+          '<span class="item"><span class="ldot" style="background:#0c8a5e"></span>Low</span></div>' +
+        '<div class="hd-chart" id="hd-trend-chart"></div>' +
+        '<div class="hd-trend-stats">' +
+          '<div><div class="hd-trend-stat-val">' + tw + '</div><div class="hd-trend-stat-lbl">This week</div></div>' +
+          '<div><div class="hd-trend-stat-val">' + lw + '</div><div class="hd-trend-stat-lbl">Last week</div></div>' +
+          '<div><div class="hd-trend-stat-val' + (down ? " good" : "") + '">' + changeTxt + "</div>" +
+            '<div class="hd-trend-stat-lbl' + (down ? " good" : "") + '">' + (down ? "↓" : "↑") + " vs last week</div></div>" +
+        "</div>" +
+      "</div>"
+    );
+  }
+
+  secondaryRow(d) {
+    const card = (value, label, sub, icon, chip, subClass) =>
+      '<div class="hd-skpi"><div class="hd-skpi-icon ' + chip + '">' + this.msr(icon) + "</div>" +
+      '<div><div class="hd-skpi-value">' + this.n(value) + "</div>" +
+      '<div class="hd-skpi-label">' + label + "</div>" +
+      '<div class="hd-skpi-sub ' + (subClass || "") + '">' + sub + "</div></div></div>";
+    return (
+      '<div class="hd-skpi-row">' +
+        card(d.appointments_today, "Appointments Today", this.n(d.appointments_upcoming) + " upcoming", "event", "chip-neutral") +
+        card(d.lab_requests_total, "Lab Requests", this.n(d.lab_requests_pending) + " pending", "science", "chip-teal", "amber") +
+        card(d.medicine_requests_total, "Medicine Requests", this.n(d.medicine_requests_pending) + " pending", "medication", "chip-pink", "amber") +
+        card(d.nurse_tasks_total, "Nurse Tasks", this.n(d.nurse_tasks_pending) + " pending", "task_alt", "chip-green") +
+        card(d.patients_at_risk, "Patients at Risk", this.n(d.patients_high_risk) + " high risk", "monitor_heart", "chip-coral") +
+      "</div>"
+    );
+  }
+
+  appointmentsPanel(d) {
+    const appts = d.todays_appointments || [];
+    let body;
+    if (!appts.length) {
+      body =
+        '<div class="hd-empty"><div class="hd-empty-icon chip-neutral">' + this.msr("calendar_today") + "</div>" +
+        '<div class="hd-empty-text">No appointments today</div></div>';
+    } else {
+      const cols = "grid-template-columns:0.8fr 1.4fr 1fr 1.2fr 0.9fr";
+      let rows = "";
+      appts.forEach((a) => {
+        const st = (a.status || "").toLowerCase();
+        rows +=
+          '<div class="hd-trow" style="' + cols + '">' +
+            '<span class="hd-time-badge">' + this.esc(a.appointment_time || "—") + "</span>" +
+            '<span class="hd-pt-cell"><span class="hd-pt-avatar" style="background:' + this.avatarColor(a.patient_name) + '">' +
+              this.initials(a.patient_name) + '</span><span class="hd-pt-name">' + this.esc(a.patient_name) + "</span></span>" +
+            "<span>" + this.esc(a.appointment_type || "Visit") + "</span>" +
+            '<span class="hd-cell-muted">' + this.esc(a.practitioner_name || "—") + "</span>" +
+            '<span><span class="hd-status-pill ' + st + '">' + this.esc(a.status || "—") + "</span></span>" +
+          "</div>";
+      });
+      body =
+        '<div class="hd-thead" style="' + cols + '"><span>TIME</span><span>PATIENT</span>' +
+        "<span>TYPE</span><span>PROVIDER</span><span>STATUS</span></div>" + rows;
+    }
+    return (
+      '<div class="hd-panel">' +
+        '<div class="hd-panel-head sb"><h2 class="hd-panel-title">Today\'s Appointments</h2>' +
+          '<a class="hd-link" href="/app/patient-appointment">View Calendar</a></div>' +
+        body +
+        '<a class="hd-foot-link" href="/app/patient-appointment">View All Appointments →</a>' +
+      "</div>"
+    );
+  }
+
+  activityPanel(d) {
+    const acts = d.recent_activity || [];
+    let body;
+    if (!acts.length) {
+      body =
+        '<div class="hd-empty"><div class="hd-empty-icon chip-neutral">' + this.msr("history") + "</div>" +
+        '<div class="hd-empty-text">No recent activity</div></div>';
+    } else {
+      body = acts.map((a) => {
+        const icon = { success: "check_circle", warning: "warning", info: "info", primary: "person_add" }[a.icon_class] || "info";
+        // message contains safe <strong> markup from the server; render as-is.
+        return (
+          '<div class="hd-activity-item"><div class="hd-activity-avatar">' + this.msr(icon) + "</div>" +
+          '<div><div class="hd-activity-text">' + (a.message || "") + "</div>" +
+          '<div class="hd-activity-time">' + this.esc(a.time || "") + "</div></div></div>"
+        );
+      }).join("");
+    }
+    return (
+      '<div class="hd-panel">' +
+        '<div class="hd-panel-head sb"><h2 class="hd-panel-title">Recent Activity</h2>' +
+          '<a class="hd-link" href="/app/chronic-care-alert">View All</a></div>' +
+        body +
+      "</div>"
+    );
+  }
+
+  renderChart() {
+    const t = this.data && this.data.alert_trend_data;
+    const el = this.container.find("#hd-trend-chart");
+    if (!t || !el.length || typeof frappe.Chart === "undefined") return;
+    try {
+      new frappe.Chart(el[0], {
+        data: {
+          labels: t.labels || ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+          datasets: [
+            { name: "High", values: t.high || [0, 0, 0, 0, 0, 0, 0] },
+            { name: "Medium", values: t.medium || [0, 0, 0, 0, 0, 0, 0] },
+            { name: "Low", values: t.low || [0, 0, 0, 0, 0, 0, 0] },
+          ],
+        },
+        type: "line",
+        height: 200,
+        colors: ["#c0413f", "#d99b2c", "#0c8a5e"],
+        lineOptions: { regionFill: 1, hideDots: 0, spline: 1 },
+        axisOptions: { xAxisMode: "tick", xIsSeries: true },
+      });
+    } catch (e) {
+      console.warn("trend chart failed", e);
+    }
   }
 }
 })();
