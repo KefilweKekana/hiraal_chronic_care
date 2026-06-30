@@ -911,16 +911,36 @@ def get_my_activity_counts():
     }
 
 
+def _to_utc_iso(dt):
+    """Convert a Frappe (site-timezone, naive) datetime to a UTC ISO-8601 string
+    ending in 'Z'. Mobile clients can then parse it as an absolute instant and
+    show correct relative times ("just now") regardless of the device timezone.
+    Falls back to the original value on any error."""
+    if not dt:
+        return dt
+    try:
+        import pytz
+        from frappe.utils import get_datetime, get_system_timezone
+        site_tz = pytz.timezone(get_system_timezone())
+        naive = get_datetime(dt)
+        return site_tz.localize(naive).astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    except Exception:
+        return str(dt)
+
+
 @frappe.whitelist()
 def get_my_notifications(limit=50):
     """Notifications for the logged-in patient's user account."""
-    return _safe_get_all(
+    rows = _safe_get_all(
         "Notification Log",
         filters={"for_user": frappe.session.user},
         fields=["name", "subject", "email_content", "type", "creation", "read"],
         order_by="creation desc",
         limit_page_length=int(limit or 50),
     )
+    for r in rows:
+        r["creation"] = _to_utc_iso(r.get("creation"))
+    return rows
 
 
 @frappe.whitelist()
