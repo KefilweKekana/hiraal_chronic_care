@@ -116,9 +116,6 @@ class ClinicDashboard {
           '<input class="hd-search-input" type="text" autocomplete="off" ' +
           'placeholder="Search patients by name…">' +
           '<span class="hd-search-chip">⌘G</span></form>' +
-        '<div class="hd-top-right">' + this.msr("notifications") +
-          '<span class="hd-help-link">Help</span>' +
-          '<div class="hd-avatar">' + (this.initials(frappe.session.user_fullname) || "A") + "</div></div>" +
       "</div>"
     );
   }
