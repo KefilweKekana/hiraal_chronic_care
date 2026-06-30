@@ -1328,6 +1328,8 @@ def register_push_token(token, platform="Android"):
     token = (token or "").strip()
     if not token:
         return {"success": False}
+    if not frappe.db.exists("DocType", "Hiraal Push Token"):
+        return {"success": False, "reason": "push not configured"}
 
     import hashlib
     key = hashlib.md5(token.encode("utf-8")).hexdigest()
@@ -1354,8 +1356,13 @@ def register_push_token(token, platform="Android"):
 
 def send_push_to_user(user, title, body, data=None):
     """Best-effort FCM push to all of a user's registered devices. A no-op when
-    FCM isn't configured yet. Never raises."""
+    FCM isn't configured yet. Never raises — and never blocks the caller's save
+    (e.g. a pharmacist changing an order status) even if push isn't set up."""
     if not user:
+        return
+    # Guard: if the push-token doctype isn't installed, querying it would emit a
+    # "DocType ... not found" message to the user. Skip silently instead.
+    if not frappe.db.exists("DocType", "Hiraal Push Token"):
         return
     try:
         tokens = frappe.get_all(
