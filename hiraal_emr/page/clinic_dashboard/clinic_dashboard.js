@@ -14,6 +14,8 @@ function ensureFonts() {
   document.head.appendChild(l);
 }
 
+const LOGO = "/assets/hiraal_emr/images/hiraal_logo.png";
+
 // Sidebar nav model — groups, labels, icons, routes (Dashboard is active here).
 const NAV = [
   { items: [
@@ -108,11 +110,12 @@ class ClinicDashboard {
   topbar() {
     return (
       '<div class="hd-topbar">' +
-        '<div class="hd-brand"><div class="hd-brand-logo">' + this.msr("health_and_safety") +
-          '</div><span class="hd-brand-name">DagaarSoft</span></div>' +
-        '<div class="hd-search">' + this.msr("search") +
-          '<span class="hd-search-text">Search or type a command</span>' +
-          '<span class="hd-search-chip">⌘G</span></div>' +
+        '<div class="hd-brand"><img class="hd-brand-img" src="' + LOGO + '" alt="Hiraal Care">' +
+          '<span class="hd-brand-name">Hiraal Care</span></div>' +
+        '<form class="hd-search" data-search>' + this.msr("search") +
+          '<input class="hd-search-input" type="text" autocomplete="off" ' +
+          'placeholder="Search patients by name…">' +
+          '<span class="hd-search-chip">⌘G</span></form>' +
         '<div class="hd-top-right">' + this.msr("notifications") +
           '<span class="hd-help-link">Help</span>' +
           '<div class="hd-avatar">' + (this.initials(frappe.session.user_fullname) || "A") + "</div></div>" +
@@ -132,8 +135,8 @@ class ClinicDashboard {
     });
     return (
       '<aside class="hd-sidebar">' +
-        '<div class="hd-side-head"><div class="hd-side-logo">' + this.msr("local_hospital") +
-          '</div><div><div class="hd-side-title">DagaarSoft</div>' +
+        '<div class="hd-side-head"><img class="hd-side-img" src="' + LOGO + '" alt="Hiraal Care">' +
+          '<div><div class="hd-side-title">Hiraal Care</div>' +
           '<div class="hd-side-sub">Health Clinic</div></div></div>' +
         '<nav class="hd-nav">' + nav + "</nav>" +
         '<div class="hd-help"><div class="hd-help-card">' +
@@ -165,16 +168,38 @@ class ClinicDashboard {
       this.renderShell('<div class="hd-loading">Refreshing…</div>');
       this.load_data();
     });
+    this.bindSearch();
     this.renderChart();
   }
 
-  kpiCard({ value, label, icon, chip, delta, deltaClass }) {
+  bindSearch() {
+    const form = this.container.find("[data-search]");
+    const input = form.find(".hd-search-input");
+    // Click anywhere on the pill focuses the field.
+    form.on("click", () => input.trigger("focus"));
+    form.on("submit", (e) => {
+      e.preventDefault();
+      const q = (input.val() || "").trim();
+      if (!q) return;
+      // Search patients by name (most common clinic lookup). A PID goes straight
+      // to that patient; otherwise open the Patient list filtered by name.
+      if (/^PID/i.test(q)) {
+        frappe.set_route("Form", "Patient", q.toUpperCase());
+      } else {
+        frappe.set_route("List", "Patient", { patient_name: ["like", "%" + q + "%"] });
+      }
+    });
+  }
+
+  kpiCard({ value, label, icon, chip, delta, deltaClass, route }) {
+    const open = route ? '<a class="hd-kpi" href="' + route + '">' : '<div class="hd-kpi">';
+    const close = route ? "</a>" : "</div>";
     return (
-      '<div class="hd-kpi"><div class="hd-kpi-icon ' + chip + '">' + this.msr(icon) + "</div>" +
+      open + '<div class="hd-kpi-icon ' + chip + '">' + this.msr(icon) + "</div>" +
       '<div class="hd-kpi-value">' + this.n(value) + "</div>" +
       '<div class="hd-kpi-label">' + label + "</div>" +
       (delta ? '<div class="hd-kpi-delta ' + (deltaClass || "muted") + '">' + delta + "</div>" : "") +
-      "</div>"
+      close
     );
   }
 
@@ -189,15 +214,15 @@ class ClinicDashboard {
     return (
       '<div class="hd-kpi-row">' +
         this.kpiCard({ value: d.active_patients, label: "Active Patients", icon: "groups", chip: "chip-teal",
-          delta: "↑ " + this.n(d.new_patients_month) + " this month", deltaClass: "good" }) +
+          delta: "↑ " + this.n(d.new_patients_month) + " this month", deltaClass: "good", route: "/app/patient" }) +
         this.kpiCard({ value: d.todays_submissions, label: "Today's Submissions", icon: "assignment", chip: "chip-neutral",
-          delta: subDelta, deltaClass: subClass }) +
+          delta: subDelta, deltaClass: subClass, route: "/app/daily-reading" }) +
         this.kpiCard({ value: d.high_risk_alerts, label: "High-Risk Alerts", icon: "warning", chip: "chip-danger",
-          delta: this.n(d.new_alerts) + " new", deltaClass: "muted" }) +
+          delta: this.n(d.new_alerts) + " new", deltaClass: "muted", route: "/app/chronic-care-alert?status=Open" }) +
         this.kpiCard({ value: d.missed_submissions, label: "Missed Submissions", icon: "schedule", chip: "chip-amber",
-          delta: "of " + this.n(d.active_patients) + " active patients", deltaClass: "amber" }) +
+          delta: "of " + this.n(d.active_patients) + " active patients", deltaClass: "amber", route: "/app/patient" }) +
         this.kpiCard({ value: d.unpaid_subscriptions, label: "Unpaid Subscriptions", icon: "credit_card", chip: "chip-neutral",
-          delta: '<a href="/app/care-subscription?status=Overdue">View Details →</a>', deltaClass: "teal" }) +
+          delta: "View Details →", deltaClass: "teal", route: "/app/care-subscription?status=Overdue" }) +
       "</div>"
     );
   }
@@ -268,18 +293,18 @@ class ClinicDashboard {
   }
 
   secondaryRow(d) {
-    const card = (value, label, sub, icon, chip, subClass) =>
-      '<div class="hd-skpi"><div class="hd-skpi-icon ' + chip + '">' + this.msr(icon) + "</div>" +
+    const card = (value, label, sub, icon, chip, route, subClass) =>
+      '<a class="hd-skpi" href="' + route + '"><div class="hd-skpi-icon ' + chip + '">' + this.msr(icon) + "</div>" +
       '<div><div class="hd-skpi-value">' + this.n(value) + "</div>" +
       '<div class="hd-skpi-label">' + label + "</div>" +
-      '<div class="hd-skpi-sub ' + (subClass || "") + '">' + sub + "</div></div></div>";
+      '<div class="hd-skpi-sub ' + (subClass || "") + '">' + sub + "</div></div></a>";
     return (
       '<div class="hd-skpi-row">' +
-        card(d.appointments_today, "Appointments Today", this.n(d.appointments_upcoming) + " upcoming", "event", "chip-neutral") +
-        card(d.lab_requests_total, "Lab Requests", this.n(d.lab_requests_pending) + " pending", "science", "chip-teal", "amber") +
-        card(d.medicine_requests_total, "Medicine Requests", this.n(d.medicine_requests_pending) + " pending", "medication", "chip-pink", "amber") +
-        card(d.nurse_tasks_total, "Nurse Tasks", this.n(d.nurse_tasks_pending) + " pending", "task_alt", "chip-green") +
-        card(d.patients_at_risk, "Patients at Risk", this.n(d.patients_high_risk) + " high risk", "monitor_heart", "chip-coral") +
+        card(d.appointments_today, "Appointments Today", this.n(d.appointments_upcoming) + " upcoming", "event", "chip-neutral", "/app/patient-appointment") +
+        card(d.lab_requests_total, "Lab Requests", this.n(d.lab_requests_pending) + " pending", "science", "chip-teal", "/app/lab-test", "amber") +
+        card(d.medicine_requests_total, "Medicine Requests", this.n(d.medicine_requests_pending) + " pending", "medication", "chip-pink", "/app/medicine-request", "amber") +
+        card(d.nurse_tasks_total, "Nurse Tasks", this.n(d.nurse_tasks_pending) + " pending", "task_alt", "chip-green", "/app/nurse-task") +
+        card(d.patients_at_risk, "Patients at Risk", this.n(d.patients_high_risk) + " high risk", "monitor_heart", "chip-coral", "/app/chronic-care-alert?status=Open") +
       "</div>"
     );
   }

@@ -297,6 +297,26 @@
 /* Loading */
 .hd-loading { padding: 80px 0; text-align: center; color: var(--ink-3); font-size: 14px; }
 
+/* ── Brand logo images (Hiraal Care) ────────────────────── */
+.hd-brand-img { width: 30px; height: 30px; border-radius: 9px; object-fit: cover; display: block; }
+.hd-side-img { width: 38px; height: 38px; border-radius: 11px; object-fit: cover; display: block; flex: none; }
+
+/* ── Functional search input ────────────────────────────── */
+.hd-search { cursor: text; }
+.hd-search-input {
+  flex: 1; min-width: 0; border: none; background: transparent; outline: none;
+  font: inherit; font-size: 13.5px; color: #3a4754;
+}
+.hd-search-input::placeholder { color: #94a2a2; }
+
+/* ── Clickable cards (KPI + secondary) ──────────────────── */
+a.hd-kpi, a.hd-skpi {
+  text-decoration: none; color: inherit; cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+a.hd-kpi:hover, a.hd-skpi:hover { border-color: #bcd7d2; background: #fcfefe; }
+a.hd-kpi:hover .hd-kpi-label, a.hd-skpi:hover .hd-skpi-label { color: var(--ink); }
+
 /* ── Responsive ─────────────────────────────────────────── */
 @media (max-width: 1180px) {
   .hd-kpi-row, .hd-skpi-row { grid-template-columns: repeat(3, 1fr); }
