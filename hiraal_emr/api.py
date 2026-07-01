@@ -1941,15 +1941,14 @@ def get_payment_methods():
 # unpaid one starts "Overdue" since the doctype has no "Pending" status).
 _SUB_PAYABLE_STATUSES = ["Active", "Overdue", "Past Due", "Expiring Soon"]
 
-# Plan catalog (scope §5.1 — Standard & Premium both $5/mo; Premium 5G hub is a
-# +$10 device add-on, not a subscription-fee difference).
+# Plan catalog. Standard $5/mo, Premium $10/mo.
 _SUBSCRIPTION_PLANS = [
     {"name": "Standard Care", "monthly_fee": 5.0, "features": [
         "Daily vitals monitoring", "Nurse & doctor review",
         "Medicine delivery", "Telemedicine visits"]},
-    {"name": "Premium Care", "monthly_fee": 5.0, "features": [
-        "Everything in Standard Care", "Priority alerts & review",
-        "Optional 5G home hub (+$10)", "Extended support"]},
+    {"name": "Premium Care", "monthly_fee": 10.0, "features": [
+        "Everything in Standard Care", "Priority alerts & faster review",
+        "Optional 5G home hub", "Extended support"]},
 ]
 _PLAN_FEES = {p["name"]: p["monthly_fee"] for p in _SUBSCRIPTION_PLANS}
 
