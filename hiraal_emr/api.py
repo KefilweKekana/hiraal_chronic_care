@@ -934,7 +934,8 @@ def get_my_notifications(limit=50):
     rows = _safe_get_all(
         "Notification Log",
         filters={"for_user": frappe.session.user},
-        fields=["name", "subject", "email_content", "type", "creation", "read"],
+        fields=["name", "subject", "email_content", "type", "creation", "read",
+                "document_type", "document_name"],
         order_by="creation desc",
         limit_page_length=int(limit or 50),
     )
