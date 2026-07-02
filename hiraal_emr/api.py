@@ -539,13 +539,43 @@ def on_lab_test_update(doc, method):
 @frappe.whitelist(allow_guest=False)
 def submit_reading(patient=None, bp_systolic=None, bp_diastolic=None,
                    blood_sugar=None, sugar_unit="mg/dL", weight=None,
-                   medicine_taken=None, note=None, source="App", device_id=None):
+                   medicine_taken=None, note=None, source="App", device_id=None,
+                   reference_id=None):
     """API endpoint for mobile app to submit a daily reading.
 
     ``patient`` is optional: when omitted it resolves to the logged-in user's
     own patient, so the mobile app doesn't need to pass an ID.
+
+    ``reference_id`` is the app's local id for the reading. Re-submitting the
+    same reference (offline retry, background sync) is idempotent — the
+    existing Daily Reading is returned instead of creating a duplicate.
     """
     patient = patient or _my_patient_name()
+    # reference_id is a globally-unique field on Daily Reading; namespace it by
+    # patient so two patients using the same app-side id can never collide.
+    ref_key = f"{patient}::{reference_id}" if reference_id else None
+
+    def _existing():
+        if not ref_key:
+            return None
+        row = frappe.db.get_value(
+            "Daily Reading", {"reference_id": ref_key},
+            ["name", "risk_level", "alert_generated"], as_dict=True,
+        )
+        if row:
+            return {
+                "success": True,
+                "reference_id": row.name,
+                "risk_level": row.risk_level,
+                "alert_generated": row.alert_generated,
+                "duplicate": True,
+            }
+        return None
+
+    dup = _existing()
+    if dup:
+        return dup
+
     reading = frappe.new_doc("Daily Reading")
     reading.patient = patient
     reading.bp_systolic = int(bp_systolic) if bp_systolic else None
@@ -556,9 +586,18 @@ def submit_reading(patient=None, bp_systolic=None, bp_diastolic=None,
     reading.medicine_taken = medicine_taken
     reading.patient_note = note
     reading.source = source
+    if ref_key:
+        reading.reference_id = ref_key
     if device_id and frappe.db.exists("Patient Device", device_id):
         reading.source_device = device_id
-    reading.insert(ignore_permissions=True)
+    try:
+        reading.insert(ignore_permissions=True)
+    except (frappe.UniqueValidationError, frappe.DuplicateEntryError):
+        # Raced with another submit of the same reference — return the winner.
+        dup = _existing()
+        if dup:
+            return dup
+        raise
 
     audit_log("Create", "Daily Reading", reading.name, "Patient submitted reading via app")
 
