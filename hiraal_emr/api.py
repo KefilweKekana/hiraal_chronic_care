@@ -43,6 +43,7 @@ def boot_session(bootinfo):
 @frappe.whitelist()
 def get_dashboard_data():
     """Return all data needed for the Clinic Dashboard page."""
+    _require_clinical()
     today_str = today()
     yesterday = str(add_days(getdate(today_str), -1))
 
@@ -265,6 +266,7 @@ def _get_alert_trend_data():
 @frappe.whitelist()
 def get_alert_queue_data():
     """Return all data for the Alert Queue page."""
+    _require_clinical()
     open_alerts = frappe.get_all(
         "Chronic Care Alert",
         filters={"status": ["in", ["Open", "In Review"]]},
@@ -295,6 +297,7 @@ def get_alert_queue_data():
 @frappe.whitelist()
 def escalate_alert(alert_name):
     """Escalate an alert to doctor review."""
+    _require_clinical()
     if not frappe.db.exists("Chronic Care Alert", alert_name):
         frappe.throw(_("Alert {0} not found").format(alert_name), frappe.DoesNotExistError)
 
@@ -317,6 +320,7 @@ def escalate_alert(alert_name):
 @frappe.whitelist()
 def add_alert_note(alert_name, note):
     """Add a resolution note to an alert."""
+    _require_clinical()
     if not frappe.db.exists("Chronic Care Alert", alert_name):
         frappe.throw(_("Alert {0} not found").format(alert_name), frappe.DoesNotExistError)
 
@@ -329,6 +333,7 @@ def add_alert_note(alert_name, note):
 @frappe.whitelist()
 def resolve_alert(alert_name):
     """Mark an alert as Resolved."""
+    _require_clinical()
     if not frappe.db.exists("Chronic Care Alert", alert_name):
         frappe.throw(_("Alert {0} not found").format(alert_name), frappe.DoesNotExistError)
     frappe.db.set_value("Chronic Care Alert", alert_name, {
@@ -345,6 +350,7 @@ def resolve_alert(alert_name):
 @frappe.whitelist()
 def get_analytics_data():
     """Return data for the Analytics Dashboard page."""
+    _require_clinical()
     total_patients = frappe.db.count("Patient", {"status": "Active"}) or 0
 
     active_subscriptions = frappe.db.count(
@@ -551,6 +557,7 @@ def submit_reading(patient=None, bp_systolic=None, bp_diastolic=None,
     existing Daily Reading is returned instead of creating a duplicate.
     """
     patient = patient or _my_patient_name()
+    _require_patient_access(patient)
     # reference_id is a globally-unique field on Daily Reading; namespace it by
     # patient so two patients using the same app-side id can never collide.
     ref_key = f"{patient}::{reference_id}" if reference_id else None
@@ -1089,6 +1096,7 @@ def biometric_token():
 @frappe.whitelist(allow_guest=False)
 def sync_readings_batch(patient, readings, device_id=None):
     """Bulk sync offline readings from mobile app."""
+    _require_patient_access(patient)
     import json
     if isinstance(readings, str):
         readings = json.loads(readings)
@@ -1122,6 +1130,7 @@ def sync_readings_batch(patient, readings, device_id=None):
 def pair_device(patient, device_id, device_type, device_name=None,
                 manufacturer=None, model=None, serial_number=None):
     """Register a device pairing for a patient."""
+    _require_patient_access(patient)
     existing = frappe.db.exists("Patient Device", {"device_id": device_id})
     if existing:
         dev = frappe.get_doc("Patient Device", existing)
@@ -1164,6 +1173,7 @@ def book_appointment(patient, practitioner, appointment_date,
     dropped on the way to the server). When ``is_video`` is set, a Telemedicine
     Session with a Jitsi meeting link is created and the link is returned so the
     app can offer a "Join Video Call" button."""
+    _require_patient_access(patient)
     appt = frappe.new_doc("Patient Appointment")
     meta = frappe.get_meta("Patient Appointment")
     appt.patient = patient
@@ -1414,6 +1424,25 @@ def register_push_token(token, platform="Android"):
     return {"success": True}
 
 
+@frappe.whitelist()
+def unregister_my_push_token(token=None):
+    """Disable this user's push tokens (all of them, or just ``token``).
+    Called by the app on logout so a shared/handed-over phone stops receiving
+    the previous patient's health notifications."""
+    user = frappe.session.user
+    if not user or user == "Guest":
+        return {"success": False}
+    if not frappe.db.exists("DocType", "Hiraal Push Token"):
+        return {"success": True}
+    filters = {"user": user}
+    if token:
+        filters["token"] = token
+    for name in frappe.get_all("Hiraal Push Token", filters=filters, pluck="name"):
+        frappe.db.set_value("Hiraal Push Token", name, "enabled", 0)
+    frappe.db.commit()
+    return {"success": True}
+
+
 def send_push_to_user(user, title, body, data=None):
     """Best-effort FCM push to all of a user's registered devices. A no-op when
     FCM isn't configured yet. Never raises — and never blocks the caller's save
@@ -1566,6 +1595,21 @@ def _is_clinical_user():
     return bool(set(frappe.get_roles()) & _CLINICAL_ROLES)
 
 
+def _require_clinical():
+    """Gate desk/clinic endpoints: clinic-wide data and actions must never be
+    reachable by a patient Website User."""
+    if not _is_clinical_user():
+        frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+
+def _require_patient_access(patient):
+    """Clinic staff may act on any patient; a patient user only on themselves."""
+    if _is_clinical_user():
+        return
+    if not patient or patient != _my_patient_name():
+        frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+
 @frappe.whitelist()
 def get_waiting_telemedicine_sessions():
     """Clinic-side feed for the Telemedicine Waiting Room desk page: video
@@ -1601,6 +1645,7 @@ def get_waiting_telemedicine_sessions():
 @frappe.whitelist(allow_guest=False)
 def request_lab_test(patient, template, practitioner=None, note=None):
     """Request a lab test from the mobile app."""
+    _require_patient_access(patient)
     lab = frappe.new_doc("Lab Test")
     lab.patient = patient
     lab.template = template
@@ -1633,6 +1678,7 @@ def order_medicine(patient=None, items=None, delivery_address=None,
     """
     import json
     patient = patient or _my_patient_name()
+    _require_patient_access(patient)
     if isinstance(items, str):
         items = json.loads(items or "[]")
     items = items or []
@@ -1797,9 +1843,15 @@ def pay_my_order(order, provider, method, phone):
     if not result.get("success"):
         frappe.throw(result.get("message") or _("Could not start the payment"))
 
+    # Bind the transaction to this order (transaction-log names are guessable;
+    # see pay_my_subscription).
+    txn = result.get("transaction_log")
+    if txn:
+        frappe.cache().set_value(f"hiraal_txn_order:{txn}", order, expires_in_sec=86400)
+
     return {
         "success": True,
-        "transaction_log": result.get("transaction_log"),
+        "transaction_log": txn,
         "amount": amount,
         "order": order,
         "message": result.get("message"),
@@ -1809,8 +1861,12 @@ def pay_my_order(order, provider, method, phone):
 @frappe.whitelist()
 def check_my_order_payment(order, transaction_log):
     """Poll a medicine-order payment. On completion, mark the order Paid and
-    record the payment reference. Idempotent."""
+    record the payment reference. Idempotent. The transaction must be the one
+    initiated for this order."""
     _my_order_or_throw(order)
+    bound = frappe.cache().get_value(f"hiraal_txn_order:{transaction_log}")
+    if bound != order:
+        frappe.throw(_("Not permitted"), frappe.PermissionError)
     pos = _mobile_payments_pos()
     if not pos:
         frappe.throw(_("Payment gateway is not available"))
@@ -1918,6 +1974,7 @@ def notify_patient(patient, subject, message, sms=False,
 @frappe.whitelist(allow_guest=False)
 def pay_subscription(patient, payment_method="Zaad", reference=None):
     """Process a subscription payment from the mobile app."""
+    _require_clinical()
     sub = frappe.db.get_value(
         "Care Subscription",
         {"patient": patient, "status": ["in", ["Active", "Overdue", "Past Due"]]},
@@ -2076,9 +2133,16 @@ def pay_my_subscription(provider, method, phone):
     if not result.get("success"):
         frappe.throw(result.get("message") or _("Could not start the payment"))
 
+    # Bind the transaction to its initiator: transaction-log names are
+    # sequential/guessable, so without this another patient could poll a
+    # completed transaction and get their own subscription credited with it.
+    txn = result.get("transaction_log")
+    if txn:
+        frappe.cache().set_value(f"hiraal_txn_owner:{txn}", patient, expires_in_sec=86400)
+
     return {
         "success": True,
-        "transaction_log": result.get("transaction_log"),
+        "transaction_log": txn,
         "amount": amount,
         "subscription": sub.name,
         "message": result.get("message"),
@@ -2088,8 +2152,12 @@ def pay_my_subscription(provider, method, phone):
 @frappe.whitelist()
 def check_my_payment(transaction_log):
     """Poll a subscription payment. On completion, mark the patient's
-    subscription paid and record a Subscription Payment (once)."""
+    subscription paid and record a Subscription Payment (once). The
+    transaction must have been initiated by this patient."""
     patient = _my_patient_name()
+    owner = frappe.cache().get_value(f"hiraal_txn_owner:{transaction_log}")
+    if owner != patient:
+        frappe.throw(_("Not permitted"), frappe.PermissionError)
     pos = _mobile_payments_pos()
     if not pos:
         frappe.throw(_("Payment gateway is not available"))
@@ -2173,6 +2241,7 @@ def get_notifications(patient, limit=20):
 def get_patient_registry_data(risk_filter=None, condition_filter=None,
                                subscription_filter=None, search=None):
     """Return data for the Patient Management page."""
+    _require_clinical()
     filters = {"status": "Active"}
     if condition_filter:
         filters["chronic_conditions"] = ["like", f"%{condition_filter}%"]
@@ -2251,6 +2320,7 @@ def get_patient_registry_data(risk_filter=None, condition_filter=None,
 @frappe.whitelist()
 def get_patient_profile(patient):
     """Return comprehensive patient profile data (Section 4.3b)."""
+    _require_clinical()
     p = frappe.get_doc("Patient", patient)
 
     # Vital sign trends (last 30 days)
@@ -2341,6 +2411,7 @@ def get_patient_profile(patient):
 @frappe.whitelist()
 def get_readings_dashboard_data(date=None):
     """Return data for the Daily Readings dashboard page."""
+    _require_clinical()
     target_date = date or today()
 
     total_readings = frappe.db.count("Daily Reading", {"reading_date": target_date}) or 0
@@ -2404,6 +2475,7 @@ def get_readings_dashboard_data(date=None):
 @frappe.whitelist()
 def get_medicine_requests_data():
     """Return data for the clinic dashboard medicine section."""
+    _require_clinical()
     total = frappe.db.count("Medicine Request") or 0
     pending = frappe.db.count("Medicine Request", {"status": "Pending"}) or 0
     preparing = frappe.db.count("Medicine Request", {"status": "Preparing"}) or 0
@@ -2459,6 +2531,7 @@ def get_health_tips(condition=None):
 @frappe.whitelist(allow_guest=False)
 def get_care_plan(patient):
     """Return the active care plan for a patient."""
+    _require_patient_access(patient)
     plan = frappe.db.get_value(
         "Care Plan",
         {"patient": patient, "status": "Active"},
@@ -2478,6 +2551,7 @@ def get_care_plan(patient):
 @frappe.whitelist(allow_guest=False)
 def get_weekly_summary(patient):
     """Return the latest weekly health summary for a patient."""
+    _require_patient_access(patient)
     summary = frappe.get_all(
         "Weekly Health Summary",
         filters={"patient": patient},
@@ -2499,6 +2573,7 @@ def get_weekly_summary(patient):
 @frappe.whitelist(allow_guest=False)
 def get_family_members(patient):
     """Return authorized family members for a patient."""
+    _require_patient_access(patient)
     members = frappe.get_all(
         "Family Member",
         filters={"patient": patient, "is_active": 1},
@@ -2519,6 +2594,7 @@ def get_family_members(patient):
 def create_telemedicine_session(patient, practitioner, appointment=None,
                                  start_time=None, meeting_url=None, meeting_id=None, notes=None):
     """Create a telemedicine session."""
+    _require_clinical()
     session = frappe.new_doc("Telemedicine Session")
     session.patient = patient
     session.practitioner = practitioner
@@ -2541,6 +2617,7 @@ def create_telemedicine_session(patient, practitioner, appointment=None,
 @frappe.whitelist(allow_guest=False)
 def get_telemedicine_sessions(patient, limit=20):
     """Return telemedicine sessions for a patient."""
+    _require_patient_access(patient)
     sessions = frappe.get_all(
         "Telemedicine Session",
         filters={"patient": patient},

@@ -51,7 +51,14 @@ def generate_missed_reading_alerts():
 
 
 def process_subscription_billing():
-    """Daily: charge subscriptions due today."""
+    """Daily: dun subscriptions due today — never auto-charge.
+
+    Mobile money (Zaad/eDahab) can't be silently debited, and the old
+    ``process_payment()`` path used an always-true gateway stub that marked
+    renewals paid for free. Instead: a due subscription goes Overdue (then
+    Past Due after max_retries daily reminders) and the patient is nudged to
+    pay in the app, which flips it back to Active via the real gateway.
+    """
     due_subs = frappe.get_all(
         "Care Subscription",
         filters={
@@ -63,10 +70,28 @@ def process_subscription_billing():
         limit=500,
     )
 
+    from hiraal_emr.api import notify_patient
+
     for sub_name in due_subs:
         try:
             sub = frappe.get_doc("Care Subscription", sub_name)
-            sub.process_payment()
+            retry = (sub.retry_count or 0) + 1
+            final = retry >= (sub.max_retries or 3)
+            sub.db_set("retry_count", retry)
+            sub.db_set("status", "Past Due" if final else "Overdue")
+            fee = f"${sub.monthly_fee:.2f}" if sub.monthly_fee else "your fee"
+            notify_patient(
+                sub.patient,
+                subject="Subscription payment due",
+                message=(
+                    f"Hiraal Lifecare: your {sub.plan or 'care'} subscription "
+                    f"({fee}/month) is due. Please open the app and pay to keep "
+                    f"your care team monitoring your health."
+                ),
+                sms=final,  # paid SMS only for the final reminder
+                document_type="Care Subscription",
+                document_name=sub.name,
+            )
         except Exception as e:
             frappe.log_error(f"Billing error for {sub_name}: {e}", "Subscription Billing")
 
