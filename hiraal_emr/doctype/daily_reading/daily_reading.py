@@ -8,8 +8,17 @@ class DailyReading(Document):
         self.assess_risk_level()
 
     def after_insert(self):
-        self.evaluate_and_alert()
-        self.update_patient_last_submission()
+        # Post-save bookkeeping must NEVER roll back a reading that already
+        # saved. Each step is isolated so a failure (e.g. an alert error or a
+        # missing optional column) is logged but the patient's reading stands.
+        try:
+            self.evaluate_and_alert()
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), "Daily Reading: alert eval failed")
+        try:
+            self.update_patient_last_submission()
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), "Daily Reading: last-submission update failed")
 
     def assess_risk_level(self):
         """Classify reading risk based on thresholds."""
@@ -57,7 +66,12 @@ class DailyReading(Document):
                 self.db_set("alert_generated", alert_name, update_modified=False)
 
     def update_patient_last_submission(self):
-        """Update patient record with last submission timestamp."""
+        """Stamp the patient's last-submission time — only if the optional
+        column exists. This is a convenience cache; every screen that shows
+        "last reading" queries Daily Reading directly, so a missing column is
+        harmless and must not break the reading save."""
+        if not frappe.db.has_column("Patient", "custom_last_submission"):
+            return
         frappe.db.set_value(
             "Patient",
             self.patient,
