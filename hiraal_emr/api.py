@@ -848,6 +848,89 @@ def verify_otp(mobile=None, otp=None, email=None, channel="sms"):
     return result
 
 
+@frappe.whitelist(allow_guest=True)
+def self_register(full_name=None, mobile=None, otp=None, email=None,
+                  sex=None, dob=None):
+    """Create a new patient account from the app after verifying phone ownership
+    by OTP (SMS channel).
+
+    The account is created **Active** so the patient can sign in immediately,
+    but it has no subscription — the app gates features until the patient
+    subscribes to a plan and pays. Returns API credentials just like verify_otp,
+    so the app logs the new patient straight in.
+    """
+    full_name = (full_name or "").strip()
+    mobile = str(mobile or "").strip()
+    otp = str(otp or "").strip()
+    email = ((email or "").strip().lower()) or None
+    sex = (sex or "").strip() or None
+    dob = (dob or "").strip() or None
+
+    # ── validate ──
+    if len(full_name) < 2:
+        frappe.throw(_("Please enter your full name"))
+    if len(mobile) < 6:
+        frappe.throw(_("A valid phone number is required"))
+    if not sex:
+        frappe.throw(_("Please select your gender"))
+    if not dob:
+        frappe.throw(_("Your date of birth is required"))
+
+    # ── verify phone ownership ──
+    if not otp_verify(mobile, otp):
+        frappe.throw(_("Invalid or expired code"), frappe.AuthenticationError)
+
+    # ── gender must be a real Gender record (Patient.sex is a Link) ──
+    if not frappe.db.exists("Gender", sex):
+        frappe.throw(_("Please select a valid gender"))
+
+    # ── already registered? make it idempotent, don't create a duplicate ──
+    existing = frappe.db.get_value(
+        "Patient", {"mobile": ["in", _mobile_candidates(mobile)]},
+        ["name", "patient_name", "status"], as_dict=True,
+    )
+    if not existing and email:
+        existing = frappe.db.get_value(
+            "Patient", {"email": email}, ["name", "patient_name", "status"], as_dict=True,
+        )
+    if existing:
+        if existing.status == "Active":
+            # Their number is already an account — just sign them in.
+            result = _issue_login(existing, contact_mobile=mobile)
+            result["already_registered"] = True
+            return result
+        frappe.throw(_("This number is already registered. Please contact the clinic."))
+
+    # ── create the patient ──
+    patient = frappe.new_doc("Patient")
+    patient.first_name = full_name
+    patient.patient_name = full_name
+    patient.sex = sex
+    patient.dob = dob
+    patient.mobile = mobile
+    if email:
+        patient.email = email
+    patient.status = "Active"
+    patient.insert(ignore_permissions=True)
+    frappe.db.commit()
+
+    audit_log("Create", "Patient", patient.name, "Self-registered via app")
+
+    result = _issue_login(patient, contact_mobile=mobile)
+    result["new_account"] = True
+    return result
+
+
+def _has_active_subscription(patient):
+    """True when the patient has a paid, currently-active Care Subscription.
+    This is the app's feature gate: no active subscription → paywall."""
+    if not patient:
+        return False
+    return bool(frappe.db.exists(
+        "Care Subscription", {"patient": patient, "status": "Active"}
+    ))
+
+
 @frappe.whitelist()
 def get_my_patient():
     """Return the Patient profile linked to the currently authenticated user.
@@ -864,7 +947,10 @@ def get_my_patient():
     if not name:
         frappe.throw(_("No patient linked to this account"), frappe.AuthenticationError)
 
-    return frappe.get_doc("Patient", name).as_dict()
+    data = frappe.get_doc("Patient", name).as_dict()
+    # Feature gate for the app: whether this patient may use paid features.
+    data["subscription_active"] = _has_active_subscription(name)
+    return data
 
 
 def _my_patient_name():
@@ -2078,7 +2164,14 @@ def get_my_subscription():
             fields=["amount", "payment_date", "payment_method", "status", "reference_id"],
             order_by="payment_date desc", limit_page_length=10,
         )
-    return {"subscription": sub, "plans": _SUBSCRIPTION_PLANS, "history": history}
+    return {
+        "subscription": sub,
+        "plans": _SUBSCRIPTION_PLANS,
+        "history": history,
+        # True only when a paid subscription is currently Active — the app's
+        # feature gate keys off this.
+        "active": bool(sub and sub.get("status") == "Active"),
+    }
 
 
 @frappe.whitelist()
