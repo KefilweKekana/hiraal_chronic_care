@@ -149,12 +149,12 @@ def evaluate_reading(patient, bp_systolic, bp_diastolic, blood_sugar, sugar_unit
     if not alert_level:
         return None
 
-    # Find assigned nurse
-    assigned_nurse = frappe.db.get_value(
-        "Patient",
-        patient,
-        "custom_assigned_nurse",
-    )
+    # Find the patient's assigned nurse, if that optional column is configured.
+    # When it isn't, the alert is created unassigned and picked up from the
+    # Alert Queue — a missing column must never suppress a critical alert.
+    assigned_nurse = None
+    if frappe.db.has_column("Patient", "custom_assigned_nurse"):
+        assigned_nurse = frappe.db.get_value("Patient", patient, "custom_assigned_nurse")
 
     alert = frappe.new_doc("Chronic Care Alert")
     alert.patient = patient
