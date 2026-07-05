@@ -1929,11 +1929,17 @@ def pay_my_order(order, provider, method, phone):
     if not result.get("success"):
         frappe.throw(result.get("message") or _("Could not start the payment"))
 
-    # Bind the transaction to this order (transaction-log names are guessable;
-    # see pay_my_subscription).
+    # Bind the transaction to this order: in cache (fast permission check) AND
+    # persistently on the order itself. The persistent link is what lets the
+    # reconciliation job mark the order paid when the wallet approval arrives
+    # AFTER the app stopped polling (ZAAD/eDahab can take minutes) — without it,
+    # money left the wallet but the order stayed "Awaiting Payment" forever.
     txn = result.get("transaction_log")
     if txn:
         frappe.cache().set_value(f"hiraal_txn_order:{txn}", order, expires_in_sec=86400)
+        frappe.db.set_value("Medicine Request", order, "payment_reference", txn,
+                            update_modified=False)
+        frappe.db.commit()
 
     return {
         "success": True,
@@ -1944,31 +1950,41 @@ def pay_my_order(order, provider, method, phone):
     }
 
 
+def mark_order_paid(order, transaction_log):
+    """Mark a medicine order paid against a completed gateway transaction.
+    Idempotent. Shared by the app's polling endpoint and the reconciliation job."""
+    cur = frappe.db.get_value("Medicine Request", order, "payment_status")
+    if cur == "Paid":
+        return
+    doc = frappe.get_doc("Medicine Request", order)
+    doc.payment_status = "Paid"
+    doc.payment_reference = transaction_log
+    if doc.status == "Awaiting Payment":
+        doc.status = "Paid"
+    doc.save(ignore_permissions=True)
+    frappe.db.commit()
+    audit_log("Update", "Medicine Request", order, "Order paid via mobile money")
+
+
 @frappe.whitelist()
 def check_my_order_payment(order, transaction_log):
     """Poll a medicine-order payment. On completion, mark the order Paid and
     record the payment reference. Idempotent. The transaction must be the one
-    initiated for this order."""
+    initiated for this order (cache binding, with the persistent link on the
+    order as fallback — the cache doesn't survive a server restart)."""
     _my_order_or_throw(order)
     bound = frappe.cache().get_value(f"hiraal_txn_order:{transaction_log}")
     if bound != order:
-        frappe.throw(_("Not permitted"), frappe.PermissionError)
+        persisted = frappe.db.get_value("Medicine Request", order, "payment_reference")
+        if persisted != transaction_log:
+            frappe.throw(_("Not permitted"), frappe.PermissionError)
     pos = _mobile_payments_pos()
     if not pos:
         frappe.throw(_("Payment gateway is not available"))
     result = _as_admin(pos.check_pos_payment_status, transaction_log) or {}
     status = result.get("status") or "Pending"
     if status == "Completed":
-        cur = frappe.db.get_value("Medicine Request", order, "payment_status")
-        if cur != "Paid":
-            doc = frappe.get_doc("Medicine Request", order)
-            doc.payment_status = "Paid"
-            doc.payment_reference = transaction_log
-            if doc.status == "Awaiting Payment":
-                doc.status = "Paid"
-            doc.save(ignore_permissions=True)
-            frappe.db.commit()
-            audit_log("Update", "Medicine Request", order, "Order paid via mobile money")
+        mark_order_paid(order, transaction_log)
     return {"status": status}
 
 
@@ -2229,9 +2245,14 @@ def pay_my_subscription(provider, method, phone):
     # Bind the transaction to its initiator: transaction-log names are
     # sequential/guessable, so without this another patient could poll a
     # completed transaction and get their own subscription credited with it.
+    # Also persist the link on the subscription so the reconciliation job can
+    # activate it when the wallet approval lands after the app stopped polling.
     txn = result.get("transaction_log")
     if txn:
         frappe.cache().set_value(f"hiraal_txn_owner:{txn}", patient, expires_in_sec=86400)
+        frappe.db.set_value("Care Subscription", sub.name, "payment_reference", txn,
+                            update_modified=False)
+        frappe.db.commit()
 
     return {
         "success": True,
@@ -2246,11 +2267,18 @@ def pay_my_subscription(provider, method, phone):
 def check_my_payment(transaction_log):
     """Poll a subscription payment. On completion, mark the patient's
     subscription paid and record a Subscription Payment (once). The
-    transaction must have been initiated by this patient."""
+    transaction must have been initiated by this patient (cache binding, with
+    the persistent link on their subscription as restart-safe fallback)."""
     patient = _my_patient_name()
     owner = frappe.cache().get_value(f"hiraal_txn_owner:{transaction_log}")
     if owner != patient:
-        frappe.throw(_("Not permitted"), frappe.PermissionError)
+        persisted = frappe.db.get_value(
+            "Care Subscription",
+            {"patient": patient, "payment_reference": transaction_log},
+            "name",
+        )
+        if not persisted:
+            frappe.throw(_("Not permitted"), frappe.PermissionError)
     pos = _mobile_payments_pos()
     if not pos:
         frappe.throw(_("Payment gateway is not available"))

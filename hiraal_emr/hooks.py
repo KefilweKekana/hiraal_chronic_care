@@ -59,6 +59,13 @@ doc_events = {
 
 # ---------- Scheduled Tasks ----------
 scheduler_events = {
+    "cron": {
+        # Settle mobile-money payments that complete after the app stops
+        # polling (ZAAD/eDahab approvals can take minutes).
+        "*/5 * * * *": [
+            "hiraal_emr.tasks.reconcile_mobile_payments",
+        ],
+    },
     "daily": [
         "hiraal_emr.tasks.generate_missed_reading_alerts",
         "hiraal_emr.tasks.process_subscription_billing",

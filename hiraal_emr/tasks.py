@@ -98,6 +98,79 @@ def process_subscription_billing():
     frappe.db.commit()
 
 
+def reconcile_mobile_payments():
+    """Every few minutes: settle payments that completed AFTER the app stopped
+    polling.
+
+    ZAAD/eDahab approvals can take longer than the app's ~2-minute poll window.
+    The gateway's own background job later marks the transaction Completed, but
+    nothing linked that completion back to the order/subscription — the patient
+    paid and the order stayed "Awaiting Payment" (real case: MED-2026-00007).
+    pay_my_order/pay_my_subscription now persist the transaction id on the
+    document; this job closes the loop.
+    """
+    if not frappe.db.exists("DocType", "Mobile Payment Transaction Log"):
+        return
+
+    from frappe.utils import flt
+    from hiraal_emr.api import mark_order_paid, _mark_subscription_paid
+
+    def _txn_status(txn):
+        return frappe.db.get_value(
+            "Mobile Payment Transaction Log", txn, ["status", "amount"], as_dict=True
+        )
+
+    # ── Medicine orders awaiting a payment that has since completed ──
+    orders = frappe.get_all(
+        "Medicine Request",
+        filters={
+            "payment_status": ["!=", "Paid"],
+            "payment_reference": ["like", "MPAY-%"],
+        },
+        fields=["name", "payment_reference", "total"],
+        limit=200,
+    )
+    for o in orders:
+        try:
+            txn = _txn_status(o.payment_reference)
+            if not txn or txn.status != "Completed":
+                continue
+            if abs(flt(txn.amount) - flt(o.total)) > 0.01:
+                # Paid amount doesn't match the order — needs a human look,
+                # never auto-settle.
+                frappe.log_error(
+                    f"{o.name}: completed txn {o.payment_reference} amount "
+                    f"{txn.amount} != order total {o.total}",
+                    "Payment Reconciliation Mismatch",
+                )
+                continue
+            mark_order_paid(o.name, o.payment_reference)
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), f"Reconcile order {o.name}")
+
+    # ── Subscriptions awaiting a payment that has since completed ──
+    subs = frappe.get_all(
+        "Care Subscription",
+        filters={
+            "status": ["in", ["Overdue", "Past Due"]],
+            "payment_reference": ["like", "MPAY-%"],
+        },
+        fields=["name", "patient", "payment_reference"],
+        limit=200,
+    )
+    for s in subs:
+        try:
+            if frappe.db.exists("Subscription Payment", {"reference_id": s.payment_reference}):
+                continue  # already credited
+            txn = _txn_status(s.payment_reference)
+            if txn and txn.status == "Completed":
+                _mark_subscription_paid(s.patient, s.payment_reference)
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), f"Reconcile subscription {s.name}")
+
+    frappe.db.commit()
+
+
 def mark_overdue_nurse_tasks():
     """Daily: mark past-due pending tasks as Overdue."""
     frappe.db.sql(
