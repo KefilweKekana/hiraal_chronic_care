@@ -975,6 +975,71 @@ def _safe_get_all(doctype, **kwargs):
 
 
 @frappe.whitelist()
+def export_my_data():
+    """Assemble everything the app's "Export My Data" feature needs: the
+    patient's own profile, readings, medicine orders, subscription and payment
+    history. Patient-scoped — only the caller's own records. The app formats
+    this into a shareable report."""
+    patient = _my_patient_name()
+    p = frappe.db.get_value(
+        "Patient",
+        patient,
+        ["patient_name", "mobile", "email", "sex", "dob", "status",
+         "blood_group"],
+        as_dict=True,
+    ) or {}
+
+    readings = _safe_get_all(
+        "Daily Reading",
+        filters={"patient": patient},
+        fields=["reading_date", "reading_time", "bp_systolic", "bp_diastolic",
+                "blood_sugar", "blood_sugar_unit", "weight", "medicine_taken",
+                "risk_level", "source", "patient_note"],
+        order_by="reading_date desc, reading_time desc",
+        limit_page_length=1000,
+    )
+
+    orders = _safe_get_all(
+        "Medicine Request",
+        filters={"patient": patient},
+        fields=["name", "creation", "status", "payment_status", "total",
+                "delivery_fee", "tax", "payment_reference"],
+        order_by="creation desc",
+        limit_page_length=200,
+    )
+
+    sub = frappe.db.get_value(
+        "Care Subscription",
+        {"patient": patient},
+        ["plan", "monthly_fee", "status", "start_date", "next_billing_date",
+         "last_payment_date", "total_collected"],
+        as_dict=True, order_by="creation desc",
+    )
+
+    payments = _safe_get_all(
+        "Subscription Payment",
+        filters={"patient": patient},
+        fields=["amount", "payment_date", "payment_method", "status", "reference_id"],
+        order_by="payment_date desc",
+        limit_page_length=200,
+    )
+
+    return {
+        "generated_at": _to_utc_iso(now_datetime()),
+        "patient": p,
+        "readings": readings,
+        "medicine_orders": orders,
+        "subscription": sub,
+        "subscription_payments": payments,
+        "counts": {
+            "readings": len(readings),
+            "medicine_orders": len(orders),
+            "subscription_payments": len(payments),
+        },
+    }
+
+
+@frappe.whitelist()
 def get_my_records():
     """Medical history (Patient Encounters) for the logged-in patient."""
     patient = _my_patient_name()
