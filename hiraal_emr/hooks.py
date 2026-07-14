@@ -81,6 +81,13 @@ scheduler_events = {
     ],
 }
 
+# ---------- Doc Events ----------
+doc_events = {
+    "Mobile Payment Transaction Log": {
+        "on_update": "hiraal_emr.payment_hooks.on_mobile_payment_update",
+    },
+}
+
 # ---------- Jinja ----------
 # jinja = {"methods": [], "filters": []}
 

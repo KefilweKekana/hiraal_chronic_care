@@ -1991,20 +1991,44 @@ def pay_my_order(order, provider, method, phone):
         pos.initiate_pos_payment,
         provider=provider, method=method, phone=phone, amount=amount, currency="USD",
     ) or {}
+
+    # Log the raw gateway response so we can diagnose "could not start" failures.
+    frappe.logger("hiraal_pay").info(
+        "pay_my_order initiate: order=%s provider=%s method=%s phone=%s amount=%s result=%s",
+        order, provider, method, phone, amount, result,
+    )
+
     if not result.get("success"):
         frappe.throw(result.get("message") or _("Could not start the payment"))
+
+    txn = result.get("transaction_log")
+    if not txn:
+        # The gateway said success but didn't hand back a transaction id. Without
+        # it the app cannot poll and the order can never be marked paid.
+        frappe.logger("hiraal_pay").error(
+            "pay_my_order missing transaction_log: order=%s result=%s", order, result
+        )
+        frappe.throw(_("Payment started but no transaction id was returned. Please try again."))
 
     # Bind the transaction to this order: in cache (fast permission check) AND
     # persistently on the order itself. The persistent link is what lets the
     # reconciliation job mark the order paid when the wallet approval arrives
     # AFTER the app stopped polling (ZAAD/eDahab can take minutes) — without it,
     # money left the wallet but the order stayed "Awaiting Payment" forever.
-    txn = result.get("transaction_log")
-    if txn:
+    # We never let a persistence/cache error hide a successfully-initiated charge.
+    try:
         frappe.cache().set_value(f"hiraal_txn_order:{txn}", order, expires_in_sec=86400)
+    except Exception:
+        frappe.logger("hiraal_pay").exception("pay_my_order cache bind failed for %s", txn)
+    try:
         frappe.db.set_value("Medicine Request", order, "payment_reference", txn,
                             update_modified=False)
         frappe.db.commit()
+    except Exception:
+        frappe.logger("hiraal_pay").exception("pay_my_order db bind failed for %s", txn)
+        # If the DB bind fails we still return success so the app can poll; the
+        # every-5-min reconciliation job can later settle the order because the
+        # gateway transaction itself exists.
 
     return {
         "success": True,
@@ -2304,20 +2328,37 @@ def pay_my_subscription(provider, method, phone):
         pos.initiate_pos_payment,
         provider=provider, method=method, phone=phone, amount=amount, currency="USD",
     ) or {}
+
+    frappe.logger("hiraal_pay").info(
+        "pay_my_subscription initiate: patient=%s sub=%s provider=%s method=%s phone=%s amount=%s result=%s",
+        patient, sub.name, provider, method, phone, amount, result,
+    )
+
     if not result.get("success"):
         frappe.throw(result.get("message") or _("Could not start the payment"))
+
+    txn = result.get("transaction_log")
+    if not txn:
+        frappe.logger("hiraal_pay").error(
+            "pay_my_subscription missing transaction_log: sub=%s result=%s", sub.name, result
+        )
+        frappe.throw(_("Payment started but no transaction id was returned. Please try again."))
 
     # Bind the transaction to its initiator: transaction-log names are
     # sequential/guessable, so without this another patient could poll a
     # completed transaction and get their own subscription credited with it.
     # Also persist the link on the subscription so the reconciliation job can
     # activate it when the wallet approval lands after the app stopped polling.
-    txn = result.get("transaction_log")
-    if txn:
+    try:
         frappe.cache().set_value(f"hiraal_txn_owner:{txn}", patient, expires_in_sec=86400)
+    except Exception:
+        frappe.logger("hiraal_pay").exception("pay_my_subscription cache bind failed for %s", txn)
+    try:
         frappe.db.set_value("Care Subscription", sub.name, "payment_reference", txn,
                             update_modified=False)
         frappe.db.commit()
+    except Exception:
+        frappe.logger("hiraal_pay").exception("pay_my_subscription db bind failed for %s", txn)
 
     return {
         "success": True,
