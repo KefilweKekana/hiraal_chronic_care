@@ -1999,7 +1999,12 @@ def pay_my_order(order, provider, method, phone):
     )
 
     if not result.get("success"):
-        frappe.throw(result.get("message") or _("Could not start the payment"))
+        msg = result.get("message") or _("Could not start the payment")
+        frappe.log_error(
+            title="Payment initiation failed",
+            message=f"order={order} provider={provider} method={method} phone={phone} amount={amount} gateway_result={result}",
+        )
+        frappe.throw(msg)
 
     txn = result.get("transaction_log")
     if not txn:
@@ -2335,7 +2340,12 @@ def pay_my_subscription(provider, method, phone):
     )
 
     if not result.get("success"):
-        frappe.throw(result.get("message") or _("Could not start the payment"))
+        msg = result.get("message") or _("Could not start the payment")
+        frappe.log_error(
+            title="Subscription payment initiation failed",
+            message=f"patient={patient} sub={sub.name} provider={provider} method={method} phone={phone} amount={amount} gateway_result={result}",
+        )
+        frappe.throw(msg)
 
     txn = result.get("transaction_log")
     if not txn:
