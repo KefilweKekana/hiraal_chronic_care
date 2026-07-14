@@ -1,8 +1,8 @@
 """Real-time payment completion hooks.
 
 Listens for the mobile_payments gateway to mark a transaction as Completed,
-then immediately notifies the patient via FCM so the app can transition from
-the "waiting for payment" screen to "paid" without waiting for the next poll.
+then immediately marks the linked order/subscription paid and pushes an FCM
+notification to the patient so the app can transition instantly.
 """
 
 import frappe
@@ -17,30 +17,30 @@ def on_mobile_payment_update(doc, method=None):
     if frappe.db.get_value("Mobile Payment Transaction Log", doc.name, "status") != "Completed":
         return
 
-    # The transaction may be bound to a Medicine Request or a Care Subscription.
     patient = None
     notification = None
+    order = None
+    sub = None
 
-    # 1. Medicine order
-    if doc.sales_invoice:
+    # 1. Medicine order — try the persistent link first.
+    order = frappe.db.get_value(
+        "Medicine Request", {"payment_reference": doc.name}, ["name", "patient"], as_dict=True
+    )
+    if not order and doc.sales_invoice:
         order = frappe.db.get_value(
-            "Medicine Request", {"payment_reference": doc.name}, ["name", "patient"], as_dict=True
+            "Medicine Request", {"sales_invoice": doc.sales_invoice}, ["name", "patient"], as_dict=True
         )
-        if not order:
-            order = frappe.db.get_value(
-                "Medicine Request", {"sales_invoice": doc.sales_invoice}, ["name", "patient"], as_dict=True
-            )
-        if order:
-            from hiraal_emr.api import mark_order_paid
-            mark_order_paid(order.name, doc.name)
-            patient = order.patient
-            notification = {
-                "title": "Payment received",
-                "body": "Your medicine order payment was received. We're preparing it now.",
-                "data": {"type": "payment_complete", "order": order.name},
-            }
+    if order:
+        from hiraal_emr.api import mark_order_paid
+        mark_order_paid(order.name, doc.name)
+        patient = order.patient
+        notification = {
+            "title": "Payment received",
+            "body": "Your medicine order payment was received. We're preparing it now.",
+            "data": {"type": "payment_complete", "order": order.name},
+        }
 
-    # 2. Care Subscription
+    # 2. Care Subscription — persistent link.
     if not patient:
         sub = frappe.db.get_value(
             "Care Subscription", {"payment_reference": doc.name}, ["name", "patient"], as_dict=True
@@ -55,13 +55,24 @@ def on_mobile_payment_update(doc, method=None):
                 "data": {"type": "subscription_payment_complete", "subscription": sub.name},
             }
 
-    # 3. Fallback: try to find the owner via the cache binding and push anyway.
+    # 3. Fallback: cache binding from pay_my_order / pay_my_subscription.
     if not patient:
         patient = frappe.cache().get_value(f"hiraal_txn_owner:{doc.name}")
     if not patient:
-        order = frappe.cache().get_value(f"hiraal_txn_order:{doc.name}")
-        if order:
-            patient = frappe.db.get_value("Medicine Request", order, "patient")
+        cached_order = frappe.cache().get_value(f"hiraal_txn_order:{doc.name}")
+        if cached_order:
+            order = frappe.db.get_value(
+                "Medicine Request", cached_order, ["name", "patient"], as_dict=True
+            )
+            if order:
+                from hiraal_emr.api import mark_order_paid
+                mark_order_paid(order.name, doc.name)
+                patient = order.patient
+                notification = {
+                    "title": "Payment received",
+                    "body": "Your medicine order payment was received. We're preparing it now.",
+                    "data": {"type": "payment_complete", "order": order.name},
+                }
 
     if patient and notification:
         _push_to_patient(patient, notification)
