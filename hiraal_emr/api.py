@@ -1210,6 +1210,30 @@ def get_my_lab_tests(limit=20):
     )
 
 
+# Lab tests a patient may still cancel themselves — once the sample is
+# collected (or the test is done/cancelled), only the lab can touch it.
+_LAB_TEST_CANCELLABLE = {"Draft", "Approved", "Printed"}
+
+
+@frappe.whitelist()
+def cancel_my_lab_test(name):
+    """Let a patient cancel their own lab test while it hasn't been
+    collected or completed yet."""
+    patient = _my_patient_name()
+    owner = frappe.db.get_value("Lab Test", name, "patient")
+    if owner != patient:
+        frappe.throw(_("Not permitted"), frappe.PermissionError)
+    status = frappe.db.get_value("Lab Test", name, "status")
+    if status not in _LAB_TEST_CANCELLABLE:
+        frappe.throw(_("This lab test can no longer be cancelled"))
+    doc = frappe.get_doc("Lab Test", name)
+    doc.status = "Cancelled"
+    doc.save(ignore_permissions=True)
+    frappe.db.commit()
+    audit_log("Update", "Lab Test", name, "Patient cancelled lab test via app")
+    return {"success": True, "status": "Cancelled"}
+
+
 @frappe.whitelist()
 def add_my_address(label=None, address_type="Personal", address_line1=None,
                    city=None, is_primary=0):
