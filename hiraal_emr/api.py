@@ -1197,6 +1197,20 @@ def get_lab_test_templates():
 
 
 @frappe.whitelist()
+def get_my_lab_tests(limit=20):
+    """The logged-in patient's lab tests, newest first — backs the app's
+    'My Lab Tests' screen (where the profile activity card leads)."""
+    patient = _my_patient_name()
+    return _safe_get_all(
+        "Lab Test",
+        filters={"patient": patient},
+        fields=["name", "template", "status", "creation", "result_date"],
+        order_by="creation desc",
+        limit_page_length=int(limit or 20),
+    )
+
+
+@frappe.whitelist()
 def add_my_address(label=None, address_type="Personal", address_line1=None,
                    city=None, is_primary=0):
     """Add an address for the logged-in patient and link it to them."""
