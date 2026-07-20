@@ -55,6 +55,9 @@ doc_events = {
     "Medicine Request": {
         "on_update": "hiraal_emr.api.on_medicine_request_update",
     },
+    "Mobile Payment Transaction Log": {
+        "on_update": "hiraal_emr.payment_hooks.on_mobile_payment_update",
+    },
 }
 
 # ---------- Scheduled Tasks ----------
@@ -79,13 +82,6 @@ scheduler_events = {
     "weekly": [
         "hiraal_emr.tasks.generate_weekly_summaries",
     ],
-}
-
-# ---------- Doc Events ----------
-doc_events = {
-    "Mobile Payment Transaction Log": {
-        "on_update": "hiraal_emr.payment_hooks.on_mobile_payment_update",
-    },
 }
 
 # ---------- Jinja ----------

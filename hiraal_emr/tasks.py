@@ -121,11 +121,14 @@ def reconcile_mobile_payments():
         )
 
     # ── Medicine orders awaiting a payment that has since completed ──
+    # Any non-empty payment_reference is fair game — do not assume the
+    # gateway's naming series (e.g. MPAY-…), or a prefix change silently
+    # disables reconciliation forever.
     orders = frappe.get_all(
         "Medicine Request",
         filters={
             "payment_status": ["!=", "Paid"],
-            "payment_reference": ["like", "MPAY-%"],
+            "payment_reference": ["!=", ""],
         },
         fields=["name", "payment_reference", "total"],
         limit=200,
@@ -133,14 +136,16 @@ def reconcile_mobile_payments():
     for o in orders:
         try:
             txn = _txn_status(o.payment_reference)
-            if not txn or txn.status != "Completed":
+            if not txn or (txn.status or "").strip().lower() != "completed":
                 continue
-            if abs(flt(txn.amount) - flt(o.total)) > 0.01:
-                # Paid amount doesn't match the order — needs a human look,
-                # never auto-settle.
+            if flt(txn.amount) < flt(o.total) - 0.01:
+                # Underpaid — needs a human look, never auto-settle.
+                # (Overpayment settles: the patient covered the order total.
+                # An exact-match rule would skip the order forever if the
+                # pharmacy edited totals after the payment was initiated.)
                 frappe.log_error(
                     f"{o.name}: completed txn {o.payment_reference} amount "
-                    f"{txn.amount} != order total {o.total}",
+                    f"{txn.amount} < order total {o.total}",
                     "Payment Reconciliation Mismatch",
                 )
                 continue
@@ -153,7 +158,7 @@ def reconcile_mobile_payments():
         "Care Subscription",
         filters={
             "status": ["in", ["Overdue", "Past Due"]],
-            "payment_reference": ["like", "MPAY-%"],
+            "payment_reference": ["!=", ""],
         },
         fields=["name", "patient", "payment_reference"],
         limit=200,
@@ -163,7 +168,7 @@ def reconcile_mobile_payments():
             if frappe.db.exists("Subscription Payment", {"reference_id": s.payment_reference}):
                 continue  # already credited
             txn = _txn_status(s.payment_reference)
-            if txn and txn.status == "Completed":
+            if txn and (txn.status or "").strip().lower() == "completed":
                 _mark_subscription_paid(s.patient, s.payment_reference)
         except Exception:
             frappe.log_error(frappe.get_traceback(), f"Reconcile subscription {s.name}")

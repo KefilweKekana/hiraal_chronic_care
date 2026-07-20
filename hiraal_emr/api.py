@@ -1098,7 +1098,14 @@ def get_my_activity_counts():
     lab_tests = frappe.db.count("Lab Test", {"patient": patient, "docstatus": 0})
     orders = 0
     try:
-        orders = frappe.db.count("Medicine Request", {"patient": patient, "status": "Pending"})
+        # "Active" = still moving through the lifecycle. The old filter used
+        # status="Pending", which isn't a Medicine Request status at all
+        # (Received/Under Review/Awaiting Payment/Paid/Preparing/Out for
+        # Delivery/Delivered/Cancelled), so the card always showed 0.
+        orders = frappe.db.count(
+            "Medicine Request",
+            {"patient": patient, "status": ["not in", ["Delivered", "Cancelled"]]},
+        )
     except Exception:
         pass
     return {
@@ -1365,6 +1372,27 @@ def book_appointment(patient, practitioner, appointment_date,
         "status": appt.status,
         "meeting_url": meeting_url,
     }
+
+
+@frappe.whitelist()
+def get_my_appointments():
+    """Upcoming Patient Appointments for the logged-in patient, soonest first
+    (today onward, not Closed/Cancelled) — powers the app's 'Next appointment'
+    card on the home screen."""
+    patient = _my_patient_name()
+    return _safe_get_all(
+        "Patient Appointment",
+        filters={
+            "patient": patient,
+            "appointment_date": [">=", today()],
+            "status": ["not in", ("Closed", "Cancelled")],
+        },
+        fields=["name", "practitioner", "practitioner_name",
+                "appointment_date", "appointment_time", "status",
+                "appointment_type"],
+        order_by="appointment_date asc, appointment_time asc",
+        limit_page_length=10,
+    )
 
 
 @frappe.whitelist()
@@ -1913,6 +1941,33 @@ _MEDICINE_ORDER_STAGES = [
 _MEDICINE_CANCELLABLE = {"Received", "Under Review", "Awaiting Payment"}
 
 
+def _lazy_reconcile_order_payment(order):
+    """Best-effort self-heal for "paid but still Awaiting Payment": if the
+    order carries a payment_reference whose transaction has since Completed,
+    settle it now. Covers completions the real-time hook and the cron missed
+    (e.g. the gateway wrote the log without doc.save(), or the scheduler was
+    down). Mutates the passed row dict so the response reflects the new state.
+    Never raises — order listing must keep working when the gateway is down."""
+    txn = (order.get("payment_reference") or "").strip()
+    if not txn or order.get("payment_status") == "Paid":
+        return
+    try:
+        pos = _mobile_payments_pos()
+        if not pos:
+            return
+        result = _as_admin(pos.check_pos_payment_status, txn) or {}
+        if (result.get("status") or "").strip().lower() != "completed":
+            return
+        mark_order_paid(order["name"], txn)
+        order["payment_status"] = "Paid"
+        if order.get("status") == "Awaiting Payment":
+            order["status"] = "Paid"
+    except Exception:
+        frappe.logger("hiraal_pay").exception(
+            "lazy reconcile failed for %s", order.get("name")
+        )
+
+
 @frappe.whitelist()
 def get_my_orders(limit=30):
     """Medicine orders for the logged-in patient, newest first, with their
@@ -1935,6 +1990,7 @@ def get_my_orders(limit=30):
         limit_page_length=int(limit or 30),
     )
     for o in orders:
+        _lazy_reconcile_order_payment(o)
         o["medicines"] = _safe_get_all(
             "Medicine Request Item",
             filters={"parent": o["name"], "parenttype": "Medicine Request"},

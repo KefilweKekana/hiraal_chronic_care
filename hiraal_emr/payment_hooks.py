@@ -10,11 +10,14 @@ import frappe
 
 def on_mobile_payment_update(doc, method=None):
     """React when a Mobile Payment Transaction Log becomes Completed."""
-    if doc.status != "Completed":
+    if (doc.status or "").strip().lower() != "completed":
         return
 
-    # Avoid duplicate processing: only act on the transition to Completed.
-    if frappe.db.get_value("Mobile Payment Transaction Log", doc.name, "status") != "Completed":
+    # Only act on the transition INTO Completed. At on_update time the row is
+    # already saved, so comparing against the DB value can never detect a
+    # transition — compare against the pre-save document instead.
+    before = doc.get_doc_before_save()
+    if before and (before.status or "").strip().lower() == "completed":
         return
 
     patient = None
@@ -26,9 +29,13 @@ def on_mobile_payment_update(doc, method=None):
     order = frappe.db.get_value(
         "Medicine Request", {"payment_reference": doc.name}, ["name", "patient"], as_dict=True
     )
-    if not order and doc.sales_invoice:
+    # Legacy fallback only if the field actually exists on both sides —
+    # querying a non-existent column would abort the whole hook before the
+    # subscription/cache fallbacks below run.
+    sales_invoice = getattr(doc, "sales_invoice", None)
+    if not order and sales_invoice and frappe.get_meta("Medicine Request").has_field("sales_invoice"):
         order = frappe.db.get_value(
-            "Medicine Request", {"sales_invoice": doc.sales_invoice}, ["name", "patient"], as_dict=True
+            "Medicine Request", {"sales_invoice": sales_invoice}, ["name", "patient"], as_dict=True
         )
     if order:
         from hiraal_emr.api import mark_order_paid
