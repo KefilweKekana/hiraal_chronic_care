@@ -1832,6 +1832,9 @@ def request_lab_test(patient, template, practitioner=None, note=None):
     lab = frappe.new_doc("Lab Test")
     lab.patient = patient
     lab.template = template
+    # patient_sex is mandatory on Lab Test; populate it from the Patient record
+    # (app-created patients may predate sex collection, so fall back safely).
+    lab.patient_sex = frappe.db.get_value("Patient", patient, "sex") or "Other"
     if practitioner:
         lab.practitioner = practitioner
     if note:
