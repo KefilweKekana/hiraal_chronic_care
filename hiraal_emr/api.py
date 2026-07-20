@@ -1093,7 +1093,11 @@ def get_my_activity_counts():
     today_d = today()
     appointments = frappe.db.count(
         "Patient Appointment",
-        {"patient": patient, "appointment_date": [">=", today_d], "status": "Open"},
+        # Same "upcoming" definition as get_my_appointments: confirmed
+        # appointments leave "Open" (e.g. become "Scheduled"), so filtering on
+        # "Open" alone undercounts. Count anything not Closed/Cancelled.
+        {"patient": patient, "appointment_date": [">=", today_d],
+         "status": ["not in", ["Closed", "Cancelled"]]},
     )
     lab_tests = frappe.db.count("Lab Test", {"patient": patient, "docstatus": 0})
     orders = 0
