@@ -2506,6 +2506,32 @@ def check_my_payment(transaction_log):
     return {"status": status}
 
 
+_SUB_PAYMENT_METHODS = ("Zaad", "eDahab", "Visa/Mastercard", "Cash", "Bank Transfer")
+
+
+def _resolve_payment_method(sub, reference):
+    """Pick a valid Subscription Payment.payment_method option.
+
+    App subscribers never have sub.payment_method set; derive the provider
+    from the gateway transaction, falling back to Zaad (the default wallet).
+    """
+    if sub.payment_method in _SUB_PAYMENT_METHODS:
+        return sub.payment_method
+    try:
+        meta = frappe.get_meta("Mobile Payment Transaction Log")
+        for field in ("provider", "payment_provider", "method", "payment_method"):
+            if meta.has_field(field):
+                val = (frappe.db.get_value(
+                    "Mobile Payment Transaction Log", reference, field) or "").lower()
+                if "dahab" in val:
+                    return "eDahab"
+                if val:
+                    return "Zaad"
+    except Exception:
+        pass
+    return "Zaad"
+
+
 def _mark_subscription_paid(patient, reference):
     """Mirror Care Subscription.process_payment()'s success branch after the
     real gateway confirms payment. Idempotent per transaction reference."""
@@ -2527,7 +2553,7 @@ def _mark_subscription_paid(patient, reference):
     pay.patient = patient
     pay.amount = amount
     pay.payment_date = now_datetime()
-    pay.payment_method = sub.payment_method or "Mobile Money"
+    pay.payment_method = _resolve_payment_method(sub, reference)
     pay.status = "Success"
     pay.reference_id = reference
     pay.transaction_id = reference
