@@ -2763,10 +2763,11 @@ def get_readings_dashboard_data(date=None):
     )
     source_map = {s.source: s.cnt for s in sources}
 
-    # High readings
+    # High readings — Daily Reading risk levels are Normal/Medium/High/Critical
+    # (see DailyReading.assess_risk_level); "Very High" only exists on alerts.
     high_readings = frappe.db.count(
         "Daily Reading",
-        {"reading_date": target_date, "risk_level": ["in", ["High", "Very High"]]},
+        {"reading_date": target_date, "risk_level": ["in", ["High", "Critical"]]},
     ) or 0
 
     # Synced vs pending
@@ -2815,9 +2816,14 @@ def get_medicine_requests_data():
     """Return data for the clinic dashboard medicine section."""
     _require_clinical()
     total = frappe.db.count("Medicine Request") or 0
-    pending = frappe.db.count("Medicine Request", {"status": "Pending"}) or 0
+    # Real lifecycle: Received → Under Review → Awaiting Payment → Paid →
+    # Preparing → Out for Delivery → Delivered (Cancelled terminal).
+    # "Pending" and "Dispatched" never existed, so those tiles always showed 0.
+    pending = frappe.db.count(
+        "Medicine Request", {"status": ["in", ["Received", "Under Review"]]}
+    ) or 0
     preparing = frappe.db.count("Medicine Request", {"status": "Preparing"}) or 0
-    dispatched = frappe.db.count("Medicine Request", {"status": "Dispatched"}) or 0
+    dispatched = frappe.db.count("Medicine Request", {"status": "Out for Delivery"}) or 0
     delivered = frappe.db.count("Medicine Request", {"status": "Delivered"}) or 0
 
     recent = frappe.get_all(
