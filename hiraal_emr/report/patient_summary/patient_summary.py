@@ -61,7 +61,7 @@ def get_data(filters):
             "Daily Reading", {"patient": p.name, "reading_date": [">=", seven_days_ago]}
         ) or 0
         med_taken = frappe.db.count(
-            "Daily Reading", {"patient": p.name, "reading_date": [">=", seven_days_ago], "medicine_taken": 1}
+            "Daily Reading", {"patient": p.name, "reading_date": [">=", seven_days_ago], "medicine_taken": "Yes"}
         ) or 0
         adherence = round((med_taken / max(readings_7d, 1)) * 100)
 

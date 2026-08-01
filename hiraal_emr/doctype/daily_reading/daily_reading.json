@@ -174,7 +174,7 @@
    "fieldname": "source",
    "fieldtype": "Select",
    "label": "Source",
-   "options": "\nApp\nBP Device\nGlucometer\nClinic\n5G Hub",
+   "options": "\nApp\nBP Device\nGlucometer\nClinic\n5G Hub\nSmart Scale",
    "default": "App",
    "in_list_view": 1,
    "in_standard_filter": 1

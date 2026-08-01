@@ -166,7 +166,7 @@ class DailyReadingsDashboard {
                   <td>
                     ${r.blood_sugar ? `<strong>${r.blood_sugar}</strong> <small>${r.blood_sugar_unit || "mg/dL"}</small>` : '<span class="text-muted">—</span>'}
                   </td>
-                  <td>${r.medicine_taken ? '✅ Yes' : '<span class="text-muted">No</span>'}</td>
+                  <td>${r.medicine_taken === 'Yes' ? '✅ Yes' : '<span class="text-muted">No</span>'}</td>
                   <td><span class="rd-source-badge">${this.source_icon(r.source)} ${r.source}</span></td>
                   <td><span class="indicator-pill ${this.risk_color(r.risk_level)}">${r.risk_level || "Normal"}</span></td>
                   <td>${r.alert_generated ? '🚨' : '—'}</td>
@@ -192,7 +192,7 @@ class DailyReadingsDashboard {
   }
 
   risk_color(level) {
-    return {"Very High": "red", "High": "orange", "Medium": "yellow", "Low": "blue", "Normal": "green"}[level] || "green";
+    return {"Very High": "red", "Critical": "red", "High": "orange", "Medium": "yellow", "Low": "blue", "Normal": "green"}[level] || "green";
   }
 }
 })();

@@ -214,7 +214,9 @@ def get_dashboard_data():
         "lab_requests_total": lab_requests_total,
         "lab_requests_pending": lab_requests_pending,
         "medicine_requests_total": frappe.db.count("Medicine Request") or 0,
-        "medicine_requests_pending": frappe.db.count("Medicine Request", {"status": "Pending"}) or 0,
+        "medicine_requests_pending": frappe.db.count(
+            "Medicine Request", {"status": ["in", ["Received", "Under Review"]]}
+        ) or 0,
         "nurse_tasks_total": nurse_tasks_total,
         "nurse_tasks_pending": nurse_tasks_pending,
         "patients_at_risk": patients_at_risk,
@@ -275,9 +277,14 @@ def get_alert_queue_data():
             "latest_reading_display", "assigned_nurse_name", "creation",
             "bp_systolic", "bp_diastolic", "blood_sugar", "reason",
         ],
-        order_by="field(alert_level, 'Very High', 'High', 'Medium', 'Low'), creation desc",
-        limit=50,
+        order_by="creation desc",
     )
+    # Frappe v15 rejects FIELD() in order_by, so rank severity in Python:
+    # Very High > High > Medium > Low, then newest first (the DB fetch above
+    # is already newest-first and sort() is stable).
+    _severity = {"Very High": 0, "High": 1, "Medium": 2, "Low": 3}
+    open_alerts.sort(key=lambda a: _severity.get(a.alert_level, 4))
+    open_alerts = open_alerts[:50]
 
     counts = {"very_high": 0, "high": 0, "medium": 0, "low": 0}
     for a in open_alerts:
@@ -546,7 +553,7 @@ def on_lab_test_update(doc, method):
 def submit_reading(patient=None, bp_systolic=None, bp_diastolic=None,
                    blood_sugar=None, sugar_unit="mg/dL", weight=None,
                    medicine_taken=None, note=None, source="App", device_id=None,
-                   reference_id=None):
+                   reference_id=None, reading_date=None, reading_time=None):
     """API endpoint for mobile app to submit a daily reading.
 
     ``patient`` is optional: when omitted it resolves to the logged-in user's
@@ -593,6 +600,19 @@ def submit_reading(patient=None, bp_systolic=None, bp_diastolic=None,
     reading.medicine_taken = medicine_taken
     reading.patient_note = note
     reading.source = source
+    # The app may send the reading's capture date/time (offline-synced readings
+    # carry when they were actually taken). Bad values fall back to the
+    # doctype's today/now defaults — never throw on them.
+    if reading_date:
+        try:
+            reading.reading_date = getdate(reading_date)
+        except Exception:
+            reading.reading_date = getdate(today())
+    if reading_time:
+        try:
+            reading.reading_time = frappe.utils.get_time(reading_time)
+        except Exception:
+            reading.reading_time = now_datetime().time()
     if ref_key:
         reading.reference_id = ref_key
     if device_id and frappe.db.exists("Patient Device", device_id):
@@ -2088,6 +2108,34 @@ def pay_my_order(order, provider, method, phone):
     if not pos:
         frappe.throw(_("Payment gateway is not available"))
 
+    # Idempotency: if this order already has an initiation in flight, an app
+    # retry must not double-charge the wallet.
+    existing_txn = frappe.db.get_value("Medicine Request", order, "payment_reference")
+    if existing_txn:
+        try:
+            existing = _as_admin(pos.check_pos_payment_status, existing_txn) or {}
+        except Exception:
+            existing = {}  # unknown — fall through to a fresh initiation
+        raw = (existing.get("status") or "").strip().lower()
+        if raw == "pending":
+            return {
+                "success": True,
+                "transaction_log": existing_txn,
+                "amount": amount,
+                "order": order,
+                "message": "Payment already in progress — approve it on your phone.",
+            }
+        if raw == "completed":
+            mark_order_paid(order, existing_txn)
+            return {
+                "success": True,
+                "transaction_log": existing_txn,
+                "amount": amount,
+                "order": order,
+                "message": "Payment already received.",
+            }
+        # Failed/unknown — proceed with a fresh initiation.
+
     result = _as_admin(
         pos.initiate_pos_payment,
         provider=provider, method=method, phone=phone, amount=amount, currency="USD",
@@ -2151,6 +2199,21 @@ def mark_order_paid(order, transaction_log):
     cur = frappe.db.get_value("Medicine Request", order, "payment_status")
     if cur == "Paid":
         return
+    # Underpayment guard (mirrors reconcile_mobile_payments): a completed
+    # transaction that covered less than the order total needs a human look —
+    # never settle it. Overpayment settles.
+    txn_amount = frappe.db.get_value(
+        "Mobile Payment Transaction Log", transaction_log, "amount"
+    )
+    if txn_amount is not None:
+        total = frappe.db.get_value("Medicine Request", order, "total")
+        if flt(txn_amount) < flt(total) - 0.01:
+            frappe.log_error(
+                f"{order}: completed txn {transaction_log} amount "
+                f"{txn_amount} < order total {total}",
+                "Payment Reconciliation Mismatch",
+            )
+            return
     doc = frappe.get_doc("Medicine Request", order)
     doc.payment_status = "Paid"
     doc.payment_reference = transaction_log
@@ -2177,7 +2240,12 @@ def check_my_order_payment(order, transaction_log):
     if not pos:
         frappe.throw(_("Payment gateway is not available"))
     result = _as_admin(pos.check_pos_payment_status, transaction_log) or {}
-    status = result.get("status") or "Pending"
+    # The gateway's status casing isn't guaranteed ("completed"/"COMPLETED");
+    # the Flutter app exact-matches the canonical values, so normalize here.
+    raw = (result.get("status") or "").strip()
+    status = {
+        "completed": "Completed", "failed": "Failed", "pending": "Pending",
+    }.get(raw.lower(), "Pending")
     if status == "Completed":
         mark_order_paid(order, transaction_log)
     return {"status": status}
@@ -2272,6 +2340,8 @@ def notify_patient(patient, subject, message, sms=False,
 def pay_subscription(patient, payment_method="Zaad", reference=None):
     """Process a subscription payment from the mobile app."""
     _require_clinical()
+    if payment_method not in ("Cash", "Bank Transfer"):
+        frappe.throw(_("Manual settlement is only for Cash or Bank Transfer. Mobile money goes through the patient app."))
     sub = frappe.db.get_value(
         "Care Subscription",
         {"patient": patient, "status": ["in", ["Active", "Overdue", "Past Due"]]},
@@ -2333,7 +2403,9 @@ def get_payment_methods():
 
 # Subscription statuses that represent a live/payable subscription (a brand-new
 # unpaid one starts "Overdue" since the doctype has no "Pending" status).
-_SUB_PAYABLE_STATUSES = ["Active", "Overdue", "Past Due", "Expiring Soon"]
+# "Suspended" must stay payable — otherwise a suspended subscriber can never
+# pay their way back and the paywall dead-ends.
+_SUB_PAYABLE_STATUSES = ["Active", "Overdue", "Past Due", "Expiring Soon", "Suspended"]
 
 # Plan catalog. Standard $5/mo, Premium $10/mo.
 _SUBSCRIPTION_PLANS = [
@@ -2430,6 +2502,34 @@ def pay_my_subscription(provider, method, phone):
     if not pos:
         frappe.throw(_("Payment gateway is not available"))
 
+    # Idempotency: if this subscription already has an initiation in flight, an
+    # app retry must not double-charge the wallet.
+    existing_txn = frappe.db.get_value("Care Subscription", sub.name, "payment_reference")
+    if existing_txn:
+        try:
+            existing = _as_admin(pos.check_pos_payment_status, existing_txn) or {}
+        except Exception:
+            existing = {}  # unknown — fall through to a fresh initiation
+        raw = (existing.get("status") or "").strip().lower()
+        if raw == "pending":
+            return {
+                "success": True,
+                "transaction_log": existing_txn,
+                "amount": amount,
+                "subscription": sub.name,
+                "message": "Payment already in progress — approve it on your phone.",
+            }
+        if raw == "completed":
+            _mark_subscription_paid(patient, existing_txn)
+            return {
+                "success": True,
+                "transaction_log": existing_txn,
+                "amount": amount,
+                "subscription": sub.name,
+                "message": "Payment already received.",
+            }
+        # Failed/unknown — proceed with a fresh initiation.
+
     result = _as_admin(
         pos.initiate_pos_payment,
         provider=provider, method=method, phone=phone, amount=amount, currency="USD",
@@ -2500,7 +2600,12 @@ def check_my_payment(transaction_log):
     if not pos:
         frappe.throw(_("Payment gateway is not available"))
     result = _as_admin(pos.check_pos_payment_status, transaction_log) or {}
-    status = result.get("status") or "Pending"
+    # The gateway's status casing isn't guaranteed ("completed"/"COMPLETED");
+    # the Flutter app exact-matches the canonical values, so normalize here.
+    raw = (result.get("status") or "").strip()
+    status = {
+        "completed": "Completed", "failed": "Failed", "pending": "Pending",
+    }.get(raw.lower(), "Pending")
     if status == "Completed":
         _mark_subscription_paid(patient, transaction_log)
     return {"status": status}
@@ -2573,6 +2678,7 @@ def _mark_subscription_paid(patient, reference):
 @frappe.whitelist(allow_guest=False)
 def get_notifications(patient, limit=20):
     """Fetch patient notifications for the mobile app."""
+    _require_patient_access(patient)
     notifications = frappe.get_all(
         "Notification Log",
         filters={"for_user": frappe.session.user},
@@ -3102,12 +3208,10 @@ def receive_andesfit_4g_reading():
     # ── 6. Create Daily Reading ──
     doc = frappe.new_doc("Daily Reading")
     doc.patient = patient
-    doc.source = "Andesfit 4G"
+    doc.source = "5G Hub"
     doc.source_device = device_name
     doc.bp_systolic = systolic
     doc.bp_diastolic = diastolic
-    if pulse:
-        doc.pulse = pulse
     if abnormal_heartbeat:
         doc.patient_note = (doc.patient_note or "") + " [Abnormal heartbeat detected]"
 

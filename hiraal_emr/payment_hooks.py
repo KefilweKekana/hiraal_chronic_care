@@ -20,69 +20,74 @@ def on_mobile_payment_update(doc, method=None):
     if before and (before.status or "").strip().lower() == "completed":
         return
 
-    patient = None
-    notification = None
-    order = None
-    sub = None
+    # A settlement or notification error must never propagate out of the
+    # gateway's own save — log it and move on.
+    try:
+        patient = None
+        notification = None
+        order = None
+        sub = None
 
-    # 1. Medicine order — try the persistent link first.
-    order = frappe.db.get_value(
-        "Medicine Request", {"payment_reference": doc.name}, ["name", "patient"], as_dict=True
-    )
-    # Legacy fallback only if the field actually exists on both sides —
-    # querying a non-existent column would abort the whole hook before the
-    # subscription/cache fallbacks below run.
-    sales_invoice = getattr(doc, "sales_invoice", None)
-    if not order and sales_invoice and frappe.get_meta("Medicine Request").has_field("sales_invoice"):
+        # 1. Medicine order — try the persistent link first.
         order = frappe.db.get_value(
-            "Medicine Request", {"sales_invoice": sales_invoice}, ["name", "patient"], as_dict=True
+            "Medicine Request", {"payment_reference": doc.name}, ["name", "patient"], as_dict=True
         )
-    if order:
-        from hiraal_emr.api import mark_order_paid
-        mark_order_paid(order.name, doc.name)
-        patient = order.patient
-        notification = {
-            "title": "Payment received",
-            "body": "Your medicine order payment was received. We're preparing it now.",
-            "data": {"type": "payment_complete", "order": order.name},
-        }
-
-    # 2. Care Subscription — persistent link.
-    if not patient:
-        sub = frappe.db.get_value(
-            "Care Subscription", {"payment_reference": doc.name}, ["name", "patient"], as_dict=True
-        )
-        if sub:
-            from hiraal_emr.api import _mark_subscription_paid
-            _mark_subscription_paid(sub.patient, doc.name)
-            patient = sub.patient
+        # Legacy fallback only if the field actually exists on both sides —
+        # querying a non-existent column would abort the whole hook before the
+        # subscription/cache fallbacks below run.
+        sales_invoice = getattr(doc, "sales_invoice", None)
+        if not order and sales_invoice and frappe.get_meta("Medicine Request").has_field("sales_invoice"):
+            order = frappe.db.get_value(
+                "Medicine Request", {"sales_invoice": sales_invoice}, ["name", "patient"], as_dict=True
+            )
+        if order:
+            from hiraal_emr.api import mark_order_paid
+            mark_order_paid(order.name, doc.name)
+            patient = order.patient
             notification = {
-                "title": "Subscription active",
-                "body": "Your payment was received. Your Hiraal subscription is now active.",
-                "data": {"type": "subscription_payment_complete", "subscription": sub.name},
+                "title": "Payment received",
+                "body": "Your medicine order payment was received. We're preparing it now.",
+                "data": {"type": "payment_complete", "order": order.name},
             }
 
-    # 3. Fallback: cache binding from pay_my_order / pay_my_subscription.
-    if not patient:
-        patient = frappe.cache().get_value(f"hiraal_txn_owner:{doc.name}")
-    if not patient:
-        cached_order = frappe.cache().get_value(f"hiraal_txn_order:{doc.name}")
-        if cached_order:
-            order = frappe.db.get_value(
-                "Medicine Request", cached_order, ["name", "patient"], as_dict=True
+        # 2. Care Subscription — persistent link.
+        if not patient:
+            sub = frappe.db.get_value(
+                "Care Subscription", {"payment_reference": doc.name}, ["name", "patient"], as_dict=True
             )
-            if order:
-                from hiraal_emr.api import mark_order_paid
-                mark_order_paid(order.name, doc.name)
-                patient = order.patient
+            if sub:
+                from hiraal_emr.api import _mark_subscription_paid
+                _mark_subscription_paid(sub.patient, doc.name)
+                patient = sub.patient
                 notification = {
-                    "title": "Payment received",
-                    "body": "Your medicine order payment was received. We're preparing it now.",
-                    "data": {"type": "payment_complete", "order": order.name},
+                    "title": "Subscription active",
+                    "body": "Your payment was received. Your Hiraal subscription is now active.",
+                    "data": {"type": "subscription_payment_complete", "subscription": sub.name},
                 }
 
-    if patient and notification:
-        _push_to_patient(patient, notification)
+        # 3. Fallback: cache binding from pay_my_order / pay_my_subscription.
+        if not patient:
+            patient = frappe.cache().get_value(f"hiraal_txn_owner:{doc.name}")
+        if not patient:
+            cached_order = frappe.cache().get_value(f"hiraal_txn_order:{doc.name}")
+            if cached_order:
+                order = frappe.db.get_value(
+                    "Medicine Request", cached_order, ["name", "patient"], as_dict=True
+                )
+                if order:
+                    from hiraal_emr.api import mark_order_paid
+                    mark_order_paid(order.name, doc.name)
+                    patient = order.patient
+                    notification = {
+                        "title": "Payment received",
+                        "body": "Your medicine order payment was received. We're preparing it now.",
+                        "data": {"type": "payment_complete", "order": order.name},
+                    }
+
+        if patient and notification:
+            _push_to_patient(patient, notification)
+    except Exception:
+        frappe.log_error(title="Hiraal payment hook failed", message=frappe.get_traceback())
 
 
 def _push_to_patient(patient, notification):
