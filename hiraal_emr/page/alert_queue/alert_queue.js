@@ -168,16 +168,17 @@ class AlertQueue {
   }
 
   bind_events() {
-    // Filter tabs
-    this.container.on("click", ".filter-tab", (e) => {
+    // Delegated handlers on the persistent container must be rebound cleanly —
+    // .off() first, or every re-render stacks another copy and one click fires
+    // N times (duplicate Doctor Reviews / stacked dialogs).
+    this.container.off("click", ".filter-tab").on("click", ".filter-tab", (e) => {
       this.current_filter = $(e.currentTarget).data("filter");
       this.container.find(".filter-tab").removeClass("active");
       $(e.currentTarget).addClass("active");
       this.apply_filter();
     });
 
-    // Action buttons
-    this.container.on("click", ".action-btn", (e) => {
+    this.container.off("click", ".action-btn").on("click", ".action-btn", (e) => {
       const action = $(e.currentTarget).data("action");
       const name = $(e.currentTarget).data("name");
       this.handle_action(action, name);

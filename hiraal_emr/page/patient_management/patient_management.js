@@ -162,27 +162,30 @@ class PatientManagement {
   }
 
   bind_events() {
-    this.container.on("input", ".pm-search-input", frappe.utils.debounce((e) => {
+    // Rebind cleanly on every render — .off() first, or delegated handlers
+    // accumulate on the persistent container and each keystroke/click fires
+    // an ever-growing number of times (API storms).
+    this.container.off("input", ".pm-search-input").on("input", ".pm-search-input", frappe.utils.debounce((e) => {
       this.filters.search = $(e.target).val();
       this.load_data();
     }, 400));
 
-    this.container.on("change", ".pm-risk-filter", (e) => {
+    this.container.off("change", ".pm-risk-filter").on("change", ".pm-risk-filter", (e) => {
       this.filters.risk = $(e.target).val();
       this.load_data();
     });
 
-    this.container.on("change", ".pm-sub-filter", (e) => {
+    this.container.off("change", ".pm-sub-filter").on("change", ".pm-sub-filter", (e) => {
       this.filters.subscription = $(e.target).val();
       this.load_data();
     });
 
-    this.container.on("click", ".view-profile-btn", async (e) => {
+    this.container.off("click", ".view-profile-btn").on("click", ".view-profile-btn", async (e) => {
       const patient = $(e.currentTarget).data("patient");
       await this.show_profile(patient);
     });
 
-    this.container.on("click", ".pm-profile-close", () => {
+    this.container.off("click", ".pm-profile-close").on("click", ".pm-profile-close", () => {
       this.container.find("#profile-drawer").hide();
     });
   }

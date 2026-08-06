@@ -67,7 +67,19 @@ def on_mobile_payment_update(doc, method=None):
 
         # 3. Fallback: cache binding from pay_my_order / pay_my_subscription.
         if not patient:
-            patient = frappe.cache().get_value(f"hiraal_txn_owner:{doc.name}")
+            cached_owner = frappe.cache().get_value(f"hiraal_txn_owner:{doc.name}")
+            if cached_owner:
+                # Subscription payment whose DB bind failed at initiation —
+                # settle it here or the paid subscription never activates
+                # (the cron can't find it: it scans by payment_reference).
+                from hiraal_emr.api import _mark_subscription_paid
+                _mark_subscription_paid(cached_owner, doc.name)
+                patient = cached_owner
+                notification = {
+                    "title": "Subscription active",
+                    "body": "Your payment was received. Your Hiraal subscription is now active.",
+                    "data": {"type": "subscription_payment_complete"},
+                }
         if not patient:
             cached_order = frappe.cache().get_value(f"hiraal_txn_order:{doc.name}")
             if cached_order:
