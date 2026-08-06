@@ -215,7 +215,9 @@ def get_dashboard_data():
         "lab_requests_pending": lab_requests_pending,
         "medicine_requests_total": frappe.db.count("Medicine Request") or 0,
         "medicine_requests_pending": frappe.db.count(
-            "Medicine Request", {"status": ["in", ["Received", "Under Review"]]}
+            "Medicine Request",
+            # "Pending" isn't in the current lifecycle but exists on legacy rows.
+            {"status": ["in", ["Received", "Under Review", "Pending"]]},
         ) or 0,
         "nurse_tasks_total": nurse_tasks_total,
         "nurse_tasks_pending": nurse_tasks_pending,
@@ -2950,9 +2952,11 @@ def get_medicine_requests_data():
     total = frappe.db.count("Medicine Request") or 0
     # Real lifecycle: Received → Under Review → Awaiting Payment → Paid →
     # Preparing → Out for Delivery → Delivered (Cancelled terminal).
-    # "Pending" and "Dispatched" never existed, so those tiles always showed 0.
+    # "Pending" is legacy data (older rows predate the lifecycle);
+    # "Dispatched" never existed.
     pending = frappe.db.count(
-        "Medicine Request", {"status": ["in", ["Received", "Under Review"]]}
+        "Medicine Request",
+        {"status": ["in", ["Received", "Under Review", "Pending"]]},
     ) or 0
     preparing = frappe.db.count("Medicine Request", {"status": "Preparing"}) or 0
     dispatched = frappe.db.count("Medicine Request", {"status": "Out for Delivery"}) or 0
