@@ -1,4 +1,6 @@
-.readings-page { padding: 15px; }
+.readings-page { padding: 0; }
+.rd-filters { margin-bottom: 16px; }
+.rd-date-input { max-width: 220px; background: #fff; }
 .rd-kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
 .rd-kpi-card { background: var(--card-bg); border-radius: 8px; padding: 16px; text-align: center; box-shadow: var(--card-shadow); }
 .rd-kpi-icon { font-size: 20px; margin-bottom: 4px; }

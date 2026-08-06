@@ -1,4 +1,4 @@
-.patient-mgmt-page { padding: 15px; }
+.patient-mgmt-page { padding: 0; }
 .pm-summary-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
 .pm-summary-card { background: var(--card-bg); border-radius: 8px; padding: 16px; text-align: center; box-shadow: var(--card-shadow); }
 .pm-summary-card .pm-summary-value { font-size: 28px; font-weight: 700; }

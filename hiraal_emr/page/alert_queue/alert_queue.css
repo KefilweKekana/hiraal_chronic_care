@@ -1,4 +1,4 @@
-.alert-queue-page { padding: 15px; }
+.alert-queue-page { padding: 0; }
 .level-cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px; }
 .level-card { background: var(--card-bg); border-radius: 8px; padding: 16px; text-align: center; box-shadow: var(--card-shadow); cursor: pointer; border: 2px solid transparent; transition: border-color 0.2s; }
 .level-card:hover { border-color: var(--primary); }

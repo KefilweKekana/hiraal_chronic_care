@@ -1,64 +1,19 @@
 (function () {
-// ─── Hiraal Sidebar (inlined — no external dependency) ───
-const HiraalMenu = {
-  sections: [
-    { title: "CLINICAL", items: [
-      { label: "Dashboard", icon: "📊", route: "/app/clinic-dashboard", name: "dashboard" },
-      { label: "Alerts", icon: "🚨", route: "/app/chronic-care-alert", name: "alerts" },
-      { label: "Patients", icon: "👥", route: "/app/patient", name: "patients" },
-      { label: "Daily Readings", icon: "📈", route: "/app/daily-reading", name: "daily-readings" },
-      { label: "Nurse Tasks", icon: "✅", route: "/app/nurse-task", name: "nurse-tasks" },
-      { label: "Doctor Review", icon: "🩺", route: "/app/doctor-review", name: "doctor-review" },
-      { label: "Appointments", icon: "📅", route: "/app/patient-appointment", name: "appointments" },
-      { label: "Lab Requests", icon: "🧪", route: "/app/lab-test", name: "lab-requests" },
-      { label: "Medicine Requests", icon: "💊", route: "/app/medicine-request", name: "medicine-requests" },
-      { label: "Devices", icon: "📱", route: "/app/patient-device", name: "devices" },
-      { label: "Telemedicine", icon: "📹", route: "/app/telemedicine-waiting-room", name: "telemedicine" },
-    ]},
-    { title: "BILLING", items: [
-      { label: "Subscriptions", icon: "🔄", route: "/app/care-subscription", name: "subscriptions" },
-      { label: "Payments", icon: "💳", route: "/app/subscription-payment", name: "payments" },
-    ]},
-    { title: "REPORTS", items: [
-      { label: "Reports", icon: "📋", route: "/app/query-report/Patient Summary", name: "reports" },
-      { label: "Analytics", icon: "📉", route: "/app/analytics-dashboard", name: "analytics" },
-    ]},
-    { title: "SETTINGS", items: [
-      { label: "Settings", icon: "⚙️", route: "/app/chronic-care-settings", name: "settings" },
-      { label: "User Management", icon: "👤", route: "/app/user", name: "user-management" },
-    ]},
-  ],
-  renderSidebar(activeName, badges) {
-    badges = badges || {};
-    let h = '<aside class="dashboard-sidebar">';
-    h += '<div class="sidebar-brand"><div class="brand-logo">🏥</div><div class="brand-text"><div class="brand-title">DagaarSoft</div><div class="brand-subtitle">Health Clinic</div></div></div>';
-    h += '<nav class="sidebar-nav">';
-    this.sections.forEach(s => {
-      h += '<div class="sidebar-section"><div class="sidebar-section-title">' + s.title + '</div><ul class="sidebar-menu">';
-      s.items.forEach(i => {
-        const a = i.name === activeName, b = badges[i.name] || 0;
-        h += '<li class="sidebar-menu-item ' + (a ? 'active' : '') + '"><a href="' + i.route + '" class="sidebar-menu-link"><span class="sidebar-icon">' + i.icon + '</span><span class="sidebar-label">' + i.label + '</span>' + (b ? '<span class="sidebar-badge">' + b + '</span>' : '') + '</a></li>';
-      });
-      h += '</ul></div>';
-    });
-    h += '</nav><div class="sidebar-footer"><div class="need-help"><div class="help-icon">💬</div><div class="help-text"><div class="help-title">Need Help?</div><div class="help-link">Contact Support</div><div class="help-email">support@dagaar.so</div></div></div></div></aside>';
-    return h;
-  },
-  wrap(activeName, content, badges) {
-    return '<div class="dashboard-with-sidebar">' + this.renderSidebar(activeName, badges) + '<div class="dashboard-main">' + content + '</div></div>';
-  }
-};
-
+// ─── Alert Queue — rendered inside the shared HiraalShell (same
+// top bar + sidebar + frame as Clinic Dashboard). See public/js/hiraal_sidebar.js.
 frappe.pages["alert-queue"].on_page_load = function (wrapper) {
   const page = frappe.ui.make_app_page({
     parent: wrapper,
     title: "Alert Queue",
-    subtitle: "Patients who need immediate follow-up based on their latest readings or activity",
     single_column: true,
   });
-
   page.main.html('<div id="alert-queue-root"></div>');
-  new AlertQueue(page);
+  const boot = function () {
+    HiraalShell.mount(page, wrapper);
+    new AlertQueue(page);
+  };
+  if (window.HiraalShell) boot();
+  else frappe.require("/assets/hiraal_emr/js/hiraal_sidebar.js", boot);
 };
 
 class AlertQueue {
@@ -66,29 +21,28 @@ class AlertQueue {
     this.page = page;
     this.container = page.main.find("#alert-queue-root");
     this.current_filter = "All";
-    this.setup_actions();
     this.load_data();
   }
 
-  setup_actions() {
-    this.page.set_secondary_action("Refresh", () => this.load_data(), "refresh");
+  shell(content) {
+    this.container.html(HiraalShell.render("alerts", "Alert Queue", content));
+    HiraalShell.bind(this.container, () => this.load_data());
   }
 
   async load_data() {
-    this.container.html(HiraalMenu.wrap("alerts", '<div class="empty-state">Loading alerts...</div>'));
+    this.shell('<div class="hd-loading">Loading alerts…</div>');
     try {
       const data = await frappe.xcall("hiraal_emr.api.get_alert_queue_data");
       this.data = data;
       this.render();
     } catch (e) {
       console.error(e);
-      this.container.html(HiraalMenu.wrap("alerts", '<div class="empty-state">Error loading alert data.</div>'));
+      this.shell('<div class="hd-loading">Error loading alert data.</div>');
     }
   }
 
   render() {
     const d = this.data;
-    const badges = { alerts: d.total || 0 };
     const content = `
       <div class="alert-queue-page">
         <!-- Level Summary Cards -->
@@ -209,7 +163,7 @@ class AlertQueue {
       </div>
     `;
 
-    this.container.html(HiraalMenu.wrap("alerts", content, badges));
+    this.shell(content);
     this.bind_events();
   }
 

@@ -38,7 +38,7 @@
     NAV,
 
     // Bump CSS_VER whenever hiraal_emr.css changes so browsers refetch it.
-    CSS_VER: "6",
+    CSS_VER: "7",
     ensureFonts() {
       if (!document.getElementById("hiraal-dash-fonts")) {
         const l = document.createElement("link");
@@ -189,7 +189,10 @@
   // Toggles a body class on every route change; restored when you leave.
   if (!window.__hiraalImmersiveBound) {
     window.__hiraalImmersiveBound = true;
-    const IMMERSIVE = ["clinic-dashboard", "telemedicine-waiting-room", "analytics-dashboard"];
+    const IMMERSIVE = [
+      "clinic-dashboard", "telemedicine-waiting-room", "analytics-dashboard",
+      "daily-readings", "patient-management", "alert-queue",
+    ];
     const toggleImmersive = function () {
       try {
         const r = (frappe.get_route_str() || "").split("/")[0];
