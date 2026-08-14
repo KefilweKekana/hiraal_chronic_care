@@ -3151,11 +3151,18 @@ def receive_andesfit_4g_reading():
     """
 
     def _respond(status_code, text):
-        """Return raw plain text that the device can parse."""
+        """Return raw plain text that the device can parse.
+
+        Frappe's as_txt handler builds the download filename from
+        response['doctype'] — omit it and every response 500s with
+        KeyError: 'doctype' (the device then shows "Er" and drops the
+        reading after one retry). The filename itself is irrelevant to
+        the device; any string satisfies the handler.
+        """
         frappe.local.response.http_status_code = status_code
         frappe.local.response['type'] = 'txt'
+        frappe.local.response['doctype'] = 'andesfit_4g'
         frappe.local.response['filecontent'] = text
-        frappe.local.response['filename'] = None
         return
 
     # ── 1. Validate method ──
