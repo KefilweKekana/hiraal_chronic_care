@@ -3253,17 +3253,23 @@ def receive_andesfit_4g_reading():
 def _andesfit_4g_response(settings):
     """Build the plain-text response the Andesfit 4G device expects.
 
-    Format: OK[&datetime=YYMMDDHHMMSS][&reminder=HH:MM:D]#end#
+    Spec (Data Exchange Protocol v2.0.0):  OK[YYYYMMDDHHMM][&reminder=HH:MM:S]#end#
+    - Clock sync: the datetime is appended DIRECTLY after "OK" — 4-digit
+      year, no key name, no seconds (e.g. OK202305310719…). The previous
+      "&datetime=YYMMDDHHMMSS" form did not match the spec, so the device
+      never actually synced its clock.
+    - Reminder: HH:MM followed by the state digit (0=off, 1=on). The setting
+      is a Time field which stringifies to HH:MM:SS — truncate to HH:MM or
+      the device receives a malformed reminder.
     """
     parts = ["OK"]
 
     if settings.andesfit_4g_sync_clock:
         now = now_datetime()
-        parts.append(f"&datetime={now.strftime('%y%m%d%H%M%S')}")
+        parts.append(now.strftime('%Y%m%d%H%M'))
 
     if settings.andesfit_4g_default_reminder:
-        # reminder format: HH:MM:D  (D = day bitmask, 1 = everyday for simplicity)
-        rem = str(settings.andesfit_4g_default_reminder)
+        rem = str(settings.andesfit_4g_default_reminder)[:5]  # HH:MM
         parts.append(f"&reminder={rem}:1")
 
     parts.append("#end#")
