@@ -1,10 +1,22 @@
 import frappe
 from frappe.model.document import Document
-from frappe.utils import add_months, getdate, today
+from frappe.utils import add_months, flt, getdate, today
 
 
 class CareSubscription(Document):
     def validate(self):
+        if self.plan and frappe.db.exists("DocType", "Subscription Plan"):
+            plan = frappe.db.get_value(
+                "Subscription Plan",
+                self.plan,
+                ["monthly_fee", "category"],
+                as_dict=True,
+            )
+            if plan:
+                if not self.monthly_fee:
+                    self.monthly_fee = flt(plan.monthly_fee)
+                if hasattr(self, "plan_category") and not self.plan_category:
+                    self.plan_category = plan.category
         if not self.next_billing_date:
             self.next_billing_date = add_months(self.start_date, 1)
 
@@ -18,7 +30,6 @@ class CareSubscription(Document):
         payment.status = "Pending"
         payment.insert(ignore_permissions=True)
 
-        # In production, integrate with Zaad/eDahab/Stripe API here
         success = self._charge_payment_gateway(payment)
 
         if success:
@@ -29,6 +40,8 @@ class CareSubscription(Document):
             self.db_set("retry_count", 0)
             self.db_set("total_collected", (self.total_collected or 0) + self.monthly_fee)
             self.db_set("status", "Active")
+            if hasattr(self, "is_on_trial"):
+                self.db_set("is_on_trial", 0)
         else:
             payment.db_set("status", "Failed")
             self.db_set("last_payment_status", "Failed")
@@ -43,7 +56,6 @@ class CareSubscription(Document):
 
     def _charge_payment_gateway(self, payment):
         """Placeholder for payment gateway integration."""
-        # TODO: Integrate Zaad API, eDahab API, Stripe
         if self.payment_method == "Cash":
             return True
-        return True  # Placeholder — assume success
+        return True

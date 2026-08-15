@@ -106,6 +106,18 @@ def get_data():
             "items": [
                 {
                     "type": "doctype",
+                    "name": "Care Station",
+                    "label": _("Care Stations"),
+                    "description": _("Clinic locations patients can visit"),
+                },
+                {
+                    "type": "doctype",
+                    "name": "Subscription Plan",
+                    "label": _("Subscription Plans"),
+                    "description": _("App plan catalog, prices, and categories"),
+                },
+                {
+                    "type": "doctype",
                     "name": "Chronic Care Settings",
                     "label": _("Chronic Care Settings"),
                     "description": _("Module configuration"),

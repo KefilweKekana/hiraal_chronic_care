@@ -64,7 +64,11 @@
     "encrypt_patient_data",
     "column_break_da1",
     "allow_data_export",
-    "backup_frequency"
+    "backup_frequency",
+    "section_subscription",
+    "enable_free_trial",
+    "column_break_sub1",
+    "free_trial_days"
   ],
   "fields": [
     {"fieldname": "section_clinic", "fieldtype": "Section Break", "label": "Clinic Information"},
@@ -133,7 +137,12 @@
     {"fieldname": "encrypt_patient_data", "fieldtype": "Check", "label": "Encrypt Patient Data", "default": 1},
     {"fieldname": "column_break_da1", "fieldtype": "Column Break"},
     {"fieldname": "allow_data_export", "fieldtype": "Check", "label": "Allow Data Export", "default": 0},
-    {"fieldname": "backup_frequency", "fieldtype": "Select", "label": "Backup Frequency", "options": "Hourly\nDaily\nWeekly", "default": "Daily"}
+    {"fieldname": "backup_frequency", "fieldtype": "Select", "label": "Backup Frequency", "options": "Hourly\nDaily\nWeekly", "default": "Daily"},
+
+    {"fieldname": "section_subscription", "fieldtype": "Section Break", "label": "App Subscriptions"},
+    {"fieldname": "enable_free_trial", "fieldtype": "Check", "label": "Enable Free Trial", "default": 0, "description": "When enabled, eligible new patients can start an Active trial without paying"},
+    {"fieldname": "column_break_sub1", "fieldtype": "Column Break"},
+    {"fieldname": "free_trial_days", "fieldtype": "Int", "label": "Free Trial Days", "default": 14, "depends_on": "enable_free_trial", "description": "Length of the free trial for plans that allow it"}
   ],
   "index_web_pages_for_search": 0,
   "links": [],

@@ -75,6 +75,9 @@ def process_subscription_billing():
     for sub_name in due_subs:
         try:
             sub = frappe.get_doc("Care Subscription", sub_name)
+            # End free trial when the trial billing date arrives.
+            if int(getattr(sub, "is_on_trial", 0) or 0):
+                sub.db_set("is_on_trial", 0)
             retry = (sub.retry_count or 0) + 1
             final = retry >= (sub.max_retries or 3)
             sub.db_set("retry_count", retry)

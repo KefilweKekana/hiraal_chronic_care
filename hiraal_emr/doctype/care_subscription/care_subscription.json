@@ -11,8 +11,11 @@
     "patient_phone",
     "column_break_cs1",
     "plan",
+    "plan_category",
     "monthly_fee",
     "status",
+    "is_on_trial",
+    "trial_end_date",
     "section_dates",
     "start_date",
     "next_billing_date",
@@ -73,13 +76,21 @@
     },
     {
       "fieldname": "plan",
-      "fieldtype": "Select",
+      "fieldtype": "Link",
       "label": "Plan",
-      "options": "\nStandard Care\nPremium Care",
+      "options": "Subscription Plan",
       "reqd": 1,
       "in_list_view": 1,
       "in_standard_filter": 1,
       "bold": 1
+    },
+    {
+      "fieldname": "plan_category",
+      "fieldtype": "Data",
+      "label": "Plan Category",
+      "fetch_from": "plan.category",
+      "read_only": 1,
+      "in_standard_filter": 1
     },
     {
       "fieldname": "monthly_fee",
@@ -98,6 +109,20 @@
       "reqd": 1,
       "in_list_view": 1,
       "in_standard_filter": 1
+    },
+    {
+      "fieldname": "is_on_trial",
+      "fieldtype": "Check",
+      "label": "On Free Trial",
+      "default": 0,
+      "in_list_view": 1,
+      "in_standard_filter": 1
+    },
+    {
+      "fieldname": "trial_end_date",
+      "fieldtype": "Date",
+      "label": "Trial End Date",
+      "depends_on": "is_on_trial"
     },
     {
       "fieldname": "section_dates",

@@ -1,0 +1,144 @@
+{
+  "actions": [],
+  "autoname": "field:station_name",
+  "creation": "2026-08-15 00:00:00.000000",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "station_name",
+    "is_active",
+    "display_order",
+    "column_break_cs1",
+    "phone",
+    "city",
+    "section_address",
+    "address",
+    "section_geo",
+    "latitude",
+    "column_break_cs2",
+    "longitude"
+  ],
+  "fields": [
+    {
+      "fieldname": "station_name",
+      "fieldtype": "Data",
+      "label": "Station Name",
+      "reqd": 1,
+      "unique": 1,
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "is_active",
+      "fieldtype": "Check",
+      "label": "Active",
+      "default": 1,
+      "in_list_view": 1,
+      "in_standard_filter": 1
+    },
+    {
+      "fieldname": "display_order",
+      "fieldtype": "Int",
+      "label": "Display Order",
+      "default": 0,
+      "description": "Lower numbers appear first in the app"
+    },
+    {
+      "fieldname": "column_break_cs1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "phone",
+      "fieldtype": "Data",
+      "label": "Phone",
+      "in_list_view": 1
+    },
+    {
+      "fieldname": "city",
+      "fieldtype": "Data",
+      "label": "City",
+      "in_list_view": 1,
+      "in_standard_filter": 1
+    },
+    {
+      "fieldname": "section_address",
+      "fieldtype": "Section Break",
+      "label": "Address"
+    },
+    {
+      "fieldname": "address",
+      "fieldtype": "Small Text",
+      "label": "Address",
+      "reqd": 1
+    },
+    {
+      "fieldname": "section_geo",
+      "fieldtype": "Section Break",
+      "label": "Map coordinates (optional)",
+      "collapsible": 1
+    },
+    {
+      "fieldname": "latitude",
+      "fieldtype": "Float",
+      "label": "Latitude",
+      "precision": 7
+    },
+    {
+      "fieldname": "column_break_cs2",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "longitude",
+      "fieldtype": "Float",
+      "label": "Longitude",
+      "precision": 7
+    }
+  ],
+  "index_web_pages_for_search": 0,
+  "links": [],
+  "modified": "2026-08-15 00:00:00.000000",
+  "modified_by": "Administrator",
+  "module": "Hiraal EMR",
+  "name": "Care Station",
+  "naming_rule": "By fieldname",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    },
+    {
+      "create": 1,
+      "delete": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Chronic Care Admin",
+      "write": 1
+    },
+    {
+      "read": 1,
+      "report": 1,
+      "role": "Chronic Care Nurse"
+    },
+    {
+      "read": 1,
+      "report": 1,
+      "role": "Chronic Care Doctor"
+    },
+    {
+      "read": 1,
+      "role": "Patient"
+    }
+  ],
+  "sort_field": "display_order",
+  "sort_order": "ASC",
+  "title_field": "station_name",
+  "track_changes": 1
+}

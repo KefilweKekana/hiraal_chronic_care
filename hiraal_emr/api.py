@@ -944,13 +944,10 @@ def self_register(full_name=None, mobile=None, otp=None, email=None,
 
 
 def _has_active_subscription(patient):
-    """True when the patient has a paid, currently-active Care Subscription.
-    This is the app's feature gate: no active subscription → paywall."""
-    if not patient:
-        return False
-    return bool(frappe.db.exists(
-        "Care Subscription", {"patient": patient, "status": "Active"}
-    ))
+    """True when the patient may use paid app features (Active, including trial)."""
+    from hiraal_emr.services.subscription_catalog import has_active_subscription
+
+    return has_active_subscription(patient)
 
 
 @frappe.whitelist()
@@ -1207,6 +1204,35 @@ def get_doctors():
 
 
 @frappe.whitelist()
+def get_care_stations():
+    """Active Care Stations for in-person booking in the mobile app.
+
+    Staff maintain these under Hiraal EMR → Care Stations. Only active rows
+    are returned, ordered for display. Lat/lng are included when set so the
+    app can later sort by distance.
+    """
+    if not frappe.db.exists("DocType", "Care Station"):
+        return []
+    return _safe_get_all(
+        "Care Station",
+        filters={"is_active": 1},
+        fields=[
+            "name",
+            "station_name",
+            "address",
+            "city",
+            "phone",
+            "display_order",
+            "latitude",
+            "longitude",
+        ],
+        order_by="display_order asc, station_name asc",
+        limit_page_length=200,
+        ignore_permissions=True,
+    )
+
+
+@frappe.whitelist()
 def get_lab_test_templates():
     """Enabled lab test templates for the lab test screen."""
     return _safe_get_all(
@@ -1387,15 +1413,37 @@ def _telemed_room_url(appointment_name):
 @frappe.whitelist(allow_guest=False)
 def book_appointment(patient, practitioner, appointment_date,
                      appointment_time=None, appointment_type="Chronic Care Follow Up",
-                     notes=None, is_video=0):
+                     notes=None, is_video=0, care_station=None):
     """Book a patient appointment from the mobile app.
 
     ``notes`` carries the patient's reason for the visit so the clinician sees
     why the appointment was requested (previously collected in the app but
     dropped on the way to the server). When ``is_video`` is set, a Telemedicine
     Session with a Jitsi meeting link is created and the link is returned so the
-    app can offer a "Join Video Call" button."""
+    app can offer a "Join Video Call" button.
+
+    ``care_station`` is the Care Station name for in-person visits (nearest
+    clinic location). Stored on the appointment when a custom link field exists,
+    and always appended into notes for desk visibility.
+    """
     _require_patient_access(patient)
+
+    station_label = None
+    if care_station and not int(is_video or 0):
+        station = frappe.db.get_value(
+            "Care Station",
+            {"name": care_station, "is_active": 1},
+            ["name", "station_name", "address", "city"],
+            as_dict=True,
+        )
+        if not station:
+            frappe.throw(_("Please choose a valid care station for the in-person visit."))
+        station_label = station.station_name or station.name
+        if station.city:
+            station_label = f"{station_label} — {station.city}"
+        if station.address:
+            station_label = f"{station_label} ({station.address})"
+
     appt = frappe.new_doc("Patient Appointment")
     meta = frappe.get_meta("Patient Appointment")
     appt.patient = patient
@@ -1407,11 +1455,20 @@ def book_appointment(patient, practitioner, appointment_date,
     appt.appointment_date = appointment_date
     appt.appointment_time = appointment_time
     appt.appointment_type = appointment_type
+    if care_station and meta.has_field("custom_care_station"):
+        appt.custom_care_station = care_station
+
+    note_parts = []
     if notes:
+        note_parts.append(str(notes).strip())
+    if station_label:
+        note_parts.append(_("Care station: {0}").format(station_label))
+    combined_notes = "\n\n".join(note_parts) if note_parts else None
+    if combined_notes:
         if meta.has_field("notes"):
-            appt.notes = notes
+            appt.notes = combined_notes
         elif meta.has_field("custom_reason"):
-            appt.custom_reason = notes
+            appt.custom_reason = combined_notes
     appt.insert(ignore_permissions=True)
 
     meeting_url = None
@@ -1435,6 +1492,7 @@ def book_appointment(patient, practitioner, appointment_date,
         "appointment": appt.name,
         "status": appt.status,
         "meeting_url": meeting_url,
+        "care_station": care_station,
     }
 
 
@@ -2409,36 +2467,42 @@ def get_payment_methods():
 # pay their way back and the paywall dead-ends.
 _SUB_PAYABLE_STATUSES = ["Active", "Overdue", "Past Due", "Expiring Soon", "Suspended"]
 
-# Plan catalog. Standard $5/mo, Premium $10/mo.
-_SUBSCRIPTION_PLANS = [
-    {"name": "Standard Care", "monthly_fee": 5.0, "features": [
-        "Daily vitals monitoring", "Nurse & doctor review",
-        "Medicine delivery", "Telemedicine visits"]},
-    {"name": "Premium Care", "monthly_fee": 10.0, "features": [
-        "Everything in Standard Care", "Priority alerts & faster review",
-        "Optional 5G home hub", "Extended support"]},
-]
-_PLAN_FEES = {p["name"]: p["monthly_fee"] for p in _SUBSCRIPTION_PLANS}
-
 
 def _my_active_subscription(patient):
     return frappe.db.get_value(
         "Care Subscription",
         {"patient": patient, "status": ["in", _SUB_PAYABLE_STATUSES]},
-        ["name", "monthly_fee"], as_dict=True, order_by="creation desc",
+        ["name", "monthly_fee", "plan", "is_on_trial", "trial_end_date", "status"],
+        as_dict=True, order_by="creation desc",
     )
 
 
 @frappe.whitelist()
 def get_my_subscription():
-    """The logged-in patient's current Care Subscription (or null), the plan
-    catalog, and recent payment history — for the app's Subscriptions screen."""
+    """The logged-in patient's Care Subscription, ERPNext plan catalog,
+    category list, free-trial settings, and payment history."""
+    from hiraal_emr.services.subscription_catalog import (
+        patient_trial_eligible,
+        subscription_plans_catalog,
+        trial_config,
+        has_active_subscription,
+    )
+
     patient = _my_patient_name()
+    fields = [
+        "name", "plan", "monthly_fee", "status", "start_date", "next_billing_date",
+        "last_payment_date", "last_payment_status", "auto_renew", "total_collected",
+    ]
+    # Trial / category columns may be missing until migrate on older sites.
+    meta = frappe.get_meta("Care Subscription")
+    for extra in ("plan_category", "is_on_trial", "trial_end_date"):
+        if meta.has_field(extra):
+            fields.append(extra)
+
     sub = frappe.db.get_value(
         "Care Subscription",
         {"patient": patient, "status": ["in", _SUB_PAYABLE_STATUSES + ["Suspended"]]},
-        ["name", "plan", "monthly_fee", "status", "start_date", "next_billing_date",
-         "last_payment_date", "last_payment_status", "auto_renew", "total_collected"],
+        fields,
         as_dict=True, order_by="creation desc",
     )
     history = []
@@ -2449,42 +2513,125 @@ def get_my_subscription():
             fields=["amount", "payment_date", "payment_method", "status", "reference_id"],
             order_by="payment_date desc", limit_page_length=10,
         )
+    plans = subscription_plans_catalog()
+    trial = trial_config()
+    trial_eligible = bool(trial["enabled"] and patient_trial_eligible(patient))
+    categories = []
+    for p in plans:
+        cat = p.get("category") or "General"
+        if cat not in categories:
+            categories.append(cat)
     return {
         "subscription": sub,
-        "plans": _SUBSCRIPTION_PLANS,
+        "plans": plans,
+        "categories": categories,
         "history": history,
-        # True only when a paid subscription is currently Active — the app's
-        # feature gate keys off this.
-        "active": bool(sub and sub.get("status") == "Active"),
+        "trial": {
+            "enabled": trial["enabled"],
+            "days": trial["days"],
+            "eligible": trial_eligible,
+        },
+        "active": has_active_subscription(patient),
     }
 
 
 @frappe.whitelist()
-def subscribe_my_plan(plan):
-    """Create a Care Subscription for the logged-in patient on the chosen plan,
-    due immediately. The app then calls pay_my_subscription to activate it.
-    If the patient already has a live subscription, returns that one instead."""
+def subscribe_my_plan(plan, start_trial=0):
+    """Create a Care Subscription for the logged-in patient on the chosen plan.
+
+    When ``start_trial`` is set and free trial is enabled in Chronic Care
+    Settings (and the plan allows it), activate immediately with no payment.
+    Otherwise create an Overdue subscription for the app to collect payment.
+    """
+    from hiraal_emr.services.subscription_catalog import (
+        patient_trial_eligible,
+        resolve_plan,
+        trial_config,
+    )
+
     patient = _my_patient_name()
-    fee = _PLAN_FEES.get(plan)
-    if fee is None:
-        frappe.throw(_("Unknown plan"))
+    plan_row = resolve_plan(plan)
+    if not plan_row:
+        frappe.throw(_("Unknown or inactive plan"))
+
+    fee = flt(plan_row["monthly_fee"])
     existing = _my_active_subscription(patient)
     if existing:
-        return {"subscription": existing.name, "monthly_fee": flt(existing.monthly_fee),
-                "plan": plan, "status": "existing"}
+        on_trial = 1 if int(existing.get("is_on_trial") or 0) else 0
+        return {
+            "subscription": existing.name,
+            "monthly_fee": flt(existing.monthly_fee),
+            "plan": existing.plan or plan,
+            "status": "existing",
+            "amount_due_now": 0 if (existing.status == "Active" and on_trial) else flt(existing.monthly_fee),
+            "is_on_trial": on_trial,
+            "trial_end_date": existing.get("trial_end_date"),
+        }
+
+    want_trial = int(start_trial or 0)
+    trial = trial_config()
+    can_trial = (
+        want_trial
+        and trial["enabled"]
+        and int(plan_row.get("allows_trial") or 0)
+        and patient_trial_eligible(patient)
+    )
+    if want_trial and not can_trial:
+        frappe.throw(_("Free trial is not available for this plan or account."))
+
     sub = frappe.new_doc("Care Subscription")
     sub.patient = patient
     sub.patient_phone = frappe.db.get_value("Patient", patient, "mobile")
-    sub.plan = plan
+    sub.plan = plan_row["name"]
+    if hasattr(sub, "plan_category"):
+        sub.plan_category = plan_row.get("category") or "General"
     sub.monthly_fee = fee
-    sub.status = "Overdue"          # unpaid; becomes Active once paid
-    sub.start_date = today()
-    sub.next_billing_date = today()
     sub.auto_renew = 1
+    sub.start_date = today()
+
+    if can_trial:
+        trial_end = add_days(getdate(today()), trial["days"])
+        sub.status = "Active"
+        if hasattr(sub, "is_on_trial"):
+            sub.is_on_trial = 1
+            sub.trial_end_date = trial_end
+        sub.next_billing_date = trial_end
+        sub.insert(ignore_permissions=True)
+        frappe.db.commit()
+        audit_log(
+            "Create", "Care Subscription", sub.name,
+            f"Patient started {trial['days']}-day trial on {plan_row['name']}",
+        )
+        return {
+            "subscription": sub.name,
+            "monthly_fee": fee,
+            "plan": plan_row["name"],
+            "status": sub.status,
+            "amount_due_now": 0,
+            "is_on_trial": 1,
+            "trial_end_date": str(trial_end),
+            "trial_days": trial["days"],
+        }
+
+    sub.status = "Overdue"  # unpaid; becomes Active once paid
+    if hasattr(sub, "is_on_trial"):
+        sub.is_on_trial = 0
+    sub.next_billing_date = today()
     sub.insert(ignore_permissions=True)
     frappe.db.commit()
-    audit_log("Create", "Care Subscription", sub.name, f"Patient subscribed to {plan} via app")
-    return {"subscription": sub.name, "monthly_fee": fee, "plan": plan, "status": sub.status}
+    audit_log(
+        "Create", "Care Subscription", sub.name,
+        f"Patient subscribed to {plan_row['name']} via app",
+    )
+    return {
+        "subscription": sub.name,
+        "monthly_fee": fee,
+        "plan": plan_row["name"],
+        "status": sub.status,
+        "amount_due_now": fee,
+        "is_on_trial": 0,
+        "trial_end_date": None,
+    }
 
 
 @frappe.whitelist()
@@ -2496,6 +2643,8 @@ def pay_my_subscription(provider, method, phone):
     sub = _my_active_subscription(patient)
     if not sub:
         frappe.throw(_("No subscription found for your account"))
+    if int(sub.get("is_on_trial") or 0):
+        frappe.throw(_("You are on a free trial. Payment is due when the trial ends."))
     amount = flt(sub.monthly_fee)
     if amount <= 0:
         frappe.throw(_("Your subscription amount is not set"))
