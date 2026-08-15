@@ -20,6 +20,7 @@
       { label: "Telemedicine", icon: "video_camera_front", route: "/app/telemedicine-waiting-room", name: "telemedicine" },
     ]},
     { label: "BILLING", items: [
+      { label: "Subscription Plans", icon: "sell", route: "/app/subscription-plan", name: "subscription-plans" },
       { label: "Subscriptions", icon: "card_membership", route: "/app/care-subscription", name: "subscriptions" },
       { label: "Payments", icon: "payments", route: "/app/subscription-payment", name: "payments" },
     ]},
@@ -28,6 +29,7 @@
       { label: "Analytics", icon: "analytics", route: "/app/analytics-dashboard", name: "analytics" },
     ]},
     { label: "SETTINGS", items: [
+      { label: "Care Stations", icon: "location_on", route: "/app/care-station", name: "care-stations" },
       { label: "Settings", icon: "settings", route: "/app/chronic-care-settings", name: "settings" },
       { label: "User Management", icon: "manage_accounts", route: "/app/user", name: "user-management" },
     ]},

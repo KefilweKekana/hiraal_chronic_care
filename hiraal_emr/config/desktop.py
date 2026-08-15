@@ -27,8 +27,16 @@ def get_data():
             {
                 "label": _("Billing"),
                 "items": [
+                    "Subscription Plan",
                     "Care Subscription",
                     "Subscription Payment",
+                ],
+            },
+            {
+                "label": _("Settings"),
+                "items": [
+                    "Care Station",
+                    "Chronic Care Settings",
                 ],
             },
         ],
