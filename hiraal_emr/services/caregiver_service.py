@@ -11,6 +11,8 @@ import frappe
 from frappe import _
 from frappe.utils import flt, get_datetime, now_datetime
 
+from hiraal_emr.services.security_helpers import client_rate_key, rate_limit
+
 
 LINK_FIELDS = [
     "name",
@@ -192,9 +194,10 @@ def invite_caregiver(patient: str, country_code: str, whatsapp_number: str, rela
 def request_sponsor_connection(country_code: str, whatsapp_number: str, relationship: str,
                              sponsor_name: str | None = None):
     phone = normalize_phone(country_code, whatsapp_number)
+    rate_limit(client_rate_key("sponsor_connect", phone), limit=10, window_sec=3600)
     patient_row = _patient_by_phone(phone)
     if not patient_row:
-        frappe.throw(_("No patient found with that WhatsApp number"))
+        frappe.throw(_("We could not find an account for that number. Check the number and try again."))
     sponsor_user = frappe.session.user
     sponsor_patient = frappe.db.get_value("Patient", {"user_id": sponsor_user}, "name")
     sponsor_display = sponsor_name or frappe.db.get_value("User", sponsor_user, "full_name") or sponsor_user
@@ -231,7 +234,31 @@ def request_sponsor_connection(country_code: str, whatsapp_number: str, relation
     return doc, patient_row
 
 
+def _phone_tail(phone: str) -> str:
+    digits = re.sub(r"\D", "", phone or "")
+    return digits[-9:] if len(digits) >= 9 else digits
+
+
+def _mask_phone(phone: str) -> str:
+    digits = re.sub(r"\D", "", phone or "")
+    if len(digits) < 4:
+        return "***"
+    return f"***{digits[-4:]}"
+
+
+def _user_matches_invite_phone(user: str, doc) -> bool:
+    """Ensure the redeeming account matches the invited WhatsApp/phone when set."""
+    invite_phone = doc.phone or normalize_phone(doc.country_code or "", doc.whatsapp_number or "")
+    if not invite_phone:
+        return True
+    user_phone = frappe.db.get_value("User", user, "mobile_no") or ""
+    if not user_phone:
+        return False
+    return _phone_tail(invite_phone) == _phone_tail(user_phone)
+
+
 def find_patient_for_sponsor(query: str):
+    rate_limit(client_rate_key("sponsor_search", query), limit=20, window_sec=3600)
     query = (query or "").strip()
     if not query:
         frappe.throw(_("Enter a phone number or member ID"))
@@ -253,7 +280,7 @@ def find_patient_for_sponsor(query: str):
     return {
         "patient": row.name,
         "patient_name": row.patient_name,
-        "mobile": row.mobile,
+        "mobile": _mask_phone(row.mobile),
         "member_id": row.name,
         "status": row.status,
         "care_plan": plan.plan if plan else None,
@@ -266,11 +293,15 @@ def redeem_invitation_code(code: str, user: str | None = None):
     code = (code or "").strip().upper()
     if not code:
         frappe.throw(_("Enter an invitation code"))
+    rate_limit(client_rate_key("redeem_invite", code), limit=10, window_sec=900)
     name = frappe.db.get_value("Family Member", {"invite_code": code, "link_status": "Pending"}, "name")
     if not name:
         frappe.throw(_("Invalid or expired invitation code"))
     doc = frappe.get_doc("Family Member", name)
-    doc.caregiver_user = user or frappe.session.user
+    redeem_user = user or frappe.session.user
+    if not _user_matches_invite_phone(redeem_user, doc):
+        frappe.throw(_("Invalid or expired invitation code"))
+    doc.caregiver_user = redeem_user
     doc.link_status = "Accepted"
     doc.accepted_on = now_datetime()
     if doc.can_pay_for_care:

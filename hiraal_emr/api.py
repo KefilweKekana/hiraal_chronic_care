@@ -8,7 +8,7 @@ from frappe import _
 from frappe.utils import add_days, add_months, add_to_date, flt, get_datetime, getdate, now_datetime, today
 import json
 
-from hiraal_emr.services.otp_service import generate_otp, verify_otp as otp_verify
+from hiraal_emr.services.otp_service import generate_otp, verify_otp as otp_verify, request_allowed
 from hiraal_emr.services.sms_service import send_otp_sms, send_alert_sms, send_sms
 try:
     from hiraal_emr.doctype.audit_log.audit_log import log_action as audit_log
@@ -663,6 +663,9 @@ def request_otp(mobile=None, channel="sms", email=None):
         email = (email or "").strip().lower()
         if "@" not in email or "." not in email.rsplit("@", 1)[-1]:
             frappe.throw(_("A valid email is required"))
+        if not request_allowed(email):
+            frappe.logger("hiraal_otp").warning("OTP rate limit exceeded for %s", email)
+            return {"success": True, "message": "OTP sent", "channel": "email", "sent_to": _mask_email(email)}
         otp = generate_otp(email)
         # Only actually deliver to a registered patient's email address.
         if frappe.db.exists("Patient", {"email": email, "status": "Active"}):
@@ -674,6 +677,9 @@ def request_otp(mobile=None, channel="sms", email=None):
     if not mobile or len(str(mobile).strip()) < 6:
         frappe.throw(_("Valid mobile number is required"))
     mobile = str(mobile).strip()
+    if not request_allowed(mobile):
+        frappe.logger("hiraal_otp").warning("OTP rate limit exceeded for %s", mobile)
+        return {"success": True, "message": "OTP sent", "channel": "sms", "sent_to": None}
     otp = generate_otp(mobile)
     used = "sms"
     sent_to = None
@@ -900,6 +906,8 @@ def self_register(full_name=None, mobile=None, otp=None, email=None,
         frappe.throw(_("Your date of birth is required"))
 
     # ── verify phone ownership ──
+    if not request_allowed(mobile):
+        frappe.throw(_("Too many attempts. Please try again later."), frappe.ValidationError)
     if not otp_verify(mobile, otp):
         frappe.throw(_("Invalid or expired code"), frappe.AuthenticationError)
 
@@ -3372,6 +3380,21 @@ def sponsor_patient_subscription(patient, plan, provider, method, phone, family_
     if not link_name:
         frappe.throw(_("You are not authorized to pay for this patient"))
 
+    link_row = frappe.db.get_value(
+        "Family Member",
+        link_name,
+        ["patient", "caregiver_user", "can_pay_for_care", "link_status"],
+        as_dict=True,
+    )
+    if (
+        not link_row
+        or link_row.patient != patient
+        or link_row.caregiver_user != sponsor_user
+        or not link_row.can_pay_for_care
+        or link_row.link_status not in ("Accepted", "Active", "Pending")
+    ):
+        frappe.throw(_("You are not authorized to pay for this patient"), frappe.PermissionError)
+
     plan_row = resolve_plan(plan)
     if not plan_row:
         frappe.throw(_("Unknown or inactive plan"))
@@ -3451,6 +3474,9 @@ def check_sponsor_payment(transaction_log):
         owner = json.loads(owner_raw)
     else:
         owner = {"patient": owner_raw}
+    sponsor = owner.get("sponsor")
+    if sponsor and sponsor != frappe.session.user:
+        frappe.throw(_("Not permitted"), frappe.PermissionError)
 
     pos = _mobile_payments_pos()
     if not pos:
@@ -3479,11 +3505,35 @@ def get_sponsored_patient_data(patient, data_type="readings"):
             "caregiver_user": user,
             "link_status": ["in", ["Accepted", "Active"]],
         },
-        ["name", "can_view_vitals", "can_view_appointments", "can_view_medications"],
+        ["name", "can_view_vitals", "can_view_appointments", "can_view_medications", "can_pay_for_care"],
         as_dict=True,
     )
     if not link:
         frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+    if data_type == "summary":
+        plan = frappe.db.get_value(
+            "Care Subscription",
+            {"patient": patient, "status": ["in", ["Active", "Overdue", "Past Due", "Expiring Soon", "Suspended"]]},
+            ["plan", "status", "monthly_fee"],
+            as_dict=True,
+        )
+        patient_row = frappe.db.get_value(
+            "Patient",
+            patient,
+            ["patient_name", "status"],
+            as_dict=True,
+        ) or {}
+        summary = {
+            "patient_name": patient_row.get("patient_name"),
+            "status": patient_row.get("status"),
+            "care_plan": plan.plan if plan else None,
+            "subscription_status": plan.status if plan else None,
+            "monthly_fee": flt(plan.monthly_fee) if plan else 0,
+        }
+        if link.can_pay_for_care:
+            summary["can_manage_subscription"] = True
+        return {"success": True, "summary": summary}
 
     if data_type == "readings" and link.can_view_vitals:
         rows = _safe_get_all(

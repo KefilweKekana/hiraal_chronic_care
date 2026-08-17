@@ -1,5 +1,7 @@
 import frappe
 
+from hiraal_emr.services.security_helpers import client_rate_key, rate_limit
+
 
 def get_context(context):
     context.no_cache = 1
@@ -15,6 +17,12 @@ def get_context(context):
     context.code = code
     if not code:
         context.error = "Missing invitation code."
+        return context
+
+    try:
+        rate_limit(client_rate_key("invite_page", code), limit=30, window_sec=900)
+    except Exception:
+        context.error = "Too many attempts. Please try again later."
         return context
 
     try:
@@ -38,6 +46,11 @@ def get_context(context):
 
     if not row:
         context.error = "This invitation code is invalid or has expired."
+        return context
+
+    if row.get("link_status") != "Pending":
+        context.error = "This invitation is no longer active."
+        context.invite = None
         return context
 
     context.invite = row
