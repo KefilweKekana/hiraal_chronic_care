@@ -1,0 +1,111 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Hiraal Life Care Invitation{% endblock %}
+
+{% block page_content %}
+<style>
+  .hiraal-invite {
+    max-width: 420px;
+    margin: 2rem auto;
+    padding: 1.5rem;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  }
+  .hiraal-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  }
+  .hiraal-logo {
+    color: #0f766e;
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+  }
+  .hiraal-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+    color: #111827;
+  }
+  .hiraal-sub {
+    color: #4b5563;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+  }
+  .hiraal-code {
+    display: inline-block;
+    letter-spacing: 0.15em;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f766e;
+    background: #ecfeff;
+    border: 1px dashed #99f6e4;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    margin: 0.5rem 0 1rem;
+  }
+  .hiraal-steps {
+    margin: 0;
+    padding-left: 1.2rem;
+    color: #374151;
+    line-height: 1.6;
+  }
+  .hiraal-error {
+    color: #b91c1c;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 12px;
+    padding: 1rem;
+  }
+  .hiraal-status {
+    display: inline-block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #92400e;
+    background: #fef3c7;
+    border-radius: 999px;
+    padding: 0.25rem 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+</style>
+
+<div class="hiraal-invite">
+  <div class="hiraal-card">
+    <div class="hiraal-logo">Hiraal Life Care</div>
+
+    {% if error %}
+      <div class="hiraal-error">{{ error }}</div>
+    {% else %}
+      {% if invite.link_status != "Pending" %}
+        <span class="hiraal-status">Invitation {{ invite.link_status }}</span>
+      {% endif %}
+
+      <h1 class="hiraal-title">
+        {% if is_sponsor %}
+          Care sponsorship invitation
+        {% else %}
+          Caregiver invitation
+        {% endif %}
+      </h1>
+
+      <p class="hiraal-sub">
+        <strong>{{ invite.patient_name }}</strong>
+        invited you to join Hiraal Life Care
+        {% if invite.relationship %} as their {{ invite.relationship|lower }}{% endif %}.
+      </p>
+
+      <div>Your invitation code</div>
+      <div class="hiraal-code">{{ code }}</div>
+
+      <ol class="hiraal-steps">
+        <li>Install the Hiraal Life Care app on your phone.</li>
+        <li>Sign in or create an account with your mobile number.</li>
+        <li>Open <strong>Profile → Sponsor Care</strong>.</li>
+        <li>Tap <strong>Redeem Code</strong> and enter <strong>{{ code }}</strong>.</li>
+      </ol>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
