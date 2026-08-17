@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20" width="30" height="20">
+  <!-- White middle band (background) -->
+  <rect width="30" height="20" fill="#ffffff"/>
+  <!-- Green top band with the Shahada -->
+  <rect width="30" height="6.667" y="0" fill="#009543"/>
+  <!-- Red bottom band -->
+  <rect width="30" height="6.667" y="13.333" fill="#d21034"/>
+  <!-- Shahada (decorative; may not render at icon size) -->
+  <text x="15" y="4.5" font-family="serif" font-size="2.3" fill="#ffffff"
+        text-anchor="middle">لا إله إلا الله محمد رسول الله</text>
+  <!-- Black five-pointed star centred on the white band -->
+  <polygon fill="#000000" points="15,6.8 15.719,9.01 18.043,9.011 16.164,10.378 16.881,12.589 15,11.224 13.119,12.589 13.836,10.378 11.957,9.011 14.281,9.01"/>
+</svg>

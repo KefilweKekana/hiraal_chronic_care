@@ -1,0 +1,811 @@
+{
+  "@@locale": "en",
+  "appName": "Hiraal",
+  "appNameFull": "Hiraal Lifecare",
+  "appBrandSubtitle": "Lifecare",
+  "appTagline": "Better Monitoring. Better Health.",
+  "welcomeHeadline": "Better Monitoring.\nBetter Health.",
+  "appSubtitle": "Your daily readings. Our daily care.\nTogether, we stay ahead.",
+  "trustBadgeDataSafe": "Your data is\nsafe & secure",
+  "trustBadgeTrustedClinics": "Trusted by clinics\nthat care",
+  "getStarted": "Get Started",
+  "needHelpContactSupport": "Need help? Contact support",
+  "contactSupportTitle": "Contact Support",
+  "supportPhoneLine": "Phone: {primary} / {secondary}",
+  "@supportPhoneLine": {
+    "placeholders": {
+      "primary": {"type": "String"},
+      "secondary": {"type": "String"}
+    }
+  },
+  "supportShortCodeLine": "Telesom or Somtel: call {shortCode}",
+  "@supportShortCodeLine": {
+    "placeholders": {
+      "shortCode": {"type": "String"}
+    }
+  },
+  "supportEmailLine": "Email: {email}",
+  "@supportEmailLine": {
+    "placeholders": {
+      "email": {"type": "String"}
+    }
+  },
+  "supportHoursLine": "Hours: {hours}",
+  "@supportHoursLine": {
+    "placeholders": {
+      "hours": {"type": "String"}
+    }
+  },
+  "close": "Close",
+  "welcomeBack": "Welcome back",
+  "unlockWithBio": "Unlock with {bioLabel} to continue",
+  "@unlockWithBio": {
+    "placeholders": {
+      "bioLabel": {"type": "String"}
+    }
+  },
+  "logInWithBio": "Log in with {bioLabel}",
+  "@logInWithBio": {
+    "placeholders": {
+      "bioLabel": {"type": "String"}
+    }
+  },
+  "signInAnotherWay": "Sign in another way",
+  "biometricFingerprint": "Fingerprint",
+
+  "letsGetStarted": "Let's get started",
+  "enterMobileLinkedToRecord": "Enter the mobile number linked to your\npatient record.",
+  "mobileNumber": "Mobile Number",
+  "emailAddress": "Email Address",
+  "enterEmailHint": "Enter your email address",
+  "enterPhoneHint": "Enter phone number",
+  "otpWillEmailCode": "We'll email your one-time code to this address.",
+  "lookupRecordInHospital": "We will look up your record in the hospital system",
+  "sendMyCodeVia": "Send my code via",
+  "channelSms": "Text message",
+  "channelSmsSublabel": "SMS to your phone",
+  "channelEmail": "Email",
+  "channelEmailSublabel": "To the email on file",
+  "sendCode": "Send Code",
+  "infoSafeWithUs": "Your information is safe with us",
+  "newToHiraal": "New to Hiraal?",
+  "createAnAccount": "Create an account",
+
+  "verifyYourAccount": "Verify your account",
+  "otpSentSms": "We've sent a 6-digit code to",
+  "otpSentEmail": "We've emailed your 6-digit code to",
+  "yourEmailFallback": "your email",
+  "edit": "Edit",
+  "enterSixDigitCode": "Enter 6-digit code",
+  "didntReceiveCode": "Didn't receive the code?",
+  "resend": "Resend",
+  "resendInSeconds": "Resend in {seconds}s",
+  "@resendInSeconds": {
+    "placeholders": {
+      "seconds": {"type": "int"}
+    }
+  },
+  "otpExpiresInMinutes": "For your security, this code will expire in {minutes} minutes",
+  "@otpExpiresInMinutes": {
+    "placeholders": {
+      "minutes": {"type": "int"}
+    }
+  },
+  "verifyAndContinue": "Verify & Continue",
+  "verificationFailed": "Verification failed. Please try again.",
+  "failedToResendOtp": "Failed to resend OTP",
+  "codeResentEmail": "Code re-sent to your email",
+  "otpResentSuccess": "OTP resent successfully",
+
+  "navHome": "Home",
+  "navServices": "Services",
+  "navHistory": "History",
+  "navProfile": "Profile",
+  "offlineBanner": "You're offline — readings will be saved on this phone",
+  "backOnlineSyncing": "Back online — syncing…",
+
+  "greetingMorning": "Good morning,",
+  "greetingAfternoon": "Good afternoon,",
+  "greetingEvening": "Good evening,",
+  "patientFallback": "Patient",
+  "paymentPending": "Payment pending",
+  "orderPayToContinue": "Order #{id} — pay {amount} to continue",
+  "@orderPayToContinue": {
+    "placeholders": {
+      "id": {"type": "String"},
+      "amount": {"type": "String"}
+    }
+  },
+  "nextAppointment": "Next appointment",
+  "yourDoctor": "Your doctor",
+  "todaysDate": "Today's Date",
+  "lastSubmitted": "Last Submitted",
+  "noReadingYetToday": "No reading yet today",
+  "enterReadingsInfo": "Please enter your readings and send to your care team.",
+  "todaysReading": "Today's Reading",
+  "required": "Required",
+  "bloodPressure": "Blood Pressure",
+  "unitMmHg": "mmHg",
+  "systolicTop": "Systolic (Top)",
+  "diastolicBottom": "Diastolic (Bottom)",
+  "hintSystolic": "e.g. 120",
+  "hintDiastolic": "e.g. 80",
+  "bloodSugar": "Blood Sugar",
+  "unitMgDl": "mg/dL",
+  "hintBloodSugar": "e.g. 140",
+  "weight": "Weight",
+  "unitKg": "kg",
+  "hintWeight": "e.g. 72",
+  "medicineTaken": "Medicine Taken",
+  "medicineTakenPrompt": "Did you take your medicine as prescribed?",
+  "yesTaken": "Yes, taken",
+  "noMissed": "No, missed",
+  "addNoteOptional": "Add Note (optional)",
+  "howFeelingHint": "How are you feeling today?",
+  "connectDevice": "Connect Device",
+  "importReadingsFromDevice": "Import readings from your device",
+  "connected": "Connected",
+  "saveAndSend": "Save & Send",
+  "sendReadingToCareTeam": "Send reading to care team",
+  "submittingReading": "Submitting Your Reading...",
+  "dontCloseWhileSending": "Please don't close the app while we send your data.",
+  "dataSecureProtected": "Your data is secure and protected.",
+  "failedToSubmitReading": "Failed to submit reading",
+  "allSet": "All Set!",
+  "readingSavedSent": "Your reading from today has been\nsaved and sent to your care team.",
+  "careTeamNotified": "Your data is secure and your care team\nhas been notified.",
+  "submissionSummary": "Submission Summary",
+  "date": "Date",
+  "time": "Time",
+  "sentTo": "Sent To",
+  "yourCareTeam": "Your Care Team",
+  "referenceId": "Reference ID",
+  "notAvailable": "N/A",
+  "notifiedWhenReviewed": "You will be notified when your care team\nreviews your reading.",
+  "goToHome": "Go to Home",
+  "viewHistory": "View History",
+
+  "servicesTitle": "Services",
+  "chooseCareToday": "Choose how you'd like to get care today.",
+  "searchServicesHint": "Search services, doctors, or medicines...",
+  "bookDoctor": "Book Doctor",
+  "bookDoctorSubtitle": "Consult with a\ndoctor online",
+  "hiraalPharma": "Hiraal Pharma",
+  "uploadPrescription": "Upload a\nprescription",
+  "labTest": "Lab Test",
+  "labTestSubtitle": "Book tests near\nyou",
+  "quickSecureHealthcare": "Quick, secure, and reliable healthcare at your fingertips.",
+  "recommendedForYou": "Recommended for You",
+  "viewAll": "View all",
+  "doctorFallback": "Doctor",
+  "departmentGeneral": "General",
+  "yourVideoVisits": "Your Video Visits",
+  "joinLiveVideo": "Join a live video consultation",
+  "orderFromHiraalPharma": "Order from Hiraal Pharma",
+  "uploadRxForDelivery": "Upload your prescription for\nreview and delivery",
+  "popularCategories": "Popular Categories",
+  "categoryHeartCare": "Heart Care",
+  "categoryChestCare": "Chest Care",
+  "categoryDiabetesCare": "Diabetes Care",
+  "categoryMentalHealth": "Mental Health",
+
+  "selectDoctor": "Select Doctor",
+  "noSpecialistsShowingAll": "No {specialty} specialists listed — showing all doctors",
+  "@noSpecialistsShowingAll": {
+    "placeholders": {
+      "specialty": {"type": "String"}
+    }
+  },
+  "retry": "Retry",
+  "refresh": "Refresh",
+  "noDoctorsAvailable": "No doctors are available right now. Please try again later.",
+  "appointmentDetails": "Appointment Details",
+  "reasonForVisit": "Reason for Visit",
+  "reasonVisitHint": "Please describe your symptoms or reason for the visit...",
+  "selectDate": "Select Date",
+  "timeSlot": "Time Slot",
+  "availableSlotsHint": "Showing available slots for today and next 7 days.",
+  "visitType": "Visit Type",
+  "chooseConsultHow": "Choose how you would like to consult.",
+  "videoCall": "Video Call",
+  "consultFromHome": "Consult from home",
+  "inPersonVisit": "In-Person Visit",
+  "visitAtClinic": "Visit at clinic",
+  "clinicLocationLabel": "Clinic Location (for in-person visit)",
+  "selectClinic": "Select a health center",
+  "pleaseSelectStation": "Please choose a care station for your visit.",
+  "noStationsAvailable": "No care stations are available right now. Please try again later or book a video visit.",
+  "appointmentSecureEasy": "Your appointment is secure and easy to manage.",
+  "requestAppointment": "Request Appointment",
+  "confirmationShortly": "You'll receive a confirmation shortly.",
+  "pleaseSelectDoctor": "Please select a doctor first.",
+  "pleaseDescribeReason": "Please describe your reason for the visit.",
+  "appointmentConfirmedTitle": "Appointment Confirmed",
+  "appointmentBooked": "Appointment Booked!",
+  "appointmentConfirmedFor": "Your appointment is confirmed for {date} at {time}.",
+  "@appointmentConfirmedFor": {
+    "placeholders": {
+      "date": {"type": "String"},
+      "time": {"type": "String"}
+    }
+  },
+  "videoVisitJoinReady": "This is a video visit. Your join link is ready under Video Visits.",
+  "goToVideoVisit": "Go to Video Visit",
+  "backToServices": "Back to Services",
+  "myAppointments": "My Appointments",
+  "noUpcomingAppointments": "No upcoming appointments",
+  "bookDoctorEmptyHint": "Book a doctor and your appointments\nwill appear here.",
+  "appointmentBookedStatus": "Booked",
+
+  "historyTitle": "History",
+  "filterReadingsTooltip": "Filter readings",
+  "filter": "Filter",
+  "filterAllTime": "All time",
+  "filterLast7Days": "Last 7 days",
+  "filterLast30Days": "Last 30 days",
+  "filterLast90Days": "Last 90 days",
+  "tabReadings": "Readings",
+  "tabNotes": "Notes",
+  "tabAlerts": "Alerts",
+  "statSubmissionsTotal": "Submissions\nTotal",
+  "statAvgSystolic": "Avg. Systolic\nmonthly",
+  "statAvgSugar": "Avg. Sugar\nmg/dL",
+  "historyInfoBanner": "Your past readings and care team feedback appear here.",
+  "careTeamFeedbackFooter": "Care team feedback will appear after they review your readings.",
+  "listView": "List View",
+  "chartView": "Chart View",
+  "todayDateLabel": "Today, {date}",
+  "@todayDateLabel": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "yesterdayDateLabel": "Yesterday, {date}",
+  "@yesterdayDateLabel": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "notEnoughChartData": "Not enough data for chart",
+  "systolic": "Systolic",
+  "diastolic": "Diastolic",
+  "sugar": "Sugar",
+  "noNotesYet": "No notes yet",
+  "noAlerts": "No alerts",
+  "statusPending": "Pending",
+  "statusSent": "Sent",
+
+  "profileTitle": "Profile",
+  "memberId": "Member ID: {id}",
+  "@memberId": {
+    "placeholders": {
+      "id": {"type": "String"}
+    }
+  },
+  "yourProgram": "Your Program",
+  "programHypertensionCare": "Hypertension Care",
+  "memberSinceMay2024": "Member since May 2024",
+  "statusActive": "Active",
+  "myInformation": "My Information",
+  "personalInformation": "Personal Information",
+  "updatePersonalDetails": "Update your personal details",
+  "healthInformation": "Health Information",
+  "viewHealthSummary": "View your health summary",
+  "medicalHistory": "Medical History",
+  "viewPastRecords": "View your past records",
+  "addresses": "Addresses",
+  "manageAddresses": "Manage your addresses",
+  "myActivity": "My Activity",
+  "countUpcoming": "{count} Upcoming",
+  "@countUpcoming": {
+    "placeholders": {
+      "count": {"type": "String"}
+    }
+  },
+  "appointments": "Appointments",
+  "countScheduled": "{count} Scheduled",
+  "@countScheduled": {
+    "placeholders": {
+      "count": {"type": "String"}
+    }
+  },
+  "labTests": "Lab Tests",
+  "countActive": "{count} Active",
+  "@countActive": {
+    "placeholders": {
+      "count": {"type": "String"}
+    }
+  },
+  "orders": "Orders",
+  "account": "Account",
+  "subscription": "Subscription",
+  "subscriptionSubtitle": "View, subscribe, or renew your plan",
+  "payments": "Payments",
+  "paymentsSubtitle": "View your payment history and receipts",
+  "privacyAndSecurity": "Privacy & Security",
+  "manageAccountSecurity": "Manage your account security",
+  "settings": "Settings",
+  "settingsSubtitle": "App version and info",
+  "logOut": "Log Out",
+  "couldNotLogOut": "Could not log out. Please try again.",
+  "language": "Language",
+  "languageSubtitle": "English or Soomaali",
+  "chooseLanguage": "Choose language",
+  "languageEnglish": "English",
+  "languageSomali": "Soomaali",
+
+  "reminders": "Reminders",
+  "medicationReminder": "Medication reminder",
+  "dailyAtTime": "Daily at {time}",
+  "@dailyAtTime": {
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "readingReminder": "Reading reminder",
+  "accessibility": "Accessibility",
+  "largeText": "Large text",
+  "largeTextSubtitle": "Increase text size throughout the app",
+  "about": "About",
+  "appVersion": "App Version",
+  "build": "Build",
+  "buildDebug": "Debug",
+  "buildRelease": "Release",
+
+  "myOrders": "My Orders",
+  "newOrder": "New Order",
+  "noOrdersYet": "No orders yet",
+  "tapNewOrderHint": "Tap “New Order” to request a medicine delivery.",
+  "prescriptionOrder": "Prescription order",
+  "plusMore": "+{count} more",
+  "@plusMore": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "otherMedicine": "other medicine",
+  "cancelled": "Cancelled",
+  "tapToPay": "Tap to pay",
+  "paymentPendingShort": "Payment pending",
+  "outForDelivery": "Out for delivery",
+  "delivered": "Delivered",
+
+  "trackOrder": "Track Order",
+  "orderNumber": "Order #{id}",
+  "@orderNumber": {
+    "placeholders": {
+      "id": {"type": "String"}
+    }
+  },
+  "placedAt": "Placed {datetime}",
+  "@placedAt": {
+    "placeholders": {
+      "datetime": {"type": "String"}
+    }
+  },
+  "orderNotFound": "Order not found.",
+  "somethingWentWrong": "Something went wrong",
+  "itemsCount": "Medicines ({count})",
+  "@itemsCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "awaitingPharmacistReview": "Awaiting pharmacist review — items will appear here once your prescription is processed.",
+  "paymentSection": "Payment",
+  "subtotal": "Subtotal",
+  "deliveryFee": "Delivery fee",
+  "handlingFee": "Handling fee",
+  "tax": "Tax",
+  "total": "Total",
+  "status": "Status",
+  "confirmAndPay": "Confirm & Pay",
+  "confirmAndPayAmount": "Confirm & Pay  {amount}",
+  "@confirmAndPayAmount": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "stagePrescriptionReceived": "Prescription received",
+  "stageUnderReview": "Under pharmacist review",
+  "stageAwaitingPayment": "Awaiting your payment",
+  "stagePaymentConfirmed": "Payment confirmed",
+  "stagePreparing": "Preparing your medicines",
+  "stageOutForDelivery": "Out for delivery",
+  "stageDelivered": "Delivered",
+  "waitingForYourPayment": "Waiting for your payment",
+  "paymentPendingBadge": "Payment pending",
+
+  "payWith": "Pay with",
+  "mobileMoneyNumber": "Mobile-money number",
+  "mobileMoneyHint": "e.g. 252612345678",
+  "payAmount": "Pay {amount}",
+  "@payAmount": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "choosePaymentMethod": "Choose a payment method.",
+  "enterMobileMoneyNumber": "Enter your mobile-money number.",
+  "waitingForPayment": "Waiting for payment",
+  "approvePayWith": "Allow payment of {amount} via {method}",
+  "@approvePayWith": {
+    "placeholders": {
+      "amount": {"type": "String"},
+      "method": {"type": "String"}
+    }
+  },
+  "requestSentTo": "Request sent to {number}",
+  "@requestSentTo": {
+    "placeholders": {
+      "number": {"type": "String"}
+    }
+  },
+  "expiresIn": "Expires in {time}",
+  "@expiresIn": {
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "openMobileMoneyApp": "Open {method} on your phone",
+  "@openMobileMoneyApp": {
+    "placeholders": {
+      "method": {"type": "String"}
+    }
+  },
+  "enterPinToConfirm": "Enter your PIN to confirm the payment",
+  "pageConfirmsAutomatically": "This page will automatically confirm the payment",
+  "iPaidCheckNow": "I paid — check now",
+  "cancelAndTryAgain": "Cancel and try again",
+  "paymentSuccessful": "Payment successful",
+  "preparingMedicinesNow": "We're preparing your medicines now.",
+  "exit": "Exit",
+  "senderMobileNumber": "Sending phone number",
+
+  "noPaymentsYet": "No payments yet",
+  "paymentsEmptyHint": "Your subscription and order payments will appear here.",
+  "careSubscription": "Care subscription",
+  "orderTitle": "Order {id}",
+  "@orderTitle": {
+    "placeholders": {
+      "id": {"type": "String"}
+    }
+  },
+  "paid": "Paid",
+  "paymentReceipt": "Payment receipt",
+  "item": "Item",
+  "service": "Service",
+  "reference": "Reference",
+  "amount": "Amount",
+  "shareReceipt": "Share receipt",
+  "shareReceiptWithSomeone": "Share the receipt",
+
+  "notifications": "Notifications",
+  "markAllRead": "Mark all read",
+  "tabAll": "All",
+  "tabMessages": "Messages",
+  "tabReminders": "Reminders",
+  "noNotificationsYet": "No notifications yet",
+  "notificationsEmptyHint": "Messages, reminders and alerts from your\ncare team will appear here.",
+  "sectionToday": "Today",
+  "sectionYesterday": "Yesterday",
+  "sectionThisWeek": "This week",
+  "sectionOlder": "Older",
+  "justNow": "just now",
+  "minutesAgo": "{minutes} min ago",
+  "@minutesAgo": {
+    "placeholders": {
+      "minutes": {"type": "int"}
+    }
+  },
+  "hoursAgo": "{hours}h ago",
+  "@hoursAgo": {
+    "placeholders": {
+      "hours": {"type": "int"}
+    }
+  },
+  "daysAgo": "{days}d ago",
+  "@daysAgo": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+
+  "monthJanuary": "January",
+  "monthFebruary": "February",
+  "monthMarch": "March",
+  "monthApril": "April",
+  "monthMay": "May",
+  "monthJune": "June",
+  "monthJuly": "July",
+  "monthAugust": "August",
+  "monthSeptember": "September",
+  "monthOctober": "October",
+  "monthNovember": "November",
+  "monthDecember": "December",
+  "weekdayMonday": "Monday",
+  "weekdayTuesday": "Tuesday",
+  "weekdayWednesday": "Wednesday",
+  "weekdayThursday": "Thursday",
+  "weekdayFriday": "Friday",
+  "weekdaySaturday": "Saturday",
+  "weekdaySunday": "Sunday",
+
+  "hiraalPharma": "Hiraal Pharma",
+  "uploadYourPrescription": "Upload your prescription",
+  "uploadPrescriptionExplain": "Snap a clear photo of your prescription. Our pharmacist will review it, confirm the price, and ask you to pay before we prepare and deliver it.",
+  "tapToAddPrescriptionPhoto": "Tap to add prescription photo",
+  "cameraOrGallery": "Camera or gallery",
+  "addYourPrescription": "Add your prescription",
+  "takeAPhoto": "Take a photo",
+  "chooseFromGallery": "Choose from gallery",
+  "noteForPharmacistOptional": "Note for the pharmacist (optional)",
+  "noteForPharmacistHint": "e.g. brand preference, allergies, or anything we should know",
+  "deliveryAddress": "Delivery Address",
+  "selectDeliveryAddress": "Select delivery address",
+  "addNewAddress": "Add new address",
+  "addADeliveryAddress": "Add a delivery address",
+  "change": "Change",
+  "prescriptionPrivacyNote": "Your prescription is private and shared only with our pharmacy.",
+  "submitPrescription": "Submit Prescription",
+  "pleaseAttachPrescription": "Please attach a photo of your prescription.",
+  "pleaseChooseDeliveryAddress": "Please choose a delivery address.",
+  "couldNotOpenCamera": "Could not open the camera.",
+  "couldNotOpenGallery": "Could not open the gallery.",
+
+  "cancelOrderQuestion": "Cancel order?",
+  "cancelOrderMessage": "This will cancel your medicine order. You can place a new one anytime.",
+  "keepOrder": "Keep order",
+  "cancelOrder": "Cancel Order",
+  "cancelling": "Cancelling…",
+  "confirming": "Confirming…",
+  "iReceivedMyOrder": "I received my order",
+  "confirmReceiptQuestion": "Confirm receipt?",
+  "confirmReceiptMessage": "Confirm that you have received this order.",
+  "notYet": "Not yet",
+  "yesReceived": "Yes, received",
+  "receiptConfirmedThanks": "Thank you! Receipt confirmed.",
+  "prescriptionAttached": "Prescription attached",
+  "outOfStock": "Out of stock",
+  "orderWasCancelled": "This order was cancelled",
+  "deliverySection": "Delivery",
+  "typeLabel": "Type",
+  "addressLabel": "Address",
+  "estimatedLabel": "Estimated",
+
+  "requestLabTest": "Request Lab Test",
+  "labTestInfoTitle": "Lab Test Info",
+  "labTestInfoBody": "Choose a test, describe your reason, and submit. The care team will review and confirm a time.\n\nResults appear in your History once available.",
+  "gotIt": "Got it",
+  "whyNeedLabTest": "Why do you need a lab test?",
+  "labTestReasonHint": "e.g. Doctor advised, feeling unwell, routine check",
+  "selectTest": "Select test",
+  "searchLabTestsHint": "Search lab tests...",
+  "preferredDate": "Preferred date",
+  "whereWantTest": "Where do you want the test?",
+  "visitClinic": "Visit Clinic",
+  "visitClinicSubtitle": "Go to a lab near you",
+  "homeSampleCollection": "Home Sample Collection",
+  "homeSampleSubtitle": "We'll come to you",
+  "fastingMayBeRequired": "Fasting may be required for some tests. We'll let you know.",
+  "requestSecurePrivate": "Your request is secure and private.",
+  "pleaseSelectAtLeastOneTest": "Please select at least one test",
+  "labTestShortTitle": "Lab Test",
+  "testScheduled": "Test Scheduled!",
+  "testScheduledBody": "We've scheduled your request and scheduled your lab test.",
+  "appointmentDetails": "Appointment Details",
+  "testType": "Test Type",
+  "timeLabel": "Time",
+  "nextAvailable": "Next available",
+  "viewAllBookings": "View All Bookings",
+
+  "alert": "Alert",
+  "highBpDetected": "High Blood Pressure Detected",
+  "highBpSubtitle": "Your reading is higher than your safe range.\nPlease follow the steps below.",
+  "yourLatestReading": "Your Latest Reading",
+  "highBadge": "High",
+  "safeRangeBp": "Safe range: Below 140/90 mmHg",
+  "whatYouShouldDo": "What You Should Do",
+  "contactYourCareTeam": "Contact Your Care Team",
+  "contactCareTeamHint": "We recommend speaking with your care team today.",
+  "restAndRecheck": "Rest and Recheck",
+  "restAndRecheckHint": "Sit quietly for 5 minutes and check your\nblood pressure again.",
+  "restThenRecheckSnack": "Rest for 5 minutes, then recheck",
+  "seekUrgentCare": "Seek Urgent Care if Needed",
+  "seekUrgentCareHint": "If you have chest pain, shortness of breath,\nor severe headache, get help right away.",
+  "seekUrgentCareDialogBody": "If you experience chest pain, shortness of breath, severe headache, or vision changes, please go to your nearest emergency room or call emergency services immediately.",
+  "getHelpNow": "Get Help Now",
+  "getHelpNowHint": "If you're experiencing any severe symptoms,\ncall emergency services.",
+  "callEmergencyNumber": "Call {number}",
+  "@callEmergencyNumber": {
+    "placeholders": {
+      "number": {"type": "String"}
+    }
+  },
+  "contactMyCareTeam": "Contact My Care Team",
+  "recheckMyBloodPressure": "Recheck My Blood Pressure",
+  "ok": "OK",
+  "emergencyCallTitle": "Emergency Call",
+  "unableToOpenDialer": "Unable to open dialer. Please call emergency services at {number} immediately.",
+  "@unableToOpenDialer": {
+    "placeholders": {
+      "number": {"type": "String"}
+    }
+  },
+
+  "careTeamCall": "Care Team Call",
+  "youreCalling": "You're calling...",
+  "careTeamNurse": "Care Team Nurse",
+  "wereHereToHelp": "We're here to help.",
+  "expectedWaitTime": "Expected Wait Time",
+  "lessThan2Minutes": "Less than 2 minutes",
+  "availableHours": "Available Hours",
+  "availableHoursValue": "8:00 AM - 8:00 PM, Daily",
+  "careTeamCanSeeReadings": "Your care team can see your recent readings\nand health information to assist you better.",
+  "recentConcern": "Recent Concern",
+  "highBloodPressureTitle": "High Blood Pressure",
+  "viewAction": "View",
+  "endCall": "End Call",
+  "callingStatus": "Calling...",
+  "speaker": "Speaker",
+  "speakerToggled": "Speaker toggled",
+  "preferToMessage": "Prefer to message?",
+  "sendMessageArrow": "Send Message >",
+  "messageCareTeam": "Message Care Team",
+  "describeYourConcern": "Describe your concern…",
+  "sendMessage": "Send Message",
+  "messageSentSnack": "Message sent. The care team will reply shortly.",
+
+  "connectMeasurementDevice": "Connect Device",
+  "noDeviceConnected": "No device connected",
+  "connectedToDevice": "Connected to {name}",
+  "@connectedToDevice": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "availableDevices": "Available Devices",
+  "availableDevicesHint": "Tap Scan — health monitors nearby and any already paired to this phone show up here. Hiraal takes over the Bluetooth link on Connect.",
+  "scanForDevices": "Scan for Devices",
+  "scanning": "Scanning…",
+  "lookingForDevices": "Looking for devices...",
+  "scanDevicesHint": "Tap Scan to find your monitor.\nTurn it ON first. If it was paired in phone Bluetooth settings, it will still appear here after Scan.",
+  "myDevices": "My Devices",
+  "noPairedDevicesYet": "No paired devices yet. Connect a device above to get started.",
+  "disconnect": "Disconnect",
+  "connectAction": "Connect",
+  "turnOnBluetooth": "Turn on Bluetooth",
+  "removeDeviceQuestion": "Remove Device?",
+  "removeDeviceMessage": "Remove \"{name}\" from paired devices?",
+  "@removeDeviceMessage": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "cancelAction": "Cancel",
+  "removeAction": "Remove",
+  "measureAction": "Measure",
+  "unknownDevice": "Unknown Device",
+
+  "caregiversTitle": "Caregivers",
+  "addCaregiver": "Add Caregiver",
+  "caregiversInfoBanner": "Invite family members to view selected health information and support your care journey.",
+  "myCaregivers": "My Caregivers",
+  "noCaregiversYet": "No caregivers yet",
+  "caregiversEmptyHint": "Add someone you trust to help monitor your care.",
+  "pendingRequests": "Pending Requests",
+  "noPendingRequests": "No pending requests",
+  "pendingRequestsHint": "Invitations waiting for acceptance will appear here.",
+  "caregiverActive": "Active",
+  "rejectCaregiver": "Reject",
+  "acceptCaregiver": "Accept",
+  "viewReadings": "View readings",
+  "viewMedicines": "View medicines",
+  "viewAppointments": "View appointments",
+  "viewSubscription": "View subscription",
+  "addCaregiverIntro": "Invite a family member or friend via WhatsApp. They will receive a secure invitation link.",
+  "countryCode": "Country code",
+  "countryCodeRequired": "Enter a country code",
+  "whatsappNumber": "WhatsApp number",
+  "whatsappRequired": "Enter a valid WhatsApp number",
+  "relationship": "Relationship",
+  "familyMemberName": "Family member name (optional)",
+  "familyMemberHint": "e.g. Hooyo Amina",
+  "permissionsTitle": "Permissions",
+  "whatsappInviteNote": "We will open WhatsApp so you can send the invitation directly.",
+  "sendInvitationWhatsapp": "Send Invitation via WhatsApp",
+  "couldNotOpenWhatsapp": "Could not open WhatsApp",
+  "invitationReady": "Invitation created. WhatsApp opened.",
+  "relationshipMother": "Mother",
+  "relationshipFather": "Father",
+  "relationshipBrother": "Brother",
+  "relationshipSister": "Sister",
+  "relationshipSpouse": "Spouse",
+  "relationshipChild": "Child",
+  "relationshipFriend": "Friend",
+  "relationshipOther": "Other",
+  "revokeCaregiverTitle": "Revoke caregiver?",
+  "revokeCaregiverMessage": "Remove {name} from your caregivers? They will lose access immediately.",
+  "@revokeCaregiverMessage": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "revokeCaregiver": "Revoke access",
+  "sendInvitationAgain": "Send invitation again",
+  "savePermissions": "Save permissions",
+  "caregiversMenu": "Caregivers",
+  "caregiversMenuSubtitle": "Manage who can support your care",
+  "sponsorCareMenu": "Sponsor Care",
+  "sponsorCareMenuSubtitle": "Find and sponsor a loved one's care",
+  "mySponsorshipMenu": "My Sponsorship",
+  "mySponsorshipMenuSubtitle": "View patients you sponsor",
+  "sponsorCareTitle": "Sponsor Care",
+  "sponsorCareCard": "Sponsor Care",
+  "sponsorCareCardSubtitle": "Pay for a family member's care plan",
+  "findPatientTab": "Find Patient",
+  "connectByWhatsappTab": "Connect via WhatsApp",
+  "findPatientTitle": "Find a patient to sponsor",
+  "findPatientHint": "Search by phone number or member ID, or redeem an invitation code from the patient.",
+  "phoneOrMemberId": "Phone or Member ID",
+  "phoneOrMemberIdHint": "e.g. HCC-2024-000125 or 612345678",
+  "findPatientButton": "Find Patient",
+  "redeemInvitationCodeTitle": "Or redeem invitation code",
+  "invitationCode": "Invitation code",
+  "invitationCodeHint": "Enter the code shared with you",
+  "redeemCodeButton": "Redeem Code",
+  "noPatientsFound": "No patients found",
+  "noPatientsFoundHint": "Try a phone number, member ID, or invitation code.",
+  "connectByWhatsappTitle": "Find a loved one on WhatsApp",
+  "connectByWhatsappHint": "Send a connection request to someone already using Hiraal. Once they accept, you can sponsor their care.",
+  "sendConnectionRequest": "Send Connection Request",
+  "enterSearchTerm": "Enter a phone number or member ID",
+  "enterInvitationCode": "Enter an invitation code",
+  "sponsorPatientTitle": "Sponsor Patient",
+  "chooseMonthlyPlan": "Choose a monthly plan",
+  "noPlansAvailable": "No subscription plans are available right now.",
+  "sponsorThisPatient": "Sponsor This Patient",
+  "confirmSponsorshipTitle": "Confirm Sponsorship",
+  "memberIdLabel": "Member ID",
+  "planLabel": "Plan",
+  "monthlyCostLabel": "Monthly cost",
+  "payAndStartSponsorship": "Pay & Start Sponsorship",
+  "sponsorPaymentTitle": "Sponsorship Payment",
+  "startingPayment": "Starting payment…",
+  "startingSponsorPaymentHint": "Please wait while we send the mobile-money request.",
+  "sponsorshipPaymentFailed": "The sponsorship payment was declined or cancelled.",
+  "paymentStillProcessing": "Taking longer than usual. If you approved the request, payment will confirm automatically.",
+  "sponsorshipActiveTitle": "Sponsorship active",
+  "sponsorshipActiveHint": "You are now sponsoring {name}'s care plan. Thank you!",
+  "@sponsorshipActiveHint": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "paymentFailedTitle": "Payment failed",
+  "tryAgain": "Try again",
+  "doneLabel": "Done",
+  "mySponsorshipTitle": "My Sponsorship",
+  "noSponsorshipsYet": "No sponsorships yet",
+  "noSponsorshipsHint": "When you sponsor someone's care, it will appear here.",
+  "activeSponsorships": "Active sponsorships",
+  "nextPaymentLabel": "Next payment",
+  "latestUpdates": "Latest updates",
+  "patientSnapshot": "Patient snapshot",
+  "connectionRequestTitle": "Connection Request",
+  "connectionSentHeadline": "Request sent",
+  "connectionSentBody": "We sent a connection request to {number}. You will be notified when they accept.",
+  "@connectionSentBody": {
+    "placeholders": {
+      "number": {"type": "String"}
+    }
+  },
+  "connectionActiveTitle": "Connected",
+  "connectionActiveHeadline": "You are connected",
+  "connectionActiveBody": "Your connection with {name} is active. You can now sponsor their care.",
+  "@connectionActiveBody": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  }
+}

@@ -1,0 +1,36 @@
+# ── Secrets & local machine config — NEVER commit ──
+android/keystore.properties
+android/local.properties
+*.keystore
+*.jks
+keys/
+
+# Firebase / service accounts (review before committing)
+**/google-services.json
+**/GoogleService-Info.plist
+
+# Flutter / Dart build artifacts
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+.pub-cache/
+.pub/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Release binaries — install from the folder, not git
+*.apk
+
+# JVM / Gradle crash dumps
+*.hprof
+hs_err_pid*.log
+android/.kotlin/errors/

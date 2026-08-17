@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Hiraal Lifecare — Full Test Plan (App + ERPNext Module)</title>
+<style>
+  :root { --primary:#0E9E9E; --ink:#1a2b33; --muted:#5b7180; --line:#d5e2e6; --bg:#f4f8f9; }
+  * { box-sizing: border-box; }
+  body { font-family: "Segoe UI", Arial, sans-serif; color: var(--ink); margin: 0; font-size: 12.5px; line-height: 1.45; }
+  .page { max-width: 960px; margin: 0 auto; padding: 28px 34px; }
+  h1 { font-size: 26px; color: var(--primary); margin: 0 0 4px; }
+  h2 { font-size: 18px; color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 4px; margin: 34px 0 10px; page-break-after: avoid; }
+  h3 { font-size: 14px; margin: 18px 0 6px; color: var(--ink); page-break-after: avoid; }
+  p { margin: 6px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0 14px; page-break-inside: auto; }
+  th { background: var(--primary); color: #fff; text-align: left; padding: 6px 8px; font-size: 11.5px; }
+  td { border: 1px solid var(--line); padding: 5px 8px; vertical-align: top; }
+  tr:nth-child(even) td { background: var(--bg); }
+  tr { page-break-inside: avoid; }
+  .cover { text-align: center; padding: 90px 0 40px; }
+  .cover h1 { font-size: 32px; }
+  .cover .sub { font-size: 16px; color: var(--muted); margin-top: 8px; }
+  .meta { margin: 40px auto 0; width: 70%; }
+  .meta td { padding: 7px 10px; }
+  .note { background: #fff7e6; border: 1px solid #ffd97a; border-radius: 6px; padding: 8px 12px; margin: 10px 0; }
+  .pass { background: #e9f9ef; border: 1px solid #9eddb2; border-radius: 6px; padding: 8px 12px; margin: 10px 0; }
+  .fail { background: #fdecea; border: 1px solid #f2a9a4; border-radius: 6px; padding: 8px 12px; margin: 10px 0; }
+  code { background: #eef3f4; border-radius: 4px; padding: 1px 5px; font-family: Consolas, monospace; font-size: 11.5px; }
+  pre { background: #0f2a2d; color: #d9f2ee; border-radius: 6px; padding: 10px 14px; overflow-x: auto; font-size: 11px; }
+  pre code { background: none; color: inherit; padding: 0; }
+  .toc td { border: none; border-bottom: 1px dotted var(--line); }
+  .pagebreak { page-break-before: always; }
+  .sm { font-size: 11px; color: var(--muted); }
+  .shots { margin: 8px 0 14px; }
+  img.shot { width: 210px; border: 1px solid var(--line); border-radius: 10px; margin: 4px 10px 4px 0; vertical-align: top; }
+  .cap { font-size: 10.5px; color: var(--muted); margin: 0 0 6px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- ═══════════ COVER ═══════════ -->
+<div class="cover">
+  <h1>Hiraal Lifecare</h1>
+  <div class="sub">Full Test Plan — Patient App (Flutter) + Hiraal EMR Module (ERPNext)</div>
+  <table class="meta">
+    <tr><td><b>Version</b></td><td>2.0 (full coverage)</td></tr>
+    <tr><td><b>Date</b></td><td>August 2026</td></tr>
+    <tr><td><b>App build</b></td><td>app-release.apk — release-signed (CN=Hiraal Lifecare), production config</td></tr>
+    <tr><td><b>Backend</b></td><td>https://uat.dagaartech.com (UAT) · module: hiraal_emr (main @ 27a9474+)</td></tr>
+    <tr><td><b>Audience</b></td><td>QA testers (app) + ERPNext verifier + developers</td></tr>
+  </table>
+</div>
+
+<div class="pagebreak"></div>
+
+<!-- ═══════════ TOC ═══════════ -->
+<h2>Contents</h2>
+<table class="toc">
+  <tr><td><b>Part 0</b> — Environments, roles &amp; one-time setup</td></tr>
+  <tr><td><b>Part 1</b> — App tests: A Auth &amp; onboarding · B Home &amp; readings · C BLE devices · D History, charts &amp; summary · E Services (doctors, labs, orders, video) · F Payments &amp; receipts · G Subscription &amp; paywall · H Profile &amp; settings · I Notifications · J Offline &amp; sync · K Alerts · L Sessions &amp; errors · M Accessibility · N Secondary screens</td></tr>
+  <tr><td><b>Part 1B</b> — Clinical staff experience (ERPNext desk): doctor, nurse, pharmacist, lab tech, admin</td></tr>
+  <tr><td><b>Part 2</b> — ERPNext module tests: N Auth/OTP API · O Readings ingestion · P Payments &amp; settlement chain · Q Orders lifecycle · R Labs &amp; appointments · S Subscriptions &amp; billing · T Notifications &amp; push · U Permissions &amp; security · V Dashboards &amp; reports · W Scheduled jobs</td></tr>
+  <tr><td><b>Part 3</b> — Regression checklist (this release's fixed-bug classes)</td></tr>
+  <tr><td><b>Part 4</b> — Known limitations &amp; how to report a bug</td></tr>
+</table>
+
+<!-- ═══════════ PART 0 ═══════════ -->
+<h2>Part 0 — Environments, roles &amp; one-time setup</h2>
+
+<h3>0.1 Roles</h3>
+<table>
+  <tr><th>Role</th><th>Responsibility</th></tr>
+  <tr><td><b>App tester</b></td><td>Uses the Android phone: signs in, measures, orders, pays.</td></tr>
+  <tr><td><b>ERPNext verifier</b></td><td>Logged into uat.dagaartech.com; confirms records actually arrive (Daily Reading, Medicine Request, Care Subscription, Subscription Payment, Notification Log, Hiraal Push Token, Patient Device).</td></tr>
+  <tr><td><b>Admin</b></td><td>Runs bench commands for module tests (Part 2) and creates practitioners/patients as needed.</td></tr>
+</table>
+
+<h3>0.2 One-time setup</h3>
+<table>
+  <tr><th>#</th><th>Step</th><th>Why</th></tr>
+  <tr><td>0.1</td><td>Uninstall older Hiraal builds, then install the release APK.</td><td>Release-signed builds can't upgrade over debug-signed ones.</td></tr>
+  <tr><td>0.2</td><td>Grant <b>Nearby devices (Bluetooth)</b>, <b>Location</b>, <b>Notifications</b> when asked.</td><td>BLE scan/connect and alerts depend on them.</td></tr>
+  <tr><td>0.3</td><td>Bluetooth ON; devices charged, unpaired from other apps/phones, and close by.</td><td>A BLE device stops advertising while connected elsewhere — force-close vendor apps (e.g. Andesfit) first.</td></tr>
+  <tr><td>0.4</td><td>Verifier: open the lists Daily Reading, Chronic Care Alert, Medicine Request, Care Subscription, Subscription Payment, Notification Log.</td><td>These are the "source of truth" for most tests.</td></tr>
+  <tr><td>0.5</td><td>Have a registered test patient (phone + email) and a small mobile-money wallet (ZAAD/eDahab). <b>Payments are live</b> — use the smallest possible amounts.</td><td>End-to-end tests move real money.</td></tr>
+</table>
+
+<h3>0.3 Environments</h3>
+<table>
+  <tr><th>Environment</th><th>How to get it</th><th>Notes</th></tr>
+  <tr><td>Live (UAT)</td><td>Default release APK build</td><td>Real OTP (SMS/email), real payments, real server data.</td></tr>
+  <tr><td>Mock (offline demo)</td><td>Dev build with <code>--dart-define=USE_MOCK=true</code></td><td>No backend needed; all data is simulated. Use for UI regression only.</td></tr>
+  <tr><td>Web debug harness</td><td><code>dart tools/uat_proxy.dart</code> + web build pointing at <code>localhost:8090</code></td><td>Single-origin proxy to UAT with full request/response logging — fastest way to see exact server errors.</td></tr>
+</table>
+
+<h3>0.4 Supported devices (BLE)</h3>
+<p>Standard Bluetooth SIG profiles (Blood Pressure 1810/2A35, Glucose 1808/2A18, Weight Scale 181D/2A9D) and Andesfit B180 (proprietary fff0). Built-in name detection covers: Omron, A&amp;D (UA-651), Accu-Chek, Contour, Andesfit. Detection order: advertised name/UUIDs → GATT table re-detect → per-characteristic fallback.</p>
+
+<div class="note"><b>Test-data hygiene:</b> record the exact time of every measurement/payment you make. The verifier uses timestamp + patient + values to find the exact record.</div>
+
+<div class="pagebreak"></div>
+<!-- ═══════════ PART 1 ═══════════ -->
+<h2>Part 1 — App tests</h2>
+
+<h3>A. Authentication &amp; onboarding</h3>
+<table>
+  <tr><th>ID</th><th>Action</th><th>Expected result</th><th>Verify in ERPNext</th></tr>
+  <tr><td>A-01</td><td>Open app fresh (no session).</td><td>Splash → welcome screen (no hang; a corrupted local DB must fall back to welcome, not hang forever).</td><td>—</td></tr>
+  <tr><td>A-02</td><td>Sign in with a registered phone number via <b>SMS</b> OTP.</td><td>Code arrives; entering it signs in. Active subscriber → Home; no active plan → paywall; never-registered → "No patient record found".</td><td>—</td></tr>
+  <tr><td>A-03</td><td>Sign in via <b>Email</b> OTP (choose Email channel, enter the email on file).</td><td>Code is emailed (only if the email belongs to a registered patient); masked address shown (e.g. <code>k***@x.com</code>); sign-in works.</td><td>—</td></tr>
+  <tr><td>A-04</td><td>Enter a wrong/expired OTP.</td><td>Clear "invalid or expired" error; the Verify button stops spinning (no permanent spinner on error).</td><td>—</td></tr>
+  <tr><td>A-05</td><td>Sign up a brand-new patient (name, gender, DOB, phone, optional email).</td><td>OTP → account created → routed to plan selection (paywall).</td><td>New Patient record, status Active, matching name/sex/DOB/mobile.</td></tr>
+  <tr><td>A-06</td><td>Sign up again with the same phone.</td><td>Signs into the existing account — no duplicate patient.</td><td>Still exactly one Patient with that mobile.</td></tr>
+  <tr><td>A-07</td><td>Country code picker: verify Oman = <b>+968</b>, Sweden = <b>+46</b> (previously wrong).</td><td>Correct codes in both signup and register screens.</td><td>—</td></tr>
+  <tr><td>A-08</td><td>With biometrics enrolled: close the app fully, reopen.</td><td>Biometric unlock prompt (or straight to Home if biometrics unavailable); no OTP re-request. Session restores patient data.</td><td>—</td></tr>
+  <tr><td>A-09</td><td>Session-expired screen (after 30 min inactivity trigger): "Log In Again" with biometrics available.</td><td>Biometric success → sign-in flow; failure stays on the screen with a message. "Back to Welcome" actually returns to welcome.</td><td>—</td></tr>
+  <tr><td>A-10</td><td>Same on a device <b>without</b> biometrics.</td><td>"Log In Again" proceeds to the OTP login (user is not stranded).</td><td>—</td></tr>
+  <tr><td>A-11</td><td>Registration success: names with double/trailing spaces (e.g. "Ali&nbsp;&nbsp;Omar") throughout signup → Home.</td><td>Avatar initials never crash (no red screen) on Home, Services, Profile, success screen.</td><td>—</td></tr>
+  <tr><td>A-12</td><td>Sign out from Profile.</td><td>Returns to sign-in; double-tapping Sign out doesn't crash (busy guard).</td><td>Push tokens for this device disabled (Hiraal Push Token: enabled=0).</td></tr>
+</table>
+<div class="shots">
+  <img class="shot" src="shots/01_welcome.png" alt="Welcome">
+  <img class="shot" src="shots/02_register.png" alt="Sign in">
+  <img class="shot" src="shots/03_otp.png" alt="OTP">
+  <p class="cap">Welcome → sign in (SMS or email OTP) → code entry.</p>
+</div>
+
+<h3>B. Home &amp; manual readings</h3>
+<table>
+  <tr><th>ID</th><th>Action</th><th>Expected result</th><th>Verify in ERPNext</th></tr>
+  <tr><td>B-01</td><td>Submit a manual BP reading (e.g. 128/82) + sugar + weight + "medicine taken".</td><td>Success view with pop-in check + haptic; greeting matches time of day; reading appears in History immediately.</td><td>One Daily Reading, Source = App, correct values, Medicine Taken matches.</td></tr>
+  <tr><td>B-02</td><td>Enter weight <b>72.5</b> (with a decimal point).</td><td>Decimal input is accepted (not blocked by digits-only keyboard).</td><td>Weight stored as 72.5.</td></tr>
+  <tr><td>B-03</td><td>Double-tap Submit fast.</td><td>Only one reading saved.</td><td>Exactly one Daily Reading.</td></tr>
+  <tr><td>B-04</td><td>Submit while offline (airplane mode), then go online.</td><td>Reading saved locally as Pending; syncs automatically when back online (also see J-02).</td><td>Row appears after reconnect, once.</td></tr>
+  <tr><td>B-05</td><td>"Last Submitted" card after B-04 (pending readings exist).</td><td>Shows the <b>newest</b> reading, not the oldest pending one.</td><td>—</td></tr>
+  <tr><td>B-06</td><td>With an order in Awaiting Payment: check Home.</td><td>Amber "Payment pending" banner with order id + amount; tapping it opens the payment screen.</td><td>—</td></tr>
+  <tr><td>B-07</td><td>With a booked appointment: check Home.</td><td>"Next appointment" card (practitioner, date, time); tapping opens My Appointments. Hidden when none.</td><td>—</td></tr>
+  <tr><td>B-08</td><td>Home initial load on a slow connection.</td><td>Skeleton shimmer shows instead of blank/spinner.</td><td>—</td></tr>
+  <tr><td>B-09</td><td>Connected BLE device: check Home's Connect Device tile.</td><td>Green "Connected" state reflects the real BLE connection (no longer hardcoded false).</td><td>—</td></tr>
+</table>
+<div class="shots">
+  <img class="shot" src="shots/04_home.png" alt="Home">
+  <p class="cap">Home: payment banner, next-appointment card, today's reading form.</p>
+</div>
+
+<h3>C. BLE devices — pair, measure, sync</h3>
+<div class="note">Prereq: force-close any vendor app (Andesfit etc.) — a device stops advertising while connected elsewhere. Location + Nearby devices permissions granted.</div>
+<table>
+  <tr><th>ID</th><th>Action</th><th>Expected result</th><th>Verify in ERPNext</th></tr>
+  <tr><td>C-01</td><td>Connect Device → Scan for Devices.</td><td>Nearby BLE medical devices listed (name or "Unknown Device" + MAC); layout is clean — no vertical single-character text; compact Connect button.</td><td>—</td></tr>
+  <tr><td>C-02</td><td>Scan with Bluetooth OFF.</td><td>Clear "turn on Bluetooth" path with a Turn On button — not a silent failure.</td><td>—</td></tr>
+  <tr><td>C-03</td><td>Deny Location permission (Android 12+), keep Nearby devices granted, scan.</td><td>Scan still works (location is best-effort on Android 12+).</td><td>—</td></tr>
+  <tr><td>C-04</td><td>Connect the BP cuff.</td><td>Connects; protocol detected (Generic Blood Pressure SIG or Andesfit B180); pairing dialog → paired; appears under My Devices.</td><td>Patient Device row created for this device id.</td></tr>
+  <tr><td>C-05</td><td>Simulate server-down during pairing (airplane mode between connect and pair).</td><td>Snackbar says "Paired on this phone — will sync to the server later" (honest), not fake success.</td><td>—</td></tr>
+  <tr><td>C-06</td><td>Start Measurement; watch the cuff inflate.</td><td>Live pressure gauge animates during inflation (Andesfit); final SYS/DIA/Pulse shown; "Saved to your records".</td><td>Exactly ONE Daily Reading, Source = BP Device, values match the cuff display.</td></tr>
+  <tr><td>C-07</td><td>Same BP reading sanity: values on phone == cuff display (SYS/DIA/Pulse).</td><td>Numbers match exactly (regression: flag-bit bug once dropped pulse or produced garbage like 2025 bpm).</td><td>Same values on the Daily Reading.</td></tr>
+  <tr><td>C-08</td><td>Disconnect cuff mid-measurement.</td><td>Measure screen flips to disconnected state; no stuck "Measuring…" spinner.</td><td>—</td></tr>
+  <tr><td>C-09</td><td>Reconnect the cuff, measure again, then again.</td><td>Each measurement saved once.</td><td>N measurements → exactly N Daily Readings. No reconnect duplicates.</td></tr>
+  <tr><td>C-10</td><td>Glucose meter with <b>stored</b> history: connect (meter in pairing mode).</td><td>Stored readings download automatically (RACP); each appears in History with its original measurement date (not "today").</td><td>One Daily Reading per stored reading, Source = Glucometer, correct historical dates.</td></tr>
+  <tr><td>C-11</td><td>Glucose value sanity (e.g. meter shows 95 mg/dL).</td><td>App shows the same value in mg/dL (regression: wrong offset/unit once produced ~0.0009 or byte-shifted values).</td><td>Same value on the Daily Reading.</td></tr>
+  <tr><td>C-12</td><td>Fresh finger-stick reading on the connected meter.</td><td>Reading arrives live and saves.</td><td>One new Daily Reading.</td></tr>
+  <tr><td>C-13</td><td>Smart scale: weigh yourself with the scale connected.</td><td>Weight shown in kg; sane value (regression: SFLOAT bug once produced ~2,212,000 kg).</td><td>Daily Reading with the weight, Source = Smart Scale.</td></tr>
+  <tr><td>C-14</td><td>After C-06: check History immediately (without app restart).</td><td>The device reading is visible right away (regression: previously invisible until next login).</td><td>—</td></tr>
+  <tr><td>C-15</td><td>Take a glucose/weight reading while on the BP measure screen path.</td><td>Non-BP readings never show a bogus "--/-- mmHg" BP result.</td><td>—</td></tr>
+  <tr><td>C-16</td><td>Kill the app mid-connection, reopen, reconnect.</td><td>Reconnection is clean; the old connection's teardown can't corrupt the new session.</td><td>—</td></tr>
+</table>
+
+<h3>D. History, charts &amp; weekly summary</h3>
+<table>
+  <tr><th>ID</th><th>Action</th><th>Expected result</th><th>Verify</th></tr>
+  <tr><td>D-01</td><td>History → list view.</td><td>All readings newest-first; skeleton while loading.</td><td>—</td></tr>
+  <tr><td>D-02</td><td>History → chart view with mixed data.</td><td>Chart renders BP + sugar series.</td><td>—</td></tr>
+  <tr><td>D-03</td><td>Chart view with <b>weight-only</b> data.</td><td>"Not enough data" placeholder instead of a crash (regression: infinite minY threw in fl_chart).</td><td>—</td></tr>
+  <tr><td>D-04</td><td>Alerts tab with a high glucose-only reading (e.g. 250 mg/dL from meter).</td><td>Appears in Alerts (regression: glucose alerts were dropped by the systolic gate); label shows mg/dL, not "--/-- mmHg".</td><td>—</td></tr>
+  <tr><td>D-05</td><td>Weekly Summary with zero readings.</td><td>Neutral "No data yet" state — not "0/0 mmHg — Good / Excellent".</td><td>—</td></tr>
+  <tr><td>D-06</td><td>Weekly Summary with an elevated week.</td><td>Warning-colored status (not everything green).</td><td>—</td></tr>
+  <tr><td>D-07</td><td>Adherence stat with server-fetched history only.</td><td>Medication adherence is computed correctly (regression: medicine_taken was dropped from the server mapping).</td><td>—</td></tr>
+</table>
+<div class="shots">
+  <img class="shot" src="shots/09_history.png" alt="History">
+  <p class="cap">History list (skeletons while loading; chart view guarded for weight-only data).</p>
+</div>
+
+<h3>E. Services — doctors, lab tests, orders, video</h3>
+<table>
+  <tr><th>ID</th><th>Action</th><th>Expected result</th><th>Verify in ERPNext</th></tr>
+  <tr><td>E-01</td><td>Services → Book Doctor.</td><td>Doctor list loads (name — department); pick date/time, video or in-person, reason required; Request Appointment → confirmation screen.</td><td>New Patient Appointment for the patient (type "Chronic Care Follow Up").</td></tr>
+  <tr><td>E-02</td><td>Back out of Book Doctor while the doctor list is still loading.</td><td>No crash (setState-after-dispose guard).</td><td>—</td></tr>
+  <tr><td>E-03</td><td>Popular Categories: tap <b>Heart Care</b> / <b>Chest Care</b> / <b>Diabetes Care</b> / <b>Mental Health</b>.</td><td>Booking opens with a filter chip; doctor list shows only matching departments (cardiology / pulmonology / endocrinology / psychiatry). No match → note "No X specialists listed — showing all doctors". Chip ✕ clears the filter.</td><td>—</td></tr>
+  <tr><td>E-04</td><td>Profile → My Activity → Appointments card.</td><td>Opens <b>My Appointments</b> (list of upcoming), not the booking form; count on the card matches reality (confirmed/Scheduled appointments included).</td><td>—</td></tr>
+  <tr><td>E-05</td><td>My Appointments → Book Doctor FAB → book one → back.</td><td>List refreshes and includes the new appointment.</td><td>New Patient Appointment present.</td></tr>
+  <tr><td>E-06</td><td>Request Lab Test: reason, pick 2–3 tests, preferred date, collection mode (Visit Clinic / Home Sample Collection) → submit.</td><td>Success confirmation.</td><td>One Lab Test per template, status Draft, <b>patient_sex populated</b>; the note carries the preferred date + collection mode.</td></tr>
+  <tr><td>E-07</td><td>Profile → My Activity → Lab Tests card.</td><td>Opens <b>My Lab Tests</b> (list with status chips), not the request form; count matches.</td><td>—</td></tr>
+  <tr><td>E-08</td><td>My Lab Tests → tap a scheduled test → Cancel this test → confirm.</td><td>Confirmation dialog → test flips to Cancelled chip; list refreshes.</td><td>Lab Test status = Cancelled.</td></tr>
+  <tr><td>E-09</td><td>Tap a Completed test.</td><td>Details sheet shows dates/reference; no Cancel button (already past cancellable).</td><td>—</td></tr>
+  <tr><td>E-10</td><td>Medicine order via prescription photo (camera/gallery).</td><td>Upload works; order appears in My Orders as Received.</td><td>New Medicine Request with prescription file attached.</td></tr>
+  <tr><td>E-11</td><td>On the address picker sheet in the order flow: dismiss by tapping the scrim / swiping down.</td><td>Nothing happens (regression: plain dismissal used to open the Add-Address screen). "Add new address" tile still works.</td><td>—</td></tr>
+  <tr><td>E-12</td><td>Order tracking: watch an order move (admin moves it in ERPNext).</td><td>Timeline advances; stage order consistent; push notification on each status change.</td><td>Notification Log entries created per status change.</td></tr>
+  <tr><td>E-13</td><td>Cancel an order in Received/Under Review/Awaiting Payment.</td><td>Cancels; payment fields (amount, method, status) remain intact on the cancelled order.</td><td>Status = Cancelled, payment fields preserved.</td></tr>
+  <tr><td>E-14</td><td>Confirm receipt on a delivered order.</td><td>Confirmed; delivery timeline + fee breakdown preserved (regression: fields were dropped).</td><td>received_confirmed = 1, timeline fields intact.</td></tr>
+  <tr><td>E-15</td><td>Video Visits: join a scheduled visit (doctor notified), end it.</td><td>Join notifies the practitioner; End completes the session; repeated joins/ends are safe (idempotent).</td><td>Telemedicine Session status transitions correct.</td></tr>
+</table>
+<div class="shots">
+  <img class="shot" src="shots/07_services.png" alt="Services">
+  <img class="shot" src="shots/08_book_doctor_filtered.png" alt="Book Doctor filtered">
+  <img class="shot" src="shots/06_appointments.png" alt="My Appointments">
+  <img class="shot" src="shots/12_my_lab_tests.png" alt="My Lab Tests">
+  <img class="shot" src="shots/15_track_order.png" alt="Track Order">
+  <img class="shot" src="shots/14_my_orders.png" alt="My Orders">
+  <p class="cap">Services → category-filtered booking (fail-open note shown) → My Appointments / My Lab Tests / order tracking / My Orders.</p>
+</div>
+
+<h3>F. Payments &amp; receipts</h3>
+<div class="note">Payments are LIVE. Use the smallest amounts. Have the wallet phone handy; test both approve and decline paths.</div>
+<table>
+  <tr><th>ID</th><th>Action</th><th>Expected result</th><th>Verify in ERPNext</th></tr>
+  <tr><td>F-01</td><td>Pay for an Awaiting-Payment order: tap Pay.</td><td><b>Immediately</b> shows the waiting screen (radar pulse, amount, "Request sent to &lt;number&gt;", countdown pill, 3-step guide) — while the request is in flight.</td><td>—</td></tr>
+  <tr><td>F-02</td><td>Approve on the phone.</td><td>Waiting screen flips to the success screen <b>automatically</b> (polling every 3s; no need to tap "I've paid").</td><td>Order Paid; payment_reference recorded.</td></tr>
+  <tr><td>F-03</td><td>Decline on the phone.</td><td>Failed screen with a friendly title ("Payment declined") and Try again / Back. No raw gateway codes as the main text.</td><td>Order stays Awaiting Payment; no Subscription/Payment row.</td></tr>
+  <tr><td>F-04</td><td>Approve slowly (&gt;15 s after the prompt).</td><td>Still works (initiation timeout is 120s — a slow approval must NOT show "couldn't start payment" while the charge completes).</td><td>Order Paid.</td></tr>
+  <tr><td>F-05</td><td>Tap Pay, then "Cancel and try again" while the prompt is live, then approve the old prompt anyway.</td><td>No double charge: re-initiation returns the same in-flight transaction instead of starting a new one.</td><td>One Mobile Payment Transaction Log per attempt; no orphan paid transaction.</td></tr>
+  <tr><td>F-06</td><td>Close the app after approving; reopen → My Orders.</td><td>Order shows Paid (lazy reconcile on fetch / cron settles it).</td><td>Order Paid even though the app stopped polling.</td></tr>
+  <tr><td>F-07</td><td>Second payment: check the form.</td><td>Wallet number pre-filled and the previous method pre-selected (remembered wallet).</td><td>—</td></tr>
+  <tr><td>F-08</td><td>Profile → Payments.</td><td>Unified history: subscription payments + paid orders, newest first, with amounts/dates/references.</td><td>Matches Subscription Payment + paid Medicine Request rows.</td></tr>
+  <tr><td>F-09</td><td>Tap a payment → Share receipt.</td><td>Receipt sheet with details; Share produces a plain-text receipt via the OS share sheet.</td><td>—</td></tr>
+  <tr><td>F-10</td><td>Let the waiting countdown expire (~4 min) without approving.</td><td>"Taking longer than usual…" reassurance replaces the countdown; polling stops; no crash.</td><td>If approved later, the cron/reconcile still settles it.</td></tr>
+</table>
+<div class="shots">
+  <img class="shot" src="shots/16_pay_form.png" alt="Payment form">
+  <img class="shot" src="shots/17_pay_waiting.png" alt="Waiting for payment">
+  <img class="shot" src="shots/18_pay_success.png" alt="Payment successful">
+  <img class="shot" src="shots/11_payments.png" alt="Payments history">
+  <img class="shot" src="shots/11b_receipt.png" alt="Receipt">
+  <p class="cap">Payment flow: form → waiting (pulse, countdown, steps) → auto success; Payments history + shareable receipt.</p>
+</div>
+
+<h3>G. Subscription &amp; paywall</h3>
+<table>
+  <tr><th>ID</th><th>Action</th><th>Expected result</th><th>Verify in ERPNext</th></tr>
+  <tr><td>G-01</td><td>New patient without a plan.</td><td>Paywall blocks the app (no way into Home); plans show Standard $5 / Premium $10 (different prices).</td><td>—</td></tr>
+  <tr><td>G-02</td><td>Subscribe &amp; Pay a plan, approve on the phone.</td><td>Waiting → success automatically; app unlocks to Home.</td><td>Care Subscription Active + Subscription Payment with a <b>valid</b> payment_method (Zaad/eDahab — never "Mobile Money").</td></tr>
+  <tr><td>G-03</td><td>Paywall with the server unreachable (airplane mode), tap Subscribe.</td><td>Error state shows a <b>Retry</b> button that recovers the screen (no sign-out needed).</td><td>—</td></tr>
+  <tr><td>G-04</td><td>Decline the subscription payment on the phone.</td><td>Friendly failed screen; Try again returns to the form.</td><td>Subscription stays Overdue; no payment row.</td></tr>
+  <tr><td>G-05</td><td>Existing subscriber signs in on a new device.</td><td>Goes straight to Home (not the "account created" success screen).</td><td>—</td></tr>
+  <tr><td>G-06</td><td>Staff-suspended subscription: patient opens the app.</td><td>Paywall shows it; payment reactivates it (no "No subscription found" loop).</td><td>Subscription back to Active after payment.</td></tr>
+</table>
+
+<h3>H. Profile &amp; settings</h3>
+<table>
+  <tr><th>ID</th><th>Action</th><th>Expected result</th><th>Verify</th></tr>
+  <tr><td>H-01</td><td>Profile → Personal Information.</td><td>No fabricated "null@hiraal.com" email row; initials never crash.</td><td>—</td></tr>
+  <tr><td>H-02</td><td>Health Information / Medical History: open and quickly back out during load.</td><td>No crash (mounted guards).</td><td>—</td></tr>
+  <tr><td>H-03</td><td>Addresses: add one, then delete one, then add again.</td><td>Add failure shows an error snackbar (not silent); no duplicate-id weirdness (mock mode); server addresses show correct type icons (home/work).</td><td>Address records on the Patient.</td></tr>
+  <tr><td>H-04</td><td>Privacy &amp; Security: enable biometric login (then leave the screen mid-prompt).</td><td>Success/failure both handled; no setState-after-dispose.</td><td>—</td></tr>
+  <tr><td>H-05</td><td>Privacy &amp; Security: Export My Data.</td><td>Produces the export (server <code>export_my_data</code> endpoint).</td><td>—</td></tr>
+  <tr><td>H-06</td><td>Settings → Reminders: enable Medication reminder at 08:00, Reading reminder at 21:00.</td><td>Times shown ("Daily at 08:00"); time picker works; notifications arrive at the set times (Android).</td><td>—</td></tr>
+  <tr><td>H-07</td><td>Settings → Accessibility → Large text ON.</td><td>Whole app text scales ~1.2×; layouts don't break (check Home, payment screens, My Orders).</td><td>—</td></tr>
+  <tr><td>H-08</td><td>Settings: About shows version/build; no dead toggles (units/language rows were removed).</td><td>Only functional controls remain.</td><td>—</td></tr>
+</table>
+<div class="shots">
+  <img class="shot" src="shots/10_profile.png" alt="Profile">
+  <img class="shot" src="shots/13_settings.png" alt="Settings">
+  <p class="cap">Profile and Settings (reminders, large text, about).</p>
+</div>
+
+<h3>I. Notifications</h3>
+<table>
+  <tr><th>ID</th><th>Action</th><th>Expected result</th><th>Verify in ERPNext</th></tr>
+  <tr><td>I-01</td><td>Open Notifications with a mix of order updates, messages, reminders.</td><td>Grouped under Today / Yesterday / This week / Older; correct icons per type (paid ✓ green, order 📦, awaiting-payment 💲, reminder ⏰, real alerts ⚠ only).</td><td>—</td></tr>
+  <tr><td>I-02</td><td>Unread items.</td><td>Colored dot + bold title on unread only; read rows dim.</td><td>—</td></tr>
+  <tr><td>I-03</td><td>Tap an order notification.</td><td>Opens that order's tracking screen; the item marks read; the bell badge decrements.</td><td>Notification Log read = 1.</td></tr>
+  <tr><td>I-04</td><td>"Mark all read" (app bar).</td><td>All items read; badge clears; failure reverts (airplane mode test).</td><td>read = 1 on all.</td></tr>
+  <tr><td>I-05</td><td>Pull-to-refresh; empty account view.</td><td>Refresh works; empty state shows the friendly "No notifications yet" panel.</td><td>—</td></tr>
+  <tr><td>I-06</td><td>Receive a push with the app closed (order status change by admin).</td><td>One system notification (not duplicated); tapping opens the app.</td><td>One Notification Log entry.</td></tr>
+  <tr><td>I-07</td><td>Timestamp on a just-arrived notification.</td><td>"just now"/"N min ago" — never a negative like "-5 min ago".</td><td>—</td></tr>
+</table>
+<div class="shots">
+  <img class="shot" src="shots/05_notifications.png" alt="Notifications">
+  <p class="cap">Notifications: date groups, per-type icons, unread dots, mark-all-read.</p>
+</div>
+
+<h3>J. Offline &amp; sync</h3>
+<table>
+  <tr><th>ID</th><th>Action</th><th>Expected result</th><th>Verify in ERPNext</th></tr>
+  <tr><td>J-01</td><td>Airplane mode with the app open.</td><td>Amber offline banner appears: "You're offline — readings will be saved on this phone".</td><td>—</td></tr>
+  <tr><td>J-02</td><td>Take 2 readings offline, go back online.</td><td>"Back online — syncing…" toast; readings upload automatically; no duplicates.</td><td>Exactly 2 new Daily Readings.</td></tr>
+  <tr><td>J-03</td><td>Offline → Sync screen (from offline/banner navigation).</td><td>Shows truly pending items; runs the real sync; per-item Sent/Not-sent; honest "Sync Incomplete" state on failure. When nothing is pending: "You're Up to Date".</td><td>Rows land once each.</td></tr>
+  <tr><td>J-04</td><td>Pending count consistency.</td><td>Offline screen count == provider badge == actual pending rows (all key off sync_status, not the display status).</td><td>—</td></tr>
+</table>
+
+<h3>K. Alerts</h3>
+<table>
+  <tr><th>ID</th><th>Action</th><th>Expected result</th><th>Verify in ERPNext</th></tr>
+  <tr><td>K-01</td><td>Submit a critical BP reading (e.g. 186/126).</td><td>High-BP alert screen appears with guidance; contact care team options work.</td><td>Daily Reading Risk = Critical; Chronic Care Alert created + linked Nurse Task.</td></tr>
+  <tr><td>K-02</td><td>Contact Care Team screen: open the message composer twice.</td><td>No leaked controllers (memory); sending works.</td><td>—</td></tr>
+</table>
+
+<h3>L. Sessions &amp; error handling</h3>
+<table>
+  <tr><th>ID</th><th>Action</th><th>Expected result</th></tr>
+  <tr><td>L-01</td><td>Force a 401 (expire the session server-side), then use the app.</td><td>Session-expired screen; no endless retry loops; no sid ever appears in URLs/logs.</td></tr>
+  <tr><td>L-02</td><td>Corrupt the local session data (dev: clear DB files) and cold-start.</td><td>Falls back to welcome/sign-in — never hangs on splash.</td></tr>
+  <tr><td>L-03</td><td>Double-tap async actions (login, logout, pay, book).</td><td>Single execution — busy guards everywhere.</td></tr>
+</table>
+
+<h3>M. Accessibility &amp; resilience quick pass</h3>
+<table>
+  <tr><th>ID</th><th>Action</th><th>Expected result</th></tr>
+  <tr><td>M-01</td><td>System font = largest, plus in-app Large text ON.</td><td>All screens remain usable; no overflow/red boxes.</td></tr>
+  <tr><td>M-02</td><td>Rotate / resize (tablet or web).</td><td>Layouts adapt; payment waiting/result screens stay centered.</td></tr>
+  <tr><td>M-03</td><td>Airplane-mode cold start.</td><td>App opens to a usable state with offline banner; no crash from failed fetches.</td></tr>
+</table>
+
+<h3>N. Secondary screens &amp; edges</h3>
+<table>
+  <tr><th>ID</th><th>Action</th><th>Expected result</th></tr>
+  <tr><td>N-01</td><td>Health Tips screen.</td><td>Tips load/display; no broken images or dead links.</td></tr>
+  <tr><td>N-02</td><td>"No data logged today" reminder nudge screen.</td><td>Log My Data Now → home form; Remind Me Later dismisses.</td></tr>
+  <tr><td>N-03</td><td>My Devices: delete a paired device (confirm dialog).</td><td>Removed from the list; no zombie connection state.</td></tr>
+  <tr><td>N-04</td><td>Contact Care Team (from a high-BP alert).</td><td>Composer opens/sends correctly on repeat use (no leaked controllers).</td></tr>
+  <tr><td>N-05</td><td>Error screen retry paths (network-down navigation).</td><td>Retry works; Back behaves sensibly (no popping to a black screen).</td></tr>
+</table>
+
+<div class="pagebreak"></div>
+<h2>Part 1B — Clinical staff experience (ERPNext desk)</h2>
+<p>These tests run on the desk at <code>https://uat.dagaartech.com</code>, one account per role. Custom roles: <b>Chronic Care Nurse / Doctor / Admin / Pharmacist / Lab Tech</b>. Desk pages live under <code>/app/&lt;page-name&gt;</code> (clinic-dashboard, alert-queue, daily-readings, patient-management, telemedicine-waiting-room, analytics-dashboard).</p>
+<div class="shots">
+  <img class="shot" src="shots/desk/02_clinic_dashboard.png" alt="Clinic Dashboard" style="width:430px">
+  <img class="shot" src="shots/desk/03_alert_queue.png" alt="Alert Queue" style="width:430px">
+  <p class="cap">Clinic Dashboard (KPIs, priority alerts, trends) and the Alert Queue.</p>
+</div>
+
+<h3>1B.0 Staff setup (once)</h3>
+<table>
+  <tr><th>ID</th><th>Action</th><th>Expected result</th></tr>
+  <tr><td>1B-01</td><td>Create/confirm one user per role (Nurse, Doctor, Admin, Pharmacist, Lab Tech) and a practitioner linked to the doctor's user.</td><td>Each role logs in and lands on its permitted desk.</td></tr>
+  <tr><td>1B-02</td><td>As each staff role, try opening pages outside your scope (e.g. pharmacist opens clinic-dashboard).</td><td>Denied cleanly — no tracebacks.</td></tr>
+</table>
+
+<h3>1B-A. Nurse — alert triage &amp; daily monitoring</h3>
+<div class="shots">
+  <img class="shot" src="shots/desk/04_daily_readings.png" alt="Daily Readings" style="width:430px">
+  <img class="shot" src="shots/desk/05_patient_management.png" alt="Patient Management" style="width:430px">
+  <p class="cap">Daily Readings page and Patient Management (registry + profile drawer).</p>
+</div>
+<table>
+  <tr><th>ID</th><th>Action</th><th>Expected result</th><th>Verify</th></tr>
+  <tr><td>1B-A1</td><td>Open <b>Alert Queue</b> after a patient submits a High/Critical reading.</td><td>Alert appears, severity-sorted (Very High → Low), with patient, latest reading, reason, time.</td><td>Chronic Care Alert row exists (Open).</td></tr>
+  <tr><td>1B-A2</td><td>Take Action → <b>Mark Reviewed</b>.</td><td>Alert resolves; resolved_at stamped; disappears from the open queue.</td><td>Status = Resolved.</td></tr>
+  <tr><td>1B-A3</td><td>Take Action → <b>Escalate to Doctor</b>.</td><td>Alert becomes Escalated AND a Doctor Review is auto-created (priority = alert level, alert linked).</td><td>Doctor Review exists, review_status "Awaiting Review".</td></tr>
+  <tr><td>1B-A4</td><td>Take Action → <b>Add Note</b>.</td><td>Note saved on the alert (resolution_note).</td><td>Note visible on the alert record.</td></tr>
+  <tr><td>1B-A5</td><td>Auto-created Nurse Task from the alert (when auto-assign is on in Chronic Care Settings).</td><td>Task exists, type mapped from alert type, due today, status Pending.</td><td>Nurse Task list.</td></tr>
+  <tr><td>1B-A6</td><td>Complete the task (set Completed).</td><td>completed_at stamped.</td><td>—</td></tr>
+  <tr><td>1B-A7</td><td>Leave a task Pending past its due date; run the daily job or wait.</td><td>Status flips to Overdue (<code>mark_overdue_nurse_tasks</code>).</td><td>—</td></tr>
+  <tr><td>1B-A8</td><td>Open <b>Daily Readings</b> page; switch dates.</td><td>KPIs (total/synced/pending/high), source breakdown, per-reading risk pills; "No" medication shows as No (not ✅); Critical = red pill.</td><td>Counts match Daily Reading list.</td></tr>
+  <tr><td>1B-A9</td><td>Open <b>Patient Management</b>; filter by risk + subscription; search; open a patient profile.</td><td>Cards, pies, filters work; profile drawer shows 30-day trend, active alerts, subscription, devices, last 5 doctor reviews, 7-day med adherence.</td><td>—</td></tr>
+  <tr><td>1B-A10</td><td>Missed-reading job: patient with no reading for 2+ days.</td><td>Daily job creates a Medium "Missed Reading" alert (once — no duplicates on re-run) + Follow Up task.</td><td>Alert + task exist.</td></tr>
+</table>
+
+<h3>1B-B. Doctor — reviews &amp; telemedicine</h3>
+<div class="shots">
+  <img class="shot" src="shots/desk/06_telemedicine_waiting.png" alt="Telemedicine Waiting Room" style="width:430px">
+  <img class="shot" src="shots/desk/07_analytics.png" alt="Analytics Dashboard" style="width:430px">
+  <p class="cap">Telemedicine waiting room and the doctor analytics dashboard.</p>
+</div>
+<table>
+  <tr><th>ID</th><th>Action</th><th>Expected result</th><th>Verify</th></tr>
+  <tr><td>1B-B1</td><td>Open the Doctor Review created in 1B-A3.</td><td>7-day clinical summary auto-computed (latest/avg BP &amp; sugar, missed days, adherence).</td><td>Fields populated on the review.</td></tr>
+  <tr><td>1B-B2</td><td>Fill assessment + follow-up interval; set review_status = Reviewed.</td><td>reviewed_at stamped; next_review_date set from the interval.</td><td>—</td></tr>
+  <tr><td>1B-B3</td><td>Leave a Very High alert Open &gt;30 min (default escalation window).</td><td>Hourly job auto-escalates and creates a Doctor Review.</td><td>Alert Escalated; review exists.</td></tr>
+  <tr><td>1B-B4</td><td>Telemedicine: patient joins from the app.</td><td>Session flips Scheduled → In Progress; doctor gets a desk notification + push (+SMS) — once, not per rejoin.</td><td>Session start_time set; Notification Log for the doctor.</td></tr>
+  <tr><td>1B-B5</td><td>Open <b>Telemedicine Waiting Room</b>.</td><td>Waiting/in-progress sessions first, today's scheduled below; auto-refresh every 20s.</td><td>—</td></tr>
+  <tr><td>1B-B6</td><td>Join Call, then <b>Mark Done</b>.</td><td>meeting_url opens; session completes with end_time + duration.</td><td>Status Completed.</td></tr>
+  <tr><td>1B-B7</td><td>Leave a session In Progress &gt;3h.</td><td>Hourly auto-close completes it.</td><td>—</td></tr>
+  <tr><td>1B-B8</td><td>Open <b>Analytics Dashboard</b> (doctor-only page).</td><td>Loads; note: some figures (engagement score, funnel %) are placeholders — flag, don't report as failures.</td><td>—</td></tr>
+</table>
+
+<h3>1B-C. Pharmacist — order fulfillment</h3>
+<div class="shots">
+  <img class="shot" src="shots/desk/10_medicine_requests.png" alt="Medicine Request list" style="width:430px">
+  <p class="cap">The Medicine Request list the pharmacist works from.</p>
+</div>
+<table>
+  <tr><th>ID</th><th>Action</th><th>Expected result</th><th>Verify</th></tr>
+  <tr><td>1B-C1</td><td>Open the new Medicine Request (from the patient's prescription order).</td><td>Prescription image attached; items listed.</td><td>—</td></tr>
+  <tr><td>1B-C2</td><td>Price each line (unit price × quantity, stock flag) and move to <b>Awaiting Payment</b>.</td><td>Totals compute (amount + delivery fee + tax); patient gets the "priced and ready" notification + push; patient app shows the pay banner.</td><td>Status + amounts on the record.</td></tr>
+  <tr><td>1B-C3</td><td>After the patient pays: move Paid → Preparing → Out for Delivery → Delivered.</td><td>Each move timestamps (preparation_started/dispatched_at/delivered_at) and notifies the patient.</td><td>Notification Log per transition.</td></tr>
+  <tr><td>1B-C4</td><td>Try clinical APIs as pharmacist (e.g. alert queue).</td><td>Denied — pharmacist works only via Medicine Request desk forms (by design).</td><td>—</td></tr>
+</table>
+
+<h3>1B-D. Lab Tech — lab work</h3>
+<table>
+  <tr><th>ID</th><th>Action</th><th>Expected result</th><th>Verify</th></tr>
+  <tr><td>1B-D1</td><td>Open the patient's requested Lab Test (standard Healthcare flow): collect sample → enter result → submit.</td><td>On submit, a "Lab Follow Up" Nurse Task is auto-created (due today).</td><td>Nurse Task exists.</td></tr>
+  <tr><td>1B-D2</td><td>Note role gap: the Chronic Care Lab Tech role has no custom permissions in the module.</td><td>Lab work uses stock Healthcare permissions — flag for provisioning, not a failure.</td><td>—</td></tr>
+</table>
+
+<h3>1B-E. Admin — billing, devices, oversight</h3>
+<table>
+  <tr><th>ID</th><th>Action</th><th>Expected result</th><th>Verify</th></tr>
+  <tr><td>1B-E1</td><td>Care Subscription list: find the patient's subscription.</td><td>Status/fee/next billing/total collected match the app's claims.</td><td>—</td></tr>
+  <tr><td>1B-E2</td><td>Manually settle a Cash payment via <code>pay_subscription</code>.</td><td>Works for Cash/Bank Transfer only; any other method is refused (no free mobile-money activation).</td><td>Subscription Payment created, status Active.</td></tr>
+  <tr><td>1B-E3</td><td>Patient Device registry: check a paired device.</td><td>Status Online; battery &lt;20% flips to Low Battery; &gt;2h without sync flips Offline (hourly job).</td><td>—</td></tr>
+  <tr><td>1B-E4</td><td>Reports: Patient Summary, Clinical Summary, Subscription, Revenue, Device Status.</td><td>All load with real numbers — Med Adherence is not all-zero; revenue matches Subscription Payment rows.</td><td>—</td></tr>
+  <tr><td>1B-E5</td><td>Clinic Dashboard.</td><td>KPIs live (medicine tiles show real counts, today's appointments, alert trend); "View All" links open filtered lists.</td><td>—</td></tr>
+</table>
+
+<h3>1B-F. Cross-side realtime checks</h3>
+<table>
+  <tr><th>ID</th><th>Action</th><th>Expected result</th></tr>
+  <tr><td>1B-F1</td><td>Patient submits a Very High reading while the desk is open.</td><td>Realtime alert event reaches desk users without a page refresh.</td></tr>
+  <tr><td>1B-F2</td><td>Nurse task assigned.</td><td>Realtime event to the assignee's user.</td></tr>
+  <tr><td>1B-F3</td><td>Patient joins a video visit.</td><td>Doctor notified (desk + push + SMS) exactly once.</td></tr>
+</table>
+
+<div class="note"><b>Known staff-side gaps (by design, not failures):</b> no assign-nurse UI on the alert queue (field exists); "Call Patient" button is a placeholder; Lab Tech role unprovisioned; some analytics figures are placeholders; pharmacist excluded from clinical APIs intentionally.</div>
+
+<h2>Part 2 — ERPNext module tests</h2>
+<p>Run these as <b>Admin</b> on UAT (desk + bench). API-level checks can use curl against <code>https://uat.dagaartech.com</code> with a patient session/API key.</p>
+
+<h3>N. Auth / OTP API</h3>
+<table>
+  <tr><th>ID</th><th>Test</th><th>Expected</th></tr>
+  <tr><td>N-01</td><td><code>POST /api/method/hiraal_emr.api.request_otp</code> with <code>{mobile, channel:"sms"}</code> for a registered number.</td><td><code>{success:true, channel:"sms"}</code>; SMS arrives; OTP cached 5 min.</td></tr>
+  <tr><td>N-02</td><td>Same with <code>{email, channel:"email"}</code> for a registered patient's email.</td><td>Email sent (masked <code>sent_to</code> in response). Unregistered email → still <code>success:true</code> but nothing is emailed (no user enumeration).</td></tr>
+  <tr><td>N-03</td><td><code>verify_otp</code> with the correct code, then replay the same code.</td><td>First: success + patient api_key/api_secret issued. Replay: fails (code invalidated).</td></tr>
+  <tr><td>N-04</td><td><code>verify_otp</code> with a wrong code; expired code (&gt;5 min).</td><td>Clean failure both times.</td></tr>
+  <tr><td>N-05</td><td>Self-register a new patient via the app flow (request_otp → verify → self_register).</td><td>Patient + user created, Active; duplicate phone returns the existing account.</td></tr>
+</table>
+
+<h3>O. Readings ingestion</h3>
+<table>
+  <tr><th>ID</th><th>Test</th><th>Expected</th></tr>
+  <tr><td>O-01</td><td><code>submit_reading</code> with a manual BP reading incl. <code>reference_id</code>.</td><td>Daily Reading created; Source "App"; duplicate <code>reference_id</code> returns the existing row (idempotent).</td></tr>
+  <tr><td>O-02</td><td>Submit with <code>reading_date</code>/<code>reading_time</code> set to yesterday 08:30.</td><td>Row is stamped with that date/time (BLE store-and-forward support), not today.</td></tr>
+  <tr><td>O-03</td><td>Submit with <code>source</code> = "Smart Scale" / "BP Device" / "Glucometer" / "5G Hub".</td><td>All accepted (valid Select options — needs the migrated doctype).</td></tr>
+  <tr><td>O-04</td><td>Critical reading (186/126).</td><td>risk_level Critical + Chronic Care Alert + Nurse Task auto-created; audit log entries written (exactly one per action — no double audit rows).</td></tr>
+  <tr><td>O-05</td><td><code>get_my_readings</code> as the patient.</td><td>Only that patient's rows; <code>medicine_taken</code> present in the payload.</td></tr>
+  <tr><td>O-06</td><td>Andesfit 4G ingestion endpoint with a device payload.</td><td>Accepted, stored with source "5G Hub"; device gets the expected OK response (not a Select-validation error).</td></tr>
+</table>
+
+<h3>P. Payments &amp; the settlement chain</h3>
+<div class="note">The chain has four settle paths: app poll (<code>check_my_order_payment</code>/<code>check_my_payment</code>), the real-time hook (<code>payment_hooks.on_mobile_payment_update</code>), the 5-minute cron (<code>reconcile_mobile_payments</code>), and lazy reconcile in <code>get_my_orders</code>. Test that each path settles and none double-settles.</div>
+<table>
+  <tr><th>ID</th><th>Test</th><th>Expected</th></tr>
+  <tr><td>P-01</td><td>App: pay an order and approve quickly.</td><td>Poll path settles: order Paid, one Subscription/Transaction record.</td></tr>
+  <tr><td>P-02</td><td>Pay, approve <b>after</b> closing the app.</td><td>Real-time hook or cron settles it within ~5 min; order Paid with no app involvement.</td></tr>
+  <tr><td>P-03</td><td>Bench: <code>bench execute hiraal_emr.tasks.reconcile_mobile_payments</code> with a Completed-but-unsettled transaction present.</td><td>Settles the order/subscription; safe to run repeatedly (idempotent).</td></tr>
+  <tr><td>P-04</td><td>Subscription Payment records after P-01/P-02.</td><td>payment_method is one of Zaad/eDahab/Visa/Mastercard/Cash/Bank Transfer — <b>never "Mobile Money"</b>; insert never throws Select validation.</td></tr>
+  <tr><td>P-05</td><td>Underpayment: force a Completed transaction whose amount &lt; order total.</td><td>NOT settled; "Payment Reconciliation Mismatch" Error Log entry. Overpayment settles.</td></tr>
+  <tr><td>P-06</td><td>Double initiation: start two pay attempts for the same order.</td><td>Second attempt returns the in-flight transaction ("already in progress") — no second wallet charge.</td></tr>
+  <tr><td>P-07</td><td>Settlement while the hook throws (e.g. temporarily break a downstream field in staging).</td><td>The gateway's own save still commits (hook is exception-safe; failure lands in Error Log, doesn't roll back the transaction log).</td></tr>
+  <tr><td>P-08</td><td>Gateway returns status in a different case (e.g. "completed").</td><td>Poll endpoints normalize to canonical Completed/Failed/Pending.</td></tr>
+  <tr><td>P-09</td><td>Admin: run <code>/api/method/hiraal_emr.api.fcm_diagnostics?user=&lt;patient-login&gt;&amp;send_test=1</code>.</td><td>JSON shows google_auth_installed, service_account configured, access_token_ok, project_id = hiraal-life-care, registered_token_count &gt; 0, and a real test push arrives (status 200).</td></tr>
+</table>
+
+<h3>Q. Orders lifecycle</h3>
+<table>
+  <tr><th>ID</th><th>Test</th><th>Expected</th></tr>
+  <tr><td>Q-01</td><td>Move an order through Received → Under Review → Awaiting Payment → Paid → Preparing → Out for Delivery → Delivered (as staff).</td><td>Each transition creates a patient Notification Log entry + push (hooks registered — doc_events merge fix).</td></tr>
+  <tr><td>Q-02</td><td>Patient cancels at each early stage; then tries after Paid.</td><td>Allowed Received/Under Review/Awaiting Payment; refused after Paid with a clear error.</td></tr>
+  <tr><td>Q-03</td><td>Patient confirms receipt of a delivered order.</td><td>received_confirmed set; order fields intact.</td></tr>
+  <tr><td>Q-04</td><td><code>get_my_orders</code> with an unpaid-but-referenced order.</td><td>Lazy reconcile settles it if the gateway says Completed; response reflects Paid immediately.</td></tr>
+</table>
+
+<h3>R. Lab tests &amp; appointments</h3>
+<table>
+  <tr><th>ID</th><th>Test</th><th>Expected</th></tr>
+  <tr><td>R-01</td><td><code>request_lab_test</code> for a patient <b>with no sex on file</b>.</td><td>Inserts fine — patient_sex falls back to "Other".</td></tr>
+  <tr><td>R-02</td><td>Request 3 templates; fail the 2nd (staging: disable one template mid-flight).</td><td>Response names exactly which templates failed — no silent duplicates on retry.</td></tr>
+  <tr><td>R-03</td><td><code>cancel_my_lab_test</code> on a Draft test, then on a Completed test.</td><td>Draft → Cancelled; Completed → refusal error. Another patient's test → PermissionError.</td></tr>
+  <tr><td>R-04</td><td><code>get_my_lab_tests</code> / <code>get_my_appointments</code>.</td><td>Scoped to the caller; correct fields; newest/soonest first.</td></tr>
+  <tr><td>R-05</td><td>Book an appointment for a practitioner (any department).</td><td>Appointment created with a valid Appointment Type link ("Chronic Care Follow Up") — no LinkValidationError.</td></tr>
+</table>
+
+<h3>S. Subscriptions &amp; billing</h3>
+<div class="shots">
+  <img class="shot" src="shots/desk/11_care_subscriptions.png" alt="Care Subscriptions" style="width:430px">
+  <img class="shot" src="shots/desk/12_subscription_payments.png" alt="Subscription Payments" style="width:430px">
+  <p class="cap">Care Subscriptions and the Subscription Payment records.</p>
+</div>
+<table>
+  <tr><th>ID</th><th>Test</th><th>Expected</th></tr>
+  <tr><td>S-01</td><td>App subscribes and pays (any plan).</td><td>Subscription Active; Subscription Payment valid; next_billing_date +1 month; total_collected incremented once.</td></tr>
+  <tr><td>S-02</td><td>Run settlement twice for the same transaction (poll + cron overlap).</td><td>Exactly one Subscription Payment per reference_id.</td></tr>
+  <tr><td>S-03</td><td>Desk: staff use <code>pay_subscription</code> with method "Zaad".</td><td>Refused — manual settlement only for Cash/Bank Transfer.</td></tr>
+  <tr><td>S-04</td><td>Billing cron <code>process_subscription_billing</code> for a due subscription.</td><td>Reminder sent (SMS/push); no silent auto-charge.</td></tr>
+  <tr><td>S-05</td><td>Suspended subscription pays via app.</td><td>Payment accepted; subscription reactivates.</td></tr>
+</table>
+
+<h3>T. Notifications &amp; push</h3>
+<div class="shots">
+  <img class="shot" src="shots/desk/14_notification_log.png" alt="Notification Log" style="width:430px">
+  <img class="shot" src="shots/desk/13_patient_devices.png" alt="Patient Devices" style="width:430px">
+  <p class="cap">Notification Log entries and the Patient Device registry.</p>
+</div>
+<table>
+  <tr><th>ID</th><th>Test</th><th>Expected</th></tr>
+  <tr><td>T-01</td><td>Register a push token from the app (login); check Hiraal Push Token list.</td><td>One row per device; enabled=1; last_seen updates on re-register.</td></tr>
+  <tr><td>T-02</td><td>Send a patient notification from the desk.</td><td>Push arrives once; token failures disable stale tokens; logged only.</td></tr>
+  <tr><td>T-03</td><td>Logout, then send again.</td><td>No push to the signed-out device (enabled=0).</td></tr>
+  <tr><td>T-04</td><td>Payment completion push data payloads.</td><td>Order flow sends <code>type=payment_complete, order=&lt;name&gt;</code>; subscription flow sends <code>type=subscription_payment_complete, subscription=&lt;name&gt;</code>.</td></tr>
+</table>
+
+<h3>U. Permissions &amp; security</h3>
+<table>
+  <tr><th>ID</th><th>Test</th><th>Expected</th></tr>
+  <tr><td>U-01</td><td>As a patient user: open another patient's record / order / lab test / notifications via direct API calls with their id.</td><td>PermissionError everywhere (incl. <code>get_notifications</code> — the closed IDOR).</td></tr>
+  <tr><td>U-02</td><td>As a patient: open clinic pages (Clinic Dashboard, Alert Queue).</td><td>Denied.</td></tr>
+  <tr><td>U-03</td><td>As staff (nurse/doctor/admin): same pages.</td><td>Open normally.</td></tr>
+  <tr><td>U-04</td><td>Guest (logged out): call any non-guest endpoint.</td><td>Authentication error; only request_otp/verify_otp/self_register are guest-open.</td></tr>
+</table>
+
+<h3>V. Dashboards &amp; reports</h3>
+<table>
+  <tr><th>ID</th><th>Test</th><th>Expected</th></tr>
+  <tr><td>V-01</td><td>Clinic Dashboard medicine tiles.</td><td>Counts match real lists (Received+Under Review shown as pending; Out for Delivery as dispatched) — no permanent zeros.</td></tr>
+  <tr><td>V-02</td><td>Alert Queue page (desk).</td><td>Loads without a query-validation error; Very High alerts sort first, then newest.</td></tr>
+  <tr><td>V-03</td><td>Daily Readings page.</td><td>Medication column: "No" shows as No (not ✅); Critical readings get a red pill.</td></tr>
+  <tr><td>V-04</td><td>Patient Summary report — Med Adherence column.</td><td>Real percentages (not all 0%).</td></tr>
+  <tr><td>V-05</td><td>Risk-level vocabulary everywhere.</td><td>Readings use Normal/Medium/High/Critical; alerts use Low/Medium/High/Very High — no mixing.</td></tr>
+</table>
+
+<h3>W. Scheduled jobs</h3>
+<table>
+  <tr><th>ID</th><th>Test</th><th>Expected</th></tr>
+  <tr><td>W-01</td><td>Scheduled Job Log on UAT.</td><td><code>reconcile_mobile_payments</code> runs every 5 min; daily jobs (missed-reading alerts, subscription billing, overdue nurse tasks) and hourly jobs run.</td></tr>
+  <tr><td>W-02</td><td>Sync-queue hygiene after successful syncs.</td><td><code>sync_queue</code> rows are deleted on success — table doesn't grow forever.</td></tr>
+</table>
+
+<div class="pagebreak"></div>
+<h2>Part 3 — Regression checklist (this release's fixed bugs)</h2>
+<p>Quick pass to confirm the fixed bug classes stay fixed. One line each — verify after every new build.</p>
+<table>
+  <tr><th>#</th><th>Bug (fixed)</th><th>Quick check</th></tr>
+  <tr><td>R-01</td><td>BLE glucose parsed at wrong byte offset / wrong units bit</td><td>C-11: meter value == app value == server value (mg/dL)</td></tr>
+  <tr><td>R-02</td><td>Weight decoded as SFLOAT (millions of kg)</td><td>C-13: sane kg value</td></tr>
+  <tr><td>R-03</td><td>BP flags shifted (pulse dropped / garbage pulse)</td><td>C-07: pulse present and correct</td></tr>
+  <tr><td>R-04</td><td>Generic glucose meters never got RACP</td><td>C-10: stored history downloads</td></tr>
+  <tr><td>R-05</td><td>RACP CCCD never enabled (ATT 0x81)</td><td>C-10/C-12 pass on strict firmware</td></tr>
+  <tr><td>R-06</td><td>Unfiltered scan blocked by neverForLocation on Android 12+</td><td>C-01: devices listed</td></tr>
+  <tr><td>R-07</td><td>Reconnect leaked old connection / corrupted new session</td><td>C-16</td></tr>
+  <tr><td>R-08</td><td>Duplicate readings on reconnect</td><td>C-09: N measurements = N rows</td></tr>
+  <tr><td>R-09</td><td>Device timestamps discarded</td><td>C-10: historical dates kept</td></tr>
+  <tr><td>R-10</td><td>Manual offline readings never synced</td><td>B-04/J-02</td></tr>
+  <tr><td>R-11</td><td>Sync screen faked syncing</td><td>J-03</td></tr>
+  <tr><td>R-12</td><td>Avatar initials RangeError on spaced names</td><td>A-11</td></tr>
+  <tr><td>R-13</td><td>"Mobile Money" Select crash on subscription settlement</td><td>P-04/G-02</td></tr>
+  <tr><td>R-14</td><td>patient_sex MandatoryError on lab requests</td><td>R-01 (module)</td></tr>
+  <tr><td>R-15</td><td>Nonexistent statuses ("Pending" orders, "Dispatched", "Very High" readings, Open-only appointments)</td><td>V-01, V-05, activity cards match lists</td></tr>
+  <tr><td>R-16</td><td>doc_events overwritten (order notifications dead)</td><td>Q-01</td></tr>
+  <tr><td>R-17</td><td>Alert Queue broken by field() order_by on v15</td><td>V-02</td></tr>
+  <tr><td>R-18</td><td>15s timeout killed slow wallet approvals</td><td>F-04</td></tr>
+  <tr><td>R-19</td><td>Push-listener throw killed auto-polling</td><td>F-02</td></tr>
+  <tr><td>R-20</td><td>Wrong country codes (Oman/Sweden)</td><td>A-07</td></tr>
+  <tr><td>R-21</td><td>Categories all opened the same unfiltered booking</td><td>E-03</td></tr>
+  <tr><td>R-22</td><td>Activity cards opened request forms instead of lists</td><td>E-04/E-07</td></tr>
+  <tr><td>R-23</td><td>setState-after-dispose crashes</td><td>E-02, H-02, H-04</td></tr>
+  <tr><td>R-24</td><td>Connect Device tile vertical-text layout</td><td>C-01</td></tr>
+  <tr><td>R-25</td><td>sid in URLs / FCM token in logs</td><td>L-01 + log review</td></tr>
+</table>
+
+<h2>Part 4 — Known limitations &amp; bug reporting</h2>
+
+<h3>Known limitations (by design or pending work)</h3>
+<table>
+  <tr><th>Area</th><th>Limitation</th></tr>
+  <tr><td>Appointments</td><td>Requires a consulting charge configured per practitioner ("OP Consulting Charge"), or booking errors. Admin setup task.</td></tr>
+  <tr><td>Auto-renewal</td><td>No silent mobile-money auto-debit — patients get a pay reminder instead. Intended.</td></tr>
+  <tr><td>Reminders</td><td>Daily local notifications use inexact alarms (no exact-alarm permission) — fire time can drift a few minutes under battery optimization.</td></tr>
+  <tr><td>Payments</td><td>Subscription push completion can't be matched to a specific transaction id server-side yet (payload carries the subscription name only).</td></tr>
+  <tr><td>Analytics page</td><td>Some desk analytics metrics are placeholder values (engagement score etc.).</td></tr>
+  <tr><td>iOS</td><td>Not currently built/tested (plist keys are in place).</td></tr>
+</table>
+
+<h3>How to report a problem</h3>
+<p>For each failure capture:</p>
+<p>
+1. Test ID (e.g. C-10) and the exact steps taken.<br>
+2. Expected vs actual.<br>
+3. Screenshot or screen recording (especially payment/measuring screens).<br>
+4. Exact values: reading numbers / order id / amount / time (for server tracing).<br>
+5. Phone model + Android version + build date of the APK.<br>
+6. ERPNext side: Error Log entries + the relevant doctype record id.
+</p>
+
+<div class="pass"><b>Release sign-off:</b> all of Part 3 (R-01…R-25) green + P-01…P-09 green = payments and device sync are safe to ship.</div>
+
+</div>
+</body>
+</html>
