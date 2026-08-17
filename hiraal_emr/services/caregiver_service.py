@@ -76,8 +76,20 @@ def _serialize_link(row: dict) -> dict:
         "can_view_medications": bool(row.get("can_view_medications")),
         "can_receive_alerts": bool(row.get("can_receive_alerts")),
         "can_pay_for_care": bool(row.get("can_pay_for_care")),
+        "view_readings": bool(row.get("can_view_vitals")),
+        "view_medicines": bool(row.get("can_view_medications")),
+        "view_appointments": bool(row.get("can_view_appointments")),
+        "view_subscription": bool(row.get("can_pay_for_care")),
     }
     return out
+
+
+_PERMISSION_ALIASES = {
+    "view_readings": "can_view_vitals",
+    "view_medicines": "can_view_medications",
+    "view_appointments": "can_view_appointments",
+    "view_subscription": "can_pay_for_care",
+}
 
 
 def _parse_permissions(raw) -> dict:
@@ -91,7 +103,18 @@ def _parse_permissions(raw) -> dict:
     return {}
 
 
+def _normalize_permissions(raw) -> dict:
+    parsed = _parse_permissions(raw)
+    out = {}
+    for key, value in parsed.items():
+        canonical = _PERMISSION_ALIASES.get(key, key)
+        if canonical.startswith("can_"):
+            out[canonical] = bool(value)
+    return out
+
+
 def _apply_permissions(doc, permissions: dict):
+    normalized = _normalize_permissions(permissions)
     for field in (
         "can_view_vitals",
         "can_view_appointments",
@@ -99,8 +122,8 @@ def _apply_permissions(doc, permissions: dict):
         "can_receive_alerts",
         "can_pay_for_care",
     ):
-        if field in permissions:
-            doc.set(field, 1 if permissions[field] else 0)
+        if field in normalized:
+            doc.set(field, 1 if normalized[field] else 0)
 
 
 def _patient_by_phone(phone: str):
@@ -138,7 +161,7 @@ def _user_for_phone(phone: str):
 def invite_caregiver(patient: str, country_code: str, whatsapp_number: str, relationship: str,
                      family_member_name: str | None = None, permissions=None):
     phone = normalize_phone(country_code, whatsapp_number)
-    perms = _parse_permissions(permissions)
+    perms = _normalize_permissions(permissions)
     name = family_member_name or phone
     doc = frappe.new_doc("Family Member")
     doc.patient = patient
@@ -322,7 +345,8 @@ def update_permissions(link_name: str, patient: str, permissions: dict):
     if doc.patient != patient:
         frappe.throw(_("Not permitted"), frappe.PermissionError)
     _apply_permissions(doc, permissions)
-    if permissions.get("can_pay_for_care"):
+    normalized = _normalize_permissions(permissions)
+    if normalized.get("can_pay_for_care"):
         doc.is_sponsor = 1
     doc.save(ignore_permissions=True)
     return doc
