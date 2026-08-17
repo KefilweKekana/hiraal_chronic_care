@@ -20,6 +20,7 @@
     "transaction_id",
     "failure_reason",
     "refund_date",
+    "paid_by_user",
     "amended_from"
   ],
   "fields": [
@@ -38,6 +39,7 @@
     {"fieldname": "transaction_id", "fieldtype": "Data", "label": "Transaction ID"},
     {"fieldname": "failure_reason", "fieldtype": "Small Text", "label": "Failure Reason"},
     {"fieldname": "refund_date", "fieldtype": "Date", "label": "Refund Date"},
+    {"fieldname": "paid_by_user", "fieldtype": "Link", "label": "Paid By User", "options": "User"},
     {"fieldname": "amended_from", "fieldtype": "Link", "label": "Amended From", "options": "Subscription Payment", "read_only": 1, "hidden": 1, "no_copy": 1}
   ],
   "index_web_pages_for_search": 0,

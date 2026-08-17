@@ -29,6 +29,10 @@
     "last_payment_date",
     "last_payment_status",
     "total_collected",
+    "section_sponsor",
+    "sponsor_user",
+    "sponsor_family_member",
+    "paid_by_sponsor",
     "section_retry",
     "retry_count",
     "max_retries",
@@ -197,6 +201,30 @@
       "fieldtype": "Currency",
       "label": "Total Collected",
       "read_only": 1
+    },
+    {
+      "fieldname": "section_sponsor",
+      "fieldtype": "Section Break",
+      "label": "Sponsor",
+      "collapsible": 1
+    },
+    {
+      "fieldname": "sponsor_user",
+      "fieldtype": "Link",
+      "label": "Sponsor User",
+      "options": "User"
+    },
+    {
+      "fieldname": "sponsor_family_member",
+      "fieldtype": "Link",
+      "label": "Sponsor Link",
+      "options": "Family Member"
+    },
+    {
+      "fieldname": "paid_by_sponsor",
+      "fieldtype": "Check",
+      "label": "Paid By Sponsor",
+      "default": 0
     },
     {
       "fieldname": "section_retry",

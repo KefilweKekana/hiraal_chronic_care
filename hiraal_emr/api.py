@@ -6,6 +6,7 @@ and document event hooks.
 import frappe
 from frappe import _
 from frappe.utils import add_days, add_months, add_to_date, flt, get_datetime, getdate, now_datetime, today
+import json
 
 from hiraal_emr.services.otp_service import generate_otp, verify_otp as otp_verify
 from hiraal_emr.services.sms_service import send_otp_sms, send_alert_sms, send_sms
@@ -2338,6 +2339,20 @@ _MEDICINE_STATUS_MESSAGES = {
 _MEDICINE_SMS_STATUSES = {"Awaiting Payment", "Out for Delivery", "Delivered", "Cancelled"}
 
 
+def on_chronic_care_alert_insert(doc, method=None):
+    """Notify linked caregivers when a clinical alert is created."""
+    try:
+        from hiraal_emr.services.caregiver_service import notify_sponsors_of_alert
+
+        notify_sponsors_of_alert(
+            doc.patient,
+            doc.alert_type or doc.alert_level or "Alert",
+            doc.reason or doc.name,
+        )
+    except Exception:
+        frappe.logger("hiraal_caregiver").exception("caregiver alert hook failed")
+
+
 def on_medicine_request_update(doc, method=None):
     """Notify the patient when their medicine order's status changes.
 
@@ -3202,17 +3217,302 @@ def get_weekly_summary(patient):
 @frappe.whitelist(allow_guest=False)
 def get_family_members(patient):
     """Return authorized family members for a patient."""
+    from hiraal_emr.services.caregiver_service import list_caregivers_for_patient
+
     _require_patient_access(patient)
-    members = frappe.get_all(
-        "Family Member",
-        filters={"patient": patient, "is_active": 1},
-        fields=[
-            "name", "family_member_name", "relationship", "phone",
-            "email", "can_view_vitals", "can_view_medications", "can_receive_alerts",
-        ],
-        order_by="creation asc",
+    return {"success": True, "family_members": list_caregivers_for_patient(patient)}
+
+
+@frappe.whitelist(allow_guest=False)
+def invite_caregiver(country_code, whatsapp_number, relationship, family_member_name=None, permissions=None):
+    """Patient invites a caregiver/sponsor by WhatsApp number."""
+    from hiraal_emr.services.caregiver_service import invite_caregiver as _invite, whatsapp_invite_url, _serialize_link
+
+    patient = _my_patient_name()
+    doc = _invite(patient, country_code, whatsapp_number, relationship, family_member_name, permissions)
+    audit_log("Create", "Family Member", doc.name, "Caregiver invited from app")
+    row = doc.as_dict()
+    return {
+        "success": True,
+        "link": _serialize_link(row),
+        "invite_code": doc.invite_code,
+        "whatsapp_url": whatsapp_invite_url(doc.name),
+    }
+
+
+@frappe.whitelist(allow_guest=False)
+def request_sponsor_connection(country_code, whatsapp_number, relationship, sponsor_name=None):
+    """Sponsor requests connection to a patient by their WhatsApp number."""
+    from hiraal_emr.services.caregiver_service import request_sponsor_connection as _req, _serialize_link
+
+    doc, patient_row = _req(country_code, whatsapp_number, relationship, sponsor_name)
+    audit_log("Create", "Family Member", doc.name, "Sponsor connection requested")
+    return {
+        "success": True,
+        "link": _serialize_link(doc.as_dict()),
+        "patient_name": patient_row.patient_name,
+    }
+
+
+@frappe.whitelist(allow_guest=False)
+def find_patient_for_sponsor(query):
+    """Find a patient by phone or member ID for sponsorship."""
+    from hiraal_emr.services.caregiver_service import find_patient_for_sponsor as _find
+
+    row = _find(query)
+    if not row:
+        return {"success": False, "message": _("No patient found")}
+    return {"success": True, "patient": row}
+
+
+@frappe.whitelist(allow_guest=False)
+def redeem_invitation_code(code):
+    """Accept a caregiver invitation using a short code."""
+    from hiraal_emr.services.caregiver_service import redeem_invitation_code as _redeem, _serialize_link
+
+    doc = _redeem(code, frappe.session.user)
+    return {"success": True, "link": _serialize_link(doc.as_dict())}
+
+
+@frappe.whitelist(allow_guest=False)
+def list_my_caregivers():
+    """Caregivers linked to the logged-in patient."""
+    from hiraal_emr.services.caregiver_service import list_caregivers_for_patient, list_pending_for_patient
+
+    patient = _my_patient_name()
+    return {
+        "success": True,
+        "caregivers": list_caregivers_for_patient(patient),
+        "pending": list_pending_for_patient(patient),
+    }
+
+
+@frappe.whitelist(allow_guest=False)
+def respond_caregiver_request(name, action):
+    """Patient accepts or rejects a caregiver/sponsor request."""
+    from hiraal_emr.services.caregiver_service import respond_to_request, _serialize_link
+
+    patient = _my_patient_name()
+    doc = respond_to_request(name, action, patient=patient)
+    audit_log("Update", "Family Member", doc.name, f"Caregiver request {action}")
+    return {"success": True, "link": _serialize_link(doc.as_dict())}
+
+
+@frappe.whitelist(allow_guest=False)
+def update_caregiver_permissions(name, permissions=None):
+    """Patient updates what a caregiver may access."""
+    from hiraal_emr.services.caregiver_service import update_permissions, _serialize_link
+
+    patient = _my_patient_name()
+    perms = permissions
+    if isinstance(permissions, str):
+        import json as _json
+        perms = _json.loads(permissions)
+    doc = update_permissions(name, patient, perms or {})
+    return {"success": True, "link": _serialize_link(doc.as_dict())}
+
+
+@frappe.whitelist(allow_guest=False)
+def revoke_caregiver(name):
+    """Patient removes caregiver access."""
+    from hiraal_emr.services.caregiver_service import revoke_link
+
+    patient = _my_patient_name()
+    doc = revoke_link(name, patient=patient)
+    audit_log("Update", "Family Member", doc.name, "Caregiver access revoked")
+    return {"success": True, "link_status": doc.link_status}
+
+
+@frappe.whitelist(allow_guest=False)
+def get_caregiver_whatsapp_invite(name):
+    """Return a wa.me URL for re-sending an invitation."""
+    from hiraal_emr.services.caregiver_service import whatsapp_invite_url
+
+    patient = _my_patient_name()
+    if frappe.db.get_value("Family Member", name, "patient") != patient:
+        frappe.throw(_("Not permitted"), frappe.PermissionError)
+    return {"success": True, "whatsapp_url": whatsapp_invite_url(name)}
+
+
+@frappe.whitelist(allow_guest=False)
+def list_my_sponsorships():
+    """Patients the logged-in user sponsors or cares for."""
+    from hiraal_emr.services.caregiver_service import list_sponsorships_for_user
+
+    return {"success": True, "sponsorships": list_sponsorships_for_user(frappe.session.user)}
+
+
+@frappe.whitelist(allow_guest=False)
+def get_sponsorship_dashboard(name):
+    """Sponsor dashboard for one linked patient."""
+    from hiraal_emr.services.caregiver_service import sponsorship_dashboard
+
+    return {"success": True, **sponsorship_dashboard(name, frappe.session.user)}
+
+
+@frappe.whitelist(allow_guest=False)
+def sponsor_patient_subscription(patient, plan, provider, method, phone, family_member=None):
+    """Sponsor pays a patient's care subscription."""
+    from hiraal_emr.services.caregiver_service import activate_sponsored_care
+    from hiraal_emr.services.subscription_catalog import resolve_plan
+
+    sponsor_user = frappe.session.user
+    link_name = family_member
+    if not link_name:
+        link_name = frappe.db.get_value(
+            "Family Member",
+            {
+                "patient": patient,
+                "caregiver_user": sponsor_user,
+                "can_pay_for_care": 1,
+                "link_status": ["in", ["Accepted", "Active", "Pending"]],
+            },
+            "name",
+        )
+    if not link_name:
+        frappe.throw(_("You are not authorized to pay for this patient"))
+
+    plan_row = resolve_plan(plan)
+    if not plan_row:
+        frappe.throw(_("Unknown or inactive plan"))
+
+    # Ensure subscription exists for patient
+    sub_name = frappe.db.get_value(
+        "Care Subscription",
+        {"patient": patient, "status": ["in", _SUB_PAYABLE_STATUSES + ["Suspended"]]},
+        "name",
     )
-    return {"success": True, "family_members": members}
+    if not sub_name:
+        sub = frappe.new_doc("Care Subscription")
+        sub.patient = patient
+        sub.plan = plan_row["name"]
+        sub.monthly_fee = flt(plan_row["monthly_fee"])
+        sub.status = "Overdue"
+        sub.start_date = today()
+        sub.next_billing_date = add_days(getdate(today()), 30)
+        sub.auto_renew = 1
+        if hasattr(sub, "sponsor_user"):
+            sub.sponsor_user = sponsor_user
+        if hasattr(sub, "sponsor_family_member"):
+            sub.sponsor_family_member = link_name
+        if hasattr(sub, "paid_by_sponsor"):
+            sub.paid_by_sponsor = 1
+        sub.insert(ignore_permissions=True)
+        sub_name = sub.name
+    else:
+        sub_doc = frappe.get_doc("Care Subscription", sub_name)
+        if hasattr(sub_doc, "sponsor_user"):
+            sub_doc.sponsor_user = sponsor_user
+        if hasattr(sub_doc, "sponsor_family_member"):
+            sub_doc.sponsor_family_member = link_name
+        if hasattr(sub_doc, "paid_by_sponsor"):
+            sub_doc.paid_by_sponsor = 1
+        sub_doc.plan = plan_row["name"]
+        sub_doc.monthly_fee = flt(plan_row["monthly_fee"])
+        sub_doc.save(ignore_permissions=True)
+
+    amount = flt(plan_row["monthly_fee"])
+    pos = _mobile_payments_pos()
+    if not pos:
+        frappe.throw(_("Payment gateway is not available"))
+
+    result = _as_admin(
+        pos.initiate_pos_payment,
+        provider=provider, method=method, phone=phone, amount=amount, currency="USD",
+    ) or {}
+    if not result.get("success"):
+        frappe.throw(result.get("message") or _("Could not start the payment"))
+
+    txn = result.get("transaction_log")
+    frappe.cache().set_value(
+        f"hiraal_txn_owner:{txn}",
+        json.dumps({"patient": patient, "sponsor": sponsor_user, "family_member": link_name}),
+        expires_in_sec=86400,
+    )
+    frappe.db.set_value("Care Subscription", sub_name, "payment_reference", txn)
+    return {
+        "success": True,
+        "transaction_log": txn,
+        "amount": amount,
+        "subscription": sub_name,
+        "patient": patient,
+    }
+
+
+@frappe.whitelist(allow_guest=False)
+def check_sponsor_payment(transaction_log):
+    """Poll sponsor payment and activate patient care when complete."""
+    from hiraal_emr.services.caregiver_service import activate_sponsored_care
+
+    owner_raw = frappe.cache().get_value(f"hiraal_txn_owner:{transaction_log}")
+    if not owner_raw:
+        frappe.throw(_("Unknown payment"))
+    if isinstance(owner_raw, str) and owner_raw.startswith("{"):
+        owner = json.loads(owner_raw)
+    else:
+        owner = {"patient": owner_raw}
+
+    pos = _mobile_payments_pos()
+    if not pos:
+        frappe.throw(_("Payment gateway is not available"))
+    status_row = _as_admin(pos.check_pos_payment_status, transaction_log) or {}
+    raw = (status_row.get("status") or "").strip().lower()
+    if raw == "completed":
+        patient = owner.get("patient")
+        if patient:
+            _mark_subscription_paid(patient, transaction_log)
+            fm = owner.get("family_member")
+            if fm:
+                activate_sponsored_care(fm)
+        return {"success": True, "status": "Completed"}
+    return {"success": True, "status": status_row.get("status") or "Pending"}
+
+
+@frappe.whitelist(allow_guest=False)
+def get_sponsored_patient_data(patient, data_type="readings"):
+    """Permission-gated data for a sponsor/caregiver."""
+    user = frappe.session.user
+    link = frappe.db.get_value(
+        "Family Member",
+        {
+            "patient": patient,
+            "caregiver_user": user,
+            "link_status": ["in", ["Accepted", "Active"]],
+        },
+        ["name", "can_view_vitals", "can_view_appointments", "can_view_medications"],
+        as_dict=True,
+    )
+    if not link:
+        frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+    if data_type == "readings" and link.can_view_vitals:
+        rows = _safe_get_all(
+            "Daily Reading",
+            filters={"patient": patient},
+            fields=["reading_date", "bp_systolic", "bp_diastolic", "blood_sugar", "weight", "risk_level"],
+            order_by="reading_date desc",
+            limit_page_length=30,
+        )
+        return {"success": True, "readings": rows}
+    if data_type == "appointments" and link.can_view_appointments:
+        rows = _safe_get_all(
+            "Patient Appointment",
+            filters={"patient": patient},
+            fields=["name", "appointment_date", "appointment_time", "practitioner_name", "status"],
+            order_by="appointment_date desc",
+            limit_page_length=20,
+        )
+        return {"success": True, "appointments": rows}
+    if data_type == "orders" and link.can_view_medications:
+        rows = _safe_get_all(
+            "Medicine Request",
+            filters={"patient": patient},
+            fields=["name", "status", "modified", "total_amount"],
+            order_by="modified desc",
+            limit_page_length=20,
+        )
+        return {"success": True, "orders": rows}
+    frappe.throw(_("Not permitted"), frappe.PermissionError)
 
 
 # ──────────────────────────────────────────────

@@ -37,7 +37,10 @@ doc_events = {
         "after_insert": "hiraal_emr.doctype.audit_log.audit_log.log_action",
     },
     "Chronic Care Alert": {
-        "after_insert": "hiraal_emr.doctype.audit_log.audit_log.log_action",
+        "after_insert": [
+            "hiraal_emr.doctype.audit_log.audit_log.log_action",
+            "hiraal_emr.api.on_chronic_care_alert_insert",
+        ],
         "on_update": "hiraal_emr.doctype.audit_log.audit_log.log_action",
     },
     "Doctor Review": {

@@ -13,11 +13,27 @@
     "column_break_fm1",
     "phone",
     "email",
+    "location",
+    "country_code",
+    "whatsapp_number",
+    "link_status",
+    "invite_direction",
+    "invite_code",
+    "invite_token",
+    "caregiver_user",
     "is_active",
     "section_permissions",
     "can_view_vitals",
+    "can_view_appointments",
     "can_view_medications",
-    "can_receive_alerts"
+    "can_receive_alerts",
+    "can_pay_for_care",
+    "is_sponsor",
+    "sponsor_subscription_active",
+    "section_dates",
+    "requested_on",
+    "accepted_on",
+    "activated_on"
   ],
   "fields": [
     {
@@ -57,7 +73,7 @@
       "fieldname": "relationship",
       "fieldtype": "Select",
       "label": "Relationship",
-      "options": "\nSpouse\nChild\nSibling\nParent\nOther",
+      "options": "\nSpouse\nChild\nSon\nDaughter\nSibling\nParent\nOther",
       "reqd": 1,
       "in_list_view": 1,
       "in_standard_filter": 1
@@ -79,6 +95,56 @@
       "options": "Email"
     },
     {
+      "fieldname": "location",
+      "fieldtype": "Data",
+      "label": "Location"
+    },
+    {
+      "fieldname": "country_code",
+      "fieldtype": "Data",
+      "label": "Country Code",
+      "default": "+252"
+    },
+    {
+      "fieldname": "whatsapp_number",
+      "fieldtype": "Data",
+      "label": "WhatsApp Number"
+    },
+    {
+      "fieldname": "link_status",
+      "fieldtype": "Select",
+      "label": "Link Status",
+      "options": "\nPending\nAccepted\nActive\nInactive\nCancelled",
+      "default": "Active",
+      "in_list_view": 1,
+      "in_standard_filter": 1
+    },
+    {
+      "fieldname": "invite_direction",
+      "fieldtype": "Select",
+      "label": "Invite Direction",
+      "options": "\nPatient Invited\nSponsor Requested\nDesk Created"
+    },
+    {
+      "fieldname": "invite_code",
+      "fieldtype": "Data",
+      "label": "Invitation Code",
+      "read_only": 1
+    },
+    {
+      "fieldname": "invite_token",
+      "fieldtype": "Data",
+      "label": "Invite Token",
+      "hidden": 1,
+      "read_only": 1
+    },
+    {
+      "fieldname": "caregiver_user",
+      "fieldtype": "Link",
+      "label": "Caregiver User",
+      "options": "User"
+    },
+    {
       "fieldname": "is_active",
       "fieldtype": "Check",
       "label": "Is Active",
@@ -97,6 +163,12 @@
       "default": 0
     },
     {
+      "fieldname": "can_view_appointments",
+      "fieldtype": "Check",
+      "label": "Can View Appointments",
+      "default": 0
+    },
+    {
       "fieldname": "can_view_medications",
       "fieldtype": "Check",
       "label": "Can View Medications",
@@ -107,11 +179,49 @@
       "fieldtype": "Check",
       "label": "Can Receive Alerts",
       "default": 1
+    },
+    {
+      "fieldname": "can_pay_for_care",
+      "fieldtype": "Check",
+      "label": "Can Pay For Care",
+      "default": 0
+    },
+    {
+      "fieldname": "is_sponsor",
+      "fieldtype": "Check",
+      "label": "Is Sponsor",
+      "default": 0
+    },
+    {
+      "fieldname": "sponsor_subscription_active",
+      "fieldtype": "Check",
+      "label": "Sponsor Subscription Active",
+      "default": 0
+    },
+    {
+      "fieldname": "section_dates",
+      "fieldtype": "Section Break",
+      "label": "Dates"
+    },
+    {
+      "fieldname": "requested_on",
+      "fieldtype": "Datetime",
+      "label": "Requested On"
+    },
+    {
+      "fieldname": "accepted_on",
+      "fieldtype": "Datetime",
+      "label": "Accepted On"
+    },
+    {
+      "fieldname": "activated_on",
+      "fieldtype": "Datetime",
+      "label": "Activated On"
     }
   ],
   "index_web_pages_for_search": 0,
   "links": [],
-  "modified": "2026-04-19 00:00:00.000000",
+  "modified": "2026-08-17 00:00:00.000000",
   "modified_by": "Administrator",
   "module": "Hiraal EMR",
   "name": "Family Member",
