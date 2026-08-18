@@ -396,10 +396,10 @@ def revoke_link(link_name: str, patient: str | None = None):
 def whatsapp_invite_url(link_name: str) -> str:
     doc = frappe.get_doc("Family Member", link_name)
     site = frappe.utils.get_url()
-    link = f"{site}/caregiver-invite?code={doc.invite_code}"
+    link = f"{site}/family-care?code={doc.invite_code}"
     message = (
         f"You have been invited to join Hiraal Life Care as a caregiver for "
-        f"{doc.patient_name}. Open: {link}  Code: {doc.invite_code}"
+        f"{doc.patient_name}. Open the Family Care portal: {link}  Code: {doc.invite_code}"
     )
     phone_digits = re.sub(r"\D", "", doc.phone or "")
     from urllib.parse import quote
@@ -408,50 +408,68 @@ def whatsapp_invite_url(link_name: str) -> str:
 
 def sponsorship_dashboard(link_name: str, user: str):
     doc = frappe.get_doc("Family Member", link_name)
-    if doc.caregiver_user != user or doc.link_status not in ("Accepted", "Active"):
+    if doc.caregiver_user != user:
+        frappe.throw(_("Not permitted"), frappe.PermissionError)
+    if doc.link_status not in ("Pending", "Accepted", "Active"):
         frappe.throw(_("Not permitted"), frappe.PermissionError)
     patient = doc.patient
     updates = []
-    if doc.can_view_medications:
-        orders = frappe.get_all(
-            "Medicine Request",
-            filters={"patient": patient, "status": ["in", ["Delivered", "Out for Delivery"]]},
-            fields=["name", "status", "modified"],
-            order_by="modified desc",
-            limit=3,
-        )
-        for o in orders:
-            updates.append({
-                "type": "delivery",
-                "title": "Medicine delivered" if o.status == "Delivered" else "Out for delivery",
-                "date": o.modified,
-                "reference": o.name,
-            })
-    if doc.can_view_appointments:
-        appts = frappe.get_all(
-            "Patient Appointment",
-            filters={"patient": patient, "status": ["!=", "Cancelled"]},
-            fields=["name", "appointment_date", "appointment_time", "practitioner_name"],
-            order_by="appointment_date desc",
-            limit=2,
-        )
-        for a in appts:
-            updates.append({
-                "type": "appointment",
-                "title": f"Visit with {a.practitioner_name or 'care team'}",
-                "date": f"{a.appointment_date} {a.appointment_time or ''}".strip(),
-                "reference": a.name,
-            })
+    if doc.link_status in ("Accepted", "Active"):
+        if doc.can_view_medications:
+            orders = frappe.get_all(
+                "Medicine Request",
+                filters={"patient": patient, "status": ["in", ["Delivered", "Out for Delivery"]]},
+                fields=["name", "status", "modified"],
+                order_by="modified desc",
+                limit=3,
+            )
+            for o in orders:
+                updates.append({
+                    "type": "delivery",
+                    "title": "Medicine delivered" if o.status == "Delivered" else "Out for delivery",
+                    "date": o.modified,
+                    "reference": o.name,
+                })
+        if doc.can_view_appointments:
+            appts = frappe.get_all(
+                "Patient Appointment",
+                filters={"patient": patient, "status": ["!=", "Cancelled"]},
+                fields=["name", "appointment_date", "appointment_time", "practitioner_name"],
+                order_by="appointment_date desc",
+                limit=2,
+            )
+            for a in appts:
+                updates.append({
+                    "type": "appointment",
+                    "title": f"Visit with {a.practitioner_name or 'care team'}",
+                    "date": f"{a.appointment_date} {a.appointment_time or ''}".strip(),
+                    "reference": a.name,
+                })
     sub = frappe.db.get_value(
         "Care Subscription",
         {"patient": patient},
         ["name", "plan", "monthly_fee", "status", "next_billing_date"],
         as_dict=True,
     )
+    update_labels = [
+        u.get("title") or u.get("message") or ""
+        for u in updates
+        if isinstance(u, dict) and (u.get("title") or u.get("message"))
+    ]
     return {
-        "link": _serialize_link(doc.as_dict()),
+        "name": doc.name,
+        "patient": doc.patient,
         "patient_name": doc.patient_name,
-        "updates": updates,
+        "patient_id": doc.patient,
+        "status": doc.link_status,
+        "relationship": doc.relationship or "",
+        "plan": sub.plan if sub else None,
+        "monthly_amount": flt(sub.monthly_fee) if sub else 0,
+        "next_payment_date": sub.next_billing_date if sub else None,
+        "subscription_status": sub.status if sub else None,
+        "can_pay_for_care": bool(doc.can_pay_for_care),
+        "updates": update_labels,
+        "link": _serialize_link(doc.as_dict()),
         "subscription": sub,
     }
 

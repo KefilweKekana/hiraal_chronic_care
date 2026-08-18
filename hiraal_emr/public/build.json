@@ -1,5 +1,7 @@
 {
   "css/hiraal_emr.css": ["public/css/hiraal_emr.css"],
+  "css/family_care.css": ["public/css/family_care.css"],
   "js/hiraal_emr.js": ["public/js/hiraal_emr.js"],
-  "js/hiraal_sidebar.js": ["public/js/hiraal_sidebar.js"]
+  "js/hiraal_sidebar.js": ["public/js/hiraal_sidebar.js"],
+  "js/family_care.js": ["public/js/family_care.js"]
 }

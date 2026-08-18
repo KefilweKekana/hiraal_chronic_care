@@ -3566,6 +3566,59 @@ def get_sponsored_patient_data(patient, data_type="readings"):
 
 
 # ──────────────────────────────────────────────
+#  Family Care web portal
+# ──────────────────────────────────────────────
+
+@frappe.whitelist(allow_guest=True)
+def portal_request_otp(mobile=None):
+    from hiraal_emr.services.family_care_portal import request_portal_otp
+
+    return request_portal_otp(mobile)
+
+
+@frappe.whitelist(allow_guest=True)
+def portal_verify_otp(mobile=None, otp=None, full_name=None, invite_code=None):
+    from hiraal_emr.services.family_care_portal import verify_portal_otp
+
+    return verify_portal_otp(mobile, otp, full_name, invite_code)
+
+
+@frappe.whitelist(allow_guest=True)
+def portal_logout():
+    from hiraal_emr.services.family_care_portal import logout_portal
+
+    return logout_portal()
+
+
+@frappe.whitelist(allow_guest=True)
+def portal_bootstrap():
+    from hiraal_emr.services.family_care_portal import bootstrap
+
+    return bootstrap()
+
+
+@frappe.whitelist(allow_guest=False)
+def portal_payment_methods():
+    from hiraal_emr.services.family_care_portal import portal_payment_methods as _methods
+
+    return _methods()
+
+
+@frappe.whitelist(allow_guest=False)
+def portal_plans():
+    from hiraal_emr.services.family_care_portal import portal_plans as _plans
+
+    return _plans()
+
+
+@frappe.whitelist(allow_guest=False)
+def portal_patient_bundle(patient):
+    from hiraal_emr.services.family_care_portal import portal_patient_bundle as _bundle
+
+    return _bundle(patient)
+
+
+# ──────────────────────────────────────────────
 #  Telemedicine Session API
 # ──────────────────────────────────────────────
 

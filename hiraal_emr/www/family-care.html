@@ -1,0 +1,32 @@
+{% extends "templates/web.html" %}
+
+{% block title %}Family Care — Hiraal Life Care{% endblock %}
+
+{% block navbar %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block sidebar %}{% endblock %}
+
+{% block style %}
+<link rel="stylesheet" href="/assets/hiraal_emr/css/family_care.css">
+{% endblock %}
+
+{% block page_content %}
+<div id="hiraal-portal" data-code="{{ invite_code }}" data-csrf="{{ csrf_token }}" data-authed="{{ '1' if authenticated else '0' }}">
+  <div class="hp-shell">
+    <header class="hp-top">
+      <div class="hp-brand">
+        <span class="hp-mark">H</span>
+        <div>
+          <strong>Hiraal Life Care</strong>
+          <span>Family Care Portal</span>
+        </div>
+      </div>
+      <button class="hp-ghost" id="hp-logout" hidden>Sign out</button>
+    </header>
+    <main class="hp-main" id="hp-main">
+      <div class="hp-loading">Loading Family Care…</div>
+    </main>
+  </div>
+</div>
+<script src="/assets/hiraal_emr/js/family_care.js"></script>
+{% endblock %}

@@ -8,6 +8,10 @@ required_apps = ["frappe", "erpnext", "health"]
 
 # ---------- Website / Portal ----------
 # home_page = "clinic-dashboard"
+website_route_rules = [
+    {"from_route": "/family-care", "to_route": "family-care"},
+    {"from_route": "/caregiver-invite", "to_route": "caregiver-invite"},
+]
 
 # ---------- Fixtures ----------
 fixtures = [
