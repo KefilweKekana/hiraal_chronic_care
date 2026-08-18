@@ -7,6 +7,9 @@
 {% block sidebar %}{% endblock %}
 
 {% block style %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/hiraal_emr/css/family_care.css">
 {% endblock %}
 
@@ -21,11 +24,20 @@
           <span>Family Care Portal</span>
         </div>
       </div>
-      <button class="hp-ghost" id="hp-logout" hidden>Sign out</button>
+      <div class="hp-top-actions">
+        <div class="hp-secure" id="hp-secure">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l8 4v6c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V7l8-4z" stroke="currentColor" stroke-width="1.6"/></svg>
+          Your data is secure.
+        </div>
+        <button class="hp-ghost" id="hp-logout" hidden>Sign out</button>
+      </div>
     </header>
     <main class="hp-main" id="hp-main">
       <div class="hp-loading">Loading Family Care…</div>
     </main>
+    <footer class="hp-footer" id="hp-footer">
+      Need help? <a href="mailto:info@hiraalhealth.so">Contact us</a>
+    </footer>
   </div>
 </div>
 <script src="/assets/hiraal_emr/js/family_care.js"></script>
