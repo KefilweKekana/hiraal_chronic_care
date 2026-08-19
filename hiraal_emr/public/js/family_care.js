@@ -51,7 +51,9 @@
   function splash() {
     return `
       <div class="hp-splash">
-        <img class="hp-splash-logo" src="/assets/hiraal_emr/images/hiraal-logo.png" alt="Hiraal Life Care">
+        <div class="hp-splash-mark">
+          <img class="hp-splash-logo" src="/assets/hiraal_emr/images/hiraal-logo.png" alt="Hiraal Life Care">
+        </div>
         <div class="hp-splash-copy">
           <strong>Hiraal Life Care Portal</strong>
           <span>${ICONS.shield} Your data is secure.</span>
