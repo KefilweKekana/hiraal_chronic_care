@@ -75,16 +75,13 @@ html, body {
   align-items: center;
 }
 
-.hp-mark {
+.hp-logo {
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  display: grid;
-  place-items: center;
-  background: var(--hp-primary);
-  color: #fff;
-  font-weight: 800;
-  font-size: 18px;
+  object-fit: cover;
+  display: block;
+  box-shadow: 0 6px 16px rgba(11, 34, 57, 0.14);
 }
 
 .hp-brand strong {
