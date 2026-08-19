@@ -41,9 +41,125 @@ html, body {
 #hiraal-portal h1,
 #hiraal-portal h2,
 #hiraal-portal h3 {
-  font-family: "DM Serif Display", Georgia, serif;
-  font-weight: 400;
+  font-family: "Inter", system-ui, sans-serif;
+  font-weight: 700;
   color: var(--hp-navy);
+}
+
+#hiraal-portal.hp-guest .hp-top,
+#hiraal-portal.hp-guest .hp-footer {
+  display: none;
+}
+
+.hp-splash {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  padding: 36px 12px 40px;
+}
+
+.hp-splash-logo {
+  width: 168px;
+  height: 168px;
+  object-fit: contain;
+  display: block;
+}
+
+.hp-splash-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hp-splash-copy strong {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--hp-navy);
+}
+
+.hp-splash-copy span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--hp-text);
+  font-size: 13px;
+}
+
+.hp-auth {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  align-items: stretch;
+}
+
+.hp-info-card,
+.hp-auth-card {
+  background: var(--hp-surface);
+  border: 1px solid var(--hp-line);
+  border-radius: 28px;
+  box-shadow: var(--hp-shadow);
+  padding: 32px 28px;
+}
+
+.hp-info-card h1 {
+  font-size: clamp(1.8rem, 3vw, 2.35rem);
+  line-height: 1.2;
+  margin: 10px 0 14px;
+}
+
+.hp-kicker {
+  display: inline-block;
+  color: var(--hp-primary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.hp-lead {
+  color: var(--hp-text);
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.hp-auth-card h2 {
+  margin: 0 0 6px;
+  font-size: 1.35rem;
+}
+
+.hp-field input,
+.hp-field select {
+  width: 100%;
+  border: 1px solid var(--hp-line);
+  background: #f8fbfc;
+  border-radius: 14px;
+  padding: 13px 14px;
+  font-size: 16px;
+  color: var(--hp-navy);
+}
+
+.hp-field input:focus,
+.hp-field select:focus {
+  outline: 0;
+  border-color: var(--hp-primary);
+  box-shadow: 0 0 0 3px rgba(12, 154, 163, 0.12);
+  background: #fff;
+}
+
+.hp-btn {
+  width: 100%;
+  border-radius: 999px;
+  background: var(--hp-primary);
+  color: #fff;
+  padding: 14px 18px;
+  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 8px;
 }
 
 .hp-shell {
@@ -78,10 +194,8 @@ html, body {
 .hp-logo {
   width: 44px;
   height: 44px;
-  border-radius: 12px;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
-  box-shadow: 0 6px 16px rgba(11, 34, 57, 0.14);
 }
 
 .hp-brand strong {
@@ -126,91 +240,6 @@ html, body {
   text-decoration: underline;
 }
 
-/* Auth layout */
-.hp-auth {
-  display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
-  gap: 36px;
-  align-items: start;
-}
-
-.hp-auth-hero {
-  padding: 8px 0 0;
-}
-
-.hp-kicker {
-  display: inline-block;
-  color: var(--hp-primary);
-  background: var(--hp-soft);
-  border-radius: 999px;
-  padding: 6px 14px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  margin-bottom: 18px;
-}
-
-.hp-auth-hero h1 {
-  font-size: clamp(2.6rem, 5vw, 3.6rem);
-  line-height: 1.05;
-  margin: 0 0 18px;
-  letter-spacing: -0.02em;
-}
-
-.hp-lead {
-  color: var(--hp-text);
-  font-size: 1.02rem;
-  line-height: 1.65;
-  max-width: 520px;
-  margin: 0 0 28px;
-}
-
-.hp-features {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 28px;
-  display: grid;
-  gap: 18px;
-}
-
-.hp-feature {
-  display: flex;
-  gap: 14px;
-  align-items: flex-start;
-}
-
-.hp-feature-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: var(--hp-soft);
-  color: var(--hp-primary);
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-}
-
-.hp-feature strong {
-  display: block;
-  color: var(--hp-navy);
-  font-size: 15px;
-  margin-bottom: 2px;
-}
-
-.hp-feature span {
-  color: var(--hp-text);
-  font-size: 13px;
-}
-
-.hp-illustration {
-  width: min(100%, 420px);
-  height: auto;
-  display: block;
-  margin-top: 8px;
-}
-
-.hp-auth-card,
 .hp-card,
 .hp-hero,
 .hp-person {
@@ -218,10 +247,6 @@ html, body {
   border: 1px solid var(--hp-line);
   border-radius: var(--hp-radius);
   box-shadow: var(--hp-shadow);
-}
-
-.hp-auth-card {
-  padding: 28px 28px 24px;
 }
 
 .hp-card-icon {
@@ -316,7 +341,7 @@ html, body {
 
 .hp-btn {
   width: 100%;
-  border-radius: 14px;
+  border-radius: 999px;
   background: var(--hp-primary);
   color: #fff;
   padding: 15px 18px;
@@ -573,16 +598,19 @@ html, body {
     grid-template-columns: 1fr;
   }
 
-  .hp-illustration {
-    margin: 0 auto;
+  .hp-splash {
+    flex-direction: column;
+    text-align: center;
+    padding: 16px 8px 24px;
+  }
+
+  .hp-splash-logo {
+    width: 128px;
+    height: 128px;
   }
 
   .hp-grid.two {
     grid-template-columns: 1fr;
-  }
-
-  .hp-secure {
-    display: none;
   }
 }
 

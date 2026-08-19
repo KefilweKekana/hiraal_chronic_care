@@ -48,41 +48,33 @@
     shield: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3l8 4v6c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V7l8-4z" stroke="currentColor" stroke-width="1.6"/></svg>',
   };
 
-  function authHero(invite = false) {
-    const inviteNote = invite
-      ? `<p class="hp-lead">You were invited to support a loved one. Sign in with your mobile number and invitation code <strong>${escapeHtml(state.inviteCode)}</strong> will be applied automatically.</p>`
-      : `<p class="hp-lead">See updates, appointments, medicines, and pay for a loved one's care plan — no app install needed.</p>`;
+  function splash() {
     return `
-      <section class="hp-auth-hero">
+      <div class="hp-splash">
+        <img class="hp-splash-logo" src="/assets/hiraal_emr/images/hiraal-logo.png" alt="Hiraal Life Care">
+        <div class="hp-splash-copy">
+          <strong>Hiraal Life Care Portal</strong>
+          <span>${ICONS.shield} Your data is secure.</span>
+        </div>
+      </div>
+    `;
+  }
+
+  function authHero(invite = false) {
+    const lead = invite
+      ? `You were invited to support a loved one. Sign in with your phone and code <strong>${escapeHtml(state.inviteCode)}</strong> will be applied automatically.`
+      : "See updates, appointments, medicines, and pay for a loved one's care plan — no app install needed.";
+    return `
+      <section class="hp-info-card">
         <span class="hp-kicker">Family Care</span>
-        <h1>Support care<br>from<br>anywhere.</h1>
-        ${inviteNote}
-        <ul class="hp-features">
-          <li class="hp-feature">
-            <span class="hp-feature-icon">${ICONS.calendar}</span>
-            <div><strong>Appointments &amp; Updates</strong><span>Stay informed in real time</span></div>
-          </li>
-          <li class="hp-feature">
-            <span class="hp-feature-icon">${ICONS.pill}</span>
-            <div><strong>Medicines &amp; Reminders</strong><span>Never miss what matters</span></div>
-          </li>
-          <li class="hp-feature">
-            <span class="hp-feature-icon">${ICONS.card}</span>
-            <div><strong>Secure Payments</strong><span>Pay safely and securely</span></div>
-          </li>
-        </ul>
-        <img class="hp-illustration" src="/assets/hiraal_emr/images/family-care-hero.png" alt="Family care illustration">
+        <h1>Support care from anywhere.</h1>
+        <p class="hp-lead">${lead}</p>
       </section>
     `;
   }
 
   function authCard(inner) {
-    return `
-      <form class="hp-auth-card">
-        <div class="hp-card-icon">${ICONS.phone}</div>
-        ${inner}
-      </form>
-    `;
+    return `<form class="hp-auth-card">${inner}</form>`;
   }
 
   async function api(method, data = {}) {
@@ -158,7 +150,8 @@
     const form = new FormData(event.target);
     state.fullName = String(form.get("full_name") || "").trim();
     const localMobile = String(form.get("mobile") || "").trim();
-    state.mobile = localMobile.startsWith("+") ? localMobile : `+252${localMobile.replace(/^0+/, "")}`;
+    const digits = localMobile.replace(/\D/g, "");
+    state.mobile = localMobile.startsWith("+") ? localMobile : (digits.startsWith("252") ? `+${digits}` : `+252${digits.replace(/^0+/, "")}`);
     if (!state.mobile || state.mobile.length < 8) return setError("Enter a valid mobile number.");
     if (!state.fullName) return setError("Enter your full name.");
     state.busy = true;
@@ -359,8 +352,8 @@
   }
 
   function renderLogin(invite = false) {
-    const mobileLocal = state.mobile.replace(/^\+252/, "").replace(/^0+/, "");
     main.innerHTML = layout(`
+      ${splash()}
       <div class="hp-auth">
         ${authHero(invite)}
         ${authCard(`
@@ -368,21 +361,13 @@
           <p class="hp-muted">We'll send a one-time code by SMS.</p>
           <label class="hp-field">
             <span>Full name</span>
-            <div class="hp-input-wrap">
-              <span class="hp-input-icon">${ICONS.user}</span>
-              <input name="full_name" value="${escapeHtml(state.fullName)}" placeholder="Your name" required>
-            </div>
+            <input name="full_name" value="${escapeHtml(state.fullName)}" placeholder="Your name" required>
           </label>
           <label class="hp-field">
             <span>Mobile number</span>
-            <div class="hp-phone-wrap">
-              <span class="hp-input-icon">${ICONS.phone}</span>
-              <span class="hp-prefix">🇸🇴 +252</span>
-              <input name="mobile" value="${escapeHtml(mobileLocal)}" placeholder="61 0000000" inputmode="tel" required>
-            </div>
+            <input name="mobile" value="${escapeHtml(state.mobile)}" placeholder="+252 61 0000000" inputmode="tel" required>
           </label>
-          <button class="hp-btn" ${state.busy ? "disabled" : ""}>${ICONS.lock} ${state.busy ? "Sending…" : "Send code"}</button>
-          <p class="hp-privacy">${ICONS.shield} We respect your privacy. Your information is safe with us.</p>
+          <button class="hp-btn" ${state.busy ? "disabled" : ""}>${state.busy ? "Sending…" : "Send code"}</button>
         `)}
       </div>
     `);
@@ -391,6 +376,7 @@
 
   function renderOtp() {
     main.innerHTML = layout(`
+      ${splash()}
       <div class="hp-auth">
         ${authHero(false)}
         ${authCard(`
@@ -399,19 +385,13 @@
           ${!state.fullName ? `
             <label class="hp-field">
               <span>Full name</span>
-              <div class="hp-input-wrap">
-                <span class="hp-input-icon">${ICONS.user}</span>
-                <input name="full_name" required placeholder="Your name">
-              </div>
+              <input name="full_name" required placeholder="Your name">
             </label>` : ""}
           <label class="hp-field">
             <span>Verification code</span>
-            <div class="hp-input-wrap">
-              <span class="hp-input-icon">${ICONS.lock}</span>
-              <input name="otp" inputmode="numeric" maxlength="6" placeholder="123456" required>
-            </div>
+            <input name="otp" inputmode="numeric" maxlength="6" placeholder="123456" required>
           </label>
-          <button class="hp-btn" ${state.busy ? "disabled" : ""}>${ICONS.lock} ${state.busy ? "Checking…" : "Continue"}</button>
+          <button class="hp-btn" ${state.busy ? "disabled" : ""}>${state.busy ? "Checking…" : "Continue"}</button>
           <p style="margin-top:14px;text-align:center"><button type="button" class="hp-link" id="hp-back">Use a different number</button></p>
         `)}
       </div>
@@ -553,6 +533,8 @@
   }
 
   function render() {
+    const guest = ["boot", "welcome-invite", "login", "register", "otp"].includes(state.view);
+    root.classList.toggle("hp-guest", guest);
     if (state.view === "welcome-invite" || state.view === "login" || state.view === "register") renderLogin(state.view !== "login");
     else if (state.view === "otp") renderOtp();
     else if (state.view === "home") renderHome();

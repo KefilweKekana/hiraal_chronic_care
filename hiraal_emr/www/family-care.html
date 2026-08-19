@@ -14,7 +14,7 @@
 {% endblock %}
 
 {% block page_content %}
-<div id="hiraal-portal" data-code="{{ invite_code }}" data-csrf="{{ csrf_token }}" data-authed="{{ '1' if authenticated else '0' }}">
+<div id="hiraal-portal" class="hp-guest" data-code="{{ invite_code }}" data-csrf="{{ csrf_token }}" data-authed="{{ '1' if authenticated else '0' }}">
   <div class="hp-shell">
     <header class="hp-top">
       <div class="hp-brand">
@@ -25,10 +25,6 @@
         </div>
       </div>
       <div class="hp-top-actions">
-        <div class="hp-secure" id="hp-secure">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l8 4v6c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V7l8-4z" stroke="currentColor" stroke-width="1.6"/></svg>
-          Your data is secure.
-        </div>
         <button class="hp-ghost" id="hp-logout" hidden>Sign out</button>
       </div>
     </header>
