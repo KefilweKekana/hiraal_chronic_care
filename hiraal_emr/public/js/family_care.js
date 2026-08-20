@@ -355,22 +355,24 @@
 
   function renderLogin(invite = false) {
     main.innerHTML = layout(`
-      ${splash()}
-      <div class="hp-auth">
-        ${authHero(invite)}
-        ${authCard(`
-          <h2>Sign in with your phone</h2>
-          <p class="hp-muted">We'll send a one-time code by SMS.</p>
-          <label class="hp-field">
-            <span>Full name</span>
-            <input name="full_name" value="${escapeHtml(state.fullName)}" placeholder="Your name" required>
-          </label>
-          <label class="hp-field">
-            <span>Mobile number</span>
-            <input name="mobile" value="${escapeHtml(state.mobile)}" placeholder="+252 61 0000000" inputmode="tel" required>
-          </label>
-          <button class="hp-btn" ${state.busy ? "disabled" : ""}>${state.busy ? "Sending…" : "Send code"}</button>
-        `)}
+      <div class="hp-login">
+        ${splash()}
+        <div class="hp-auth">
+          ${authHero(invite)}
+          ${authCard(`
+            <h2>Sign in with your phone</h2>
+            <p class="hp-muted">We'll send a one-time code by SMS.</p>
+            <label class="hp-field">
+              <span>Full name</span>
+              <input name="full_name" value="${escapeHtml(state.fullName)}" placeholder="Your name" required autocomplete="name">
+            </label>
+            <label class="hp-field">
+              <span>Mobile number</span>
+              <input name="mobile" value="${escapeHtml(state.mobile)}" placeholder="+252 61 0000000" inputmode="tel" required autocomplete="tel">
+            </label>
+            <button class="hp-btn" ${state.busy ? "disabled" : ""}>${state.busy ? "Sending…" : "Send code"}</button>
+          `)}
+        </div>
       </div>
     `);
     main.querySelector(".hp-auth-card").addEventListener("submit", requestOtp);
@@ -378,24 +380,26 @@
 
   function renderOtp() {
     main.innerHTML = layout(`
-      ${splash()}
-      <div class="hp-auth">
-        ${authHero(false)}
-        ${authCard(`
-          <h2>Enter your code</h2>
-          <p class="hp-muted">We sent a 6-digit code to ${escapeHtml(state.mobile)}.</p>
-          ${!state.fullName ? `
+      <div class="hp-login">
+        ${splash()}
+        <div class="hp-auth">
+          ${authHero(false)}
+          ${authCard(`
+            <h2>Enter your code</h2>
+            <p class="hp-muted">We sent a 6-digit code to ${escapeHtml(state.mobile)}.</p>
+            ${!state.fullName ? `
+              <label class="hp-field">
+                <span>Full name</span>
+                <input name="full_name" required placeholder="Your name" autocomplete="name">
+              </label>` : ""}
             <label class="hp-field">
-              <span>Full name</span>
-              <input name="full_name" required placeholder="Your name">
-            </label>` : ""}
-          <label class="hp-field">
-            <span>Verification code</span>
-            <input name="otp" inputmode="numeric" maxlength="6" placeholder="123456" required>
-          </label>
-          <button class="hp-btn" ${state.busy ? "disabled" : ""}>${state.busy ? "Checking…" : "Continue"}</button>
-          <p style="margin-top:14px;text-align:center"><button type="button" class="hp-link" id="hp-back">Use a different number</button></p>
-        `)}
+              <span>Verification code</span>
+              <input name="otp" inputmode="numeric" maxlength="6" placeholder="123456" required autocomplete="one-time-code">
+            </label>
+            <button class="hp-btn" ${state.busy ? "disabled" : ""}>${state.busy ? "Checking…" : "Continue"}</button>
+            <p style="margin-top:14px;text-align:center"><button type="button" class="hp-link" id="hp-back">Use a different number</button></p>
+          `)}
+        </div>
       </div>
     `);
     main.querySelector(".hp-auth-card").addEventListener("submit", verifyOtp);

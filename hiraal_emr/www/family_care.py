@@ -7,6 +7,8 @@ def get_context(context):
     context.show_sidebar = 0
     context.no_header = 1
     context.full_width = 1
+    context.add_sidebar_page = False
+    context.splash_image = None
     context.invite_code = (frappe.form_dict.get("code") or "").strip().upper()
     context.csrf_token = frappe.sessions.get_csrf_token()
     context.session_user = frappe.session.user if frappe.session.user != "Guest" else ""

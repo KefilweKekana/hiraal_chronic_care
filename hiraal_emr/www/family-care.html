@@ -5,12 +5,26 @@
 {% block navbar %}{% endblock %}
 {% block footer %}{% endblock %}
 {% block sidebar %}{% endblock %}
+{% block head_include %}
+<style>
+  .navbar, .web-footer, .page-header, .breadcrumb, #navbar, .footer-powered,
+  .page-breadcrumbs, .page-head, header.web-header, .footer-message {
+    display: none !important;
+  }
+  body, .main-section, .page_content, .web-page-content, .container {
+    background: #F7F9FA !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+  }
+</style>
+{% endblock %}
 
 {% block style %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/hiraal_emr/css/family_care.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/hiraal_emr/css/family_care.css?v=20260820">
 {% endblock %}
 
 {% block page_content %}
@@ -36,5 +50,5 @@
     </footer>
   </div>
 </div>
-<script src="/assets/hiraal_emr/js/family_care.js"></script>
+<script src="/assets/hiraal_emr/js/family_care.js?v=20260820"></script>
 {% endblock %}
