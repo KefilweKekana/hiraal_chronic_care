@@ -183,20 +183,77 @@ class ErpNextPaymentService implements PaymentService {
   Future<Result<List<SubscriptionPlan>>> getPlans() async {
     try {
       final r = await _api.dio.post('/method/hiraal_emr.api.get_subscription_plans');
-      final msg = r.data?['message'] as Map<String, dynamic>?;
-      final list = (msg?['plans'] as List?) ?? [];
-      final plans = list
-          .whereType<Map>()
-          .map((e) => SubscriptionPlan.fromJson(Map<String, dynamic>.from(e)))
-          .toList();
-      return Success(plans);
+      final plans = _plansFromResponse(r.data);
+      if (plans != null) return Success(plans);
+      return const Failure('Failed to load subscription plans');
     } on DioException catch (e) {
+      if (_isMissingWhitelistedMethod(e)) {
+        log.w(
+          'get_subscription_plans missing on server; falling back to portal_plans / get_my_subscription',
+          error: e,
+        );
+        return _getPlansFromOlderEndpoints(e);
+      }
       log.e('getPlans failed', error: e);
       return Failure(_parseServerError(e.response?.data, 'Failed to load subscription plans'),
           statusCode: e.response?.statusCode);
     } catch (e) {
       return Failure(e.toString());
     }
+  }
+
+  /// Older EMR builds expose the same catalog on `portal_plans` (caregiver
+  /// portal) and as the `plans` key on `get_my_subscription` (patient paywall).
+  Future<Result<List<SubscriptionPlan>>> _getPlansFromOlderEndpoints(
+    DioException primary,
+  ) async {
+    try {
+      final r = await _api.dio.post('/method/hiraal_emr.api.portal_plans');
+      final plans = _plansFromResponse(r.data);
+      if (plans != null && plans.isNotEmpty) return Success(plans);
+    } on DioException catch (e) {
+      log.w('portal_plans fallback failed', error: e);
+    }
+    try {
+      final r = await _api.dio.post('/method/hiraal_emr.api.get_my_subscription');
+      final plans = _plansFromResponse(r.data);
+      if (plans != null && plans.isNotEmpty) return Success(plans);
+    } on DioException catch (e) {
+      log.w('get_my_subscription plans fallback failed', error: e);
+      return Failure(
+        _parseServerError(e.response?.data, 'Failed to load subscription plans'),
+        statusCode: e.response?.statusCode,
+      );
+    } catch (e) {
+      return Failure(e.toString());
+    }
+    return Failure(
+      _parseServerError(primary.response?.data, 'Failed to load subscription plans'),
+      statusCode: primary.response?.statusCode,
+    );
+  }
+
+  List<SubscriptionPlan>? _plansFromResponse(dynamic data) {
+    final msg = data is Map ? data['message'] : null;
+    List? list;
+    if (msg is Map) {
+      list = msg['plans'] as List?;
+    } else if (msg is List) {
+      list = msg;
+    }
+    if (list == null) return null;
+    return list
+        .whereType<Map>()
+        .map((e) => SubscriptionPlan.fromJson(Map<String, dynamic>.from(e)))
+        .toList();
+  }
+
+  bool _isMissingWhitelistedMethod(DioException e) {
+    final parsed = _parseServerError(e.response?.data, '');
+    final blob = '$parsed ${e.response?.data} ${e.message}'.toLowerCase();
+    return blob.contains('has no attribute') ||
+        blob.contains('failed to get method for command') ||
+        blob.contains('attributeerror');
   }
 
   @override
