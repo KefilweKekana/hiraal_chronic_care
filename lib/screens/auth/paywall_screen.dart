@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/result.dart';
 import '../../models/subscription.dart';
+import '../../l10n/app_localizations.dart';
 import '../../providers/app_provider.dart';
 import '../../services/service_locator.dart';
 import '../../widgets/shared_widgets.dart';
@@ -93,28 +94,21 @@ class _PaywallScreenState extends State<PaywallScreen> {
     setState(() => _busy = true);
 
     double amount;
-    if (!startTrial &&
-        _existing != null &&
-        _existing!.plan == plan &&
-        !_existing!.isActive) {
-      amount = _existing!.monthlyFee;
-    } else {
-      final result = await ServiceLocator.instance.payments
-          .subscribe(plan, startTrial: startTrial);
-      if (!mounted) return;
-      switch (result) {
-        case Success(data: final subResult):
-          if (subResult.isOnTrial || subResult.amountDueNow <= 0) {
-            setState(() => _busy = false);
-            await context.read<AppProvider>().refreshSubscriptionGate();
-            return;
-          }
-          amount = subResult.amountDueNow;
-        case Failure(message: final msg):
+    final result = await ServiceLocator.instance.payments
+        .subscribe(plan, startTrial: startTrial);
+    if (!mounted) return;
+    switch (result) {
+      case Success(data: final subResult):
+        if (subResult.isOnTrial || subResult.amountDueNow <= 0) {
           setState(() => _busy = false);
-          _snack(msg, error: true);
+          await context.read<AppProvider>().refreshSubscriptionGate();
           return;
-      }
+        }
+        amount = subResult.amountDueNow;
+      case Failure(message: final msg):
+        setState(() => _busy = false);
+        _snack(msg, error: true);
+        return;
     }
     if (!mounted) return;
     setState(() => _busy = false);
@@ -237,6 +231,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final provider = context.watch<AppProvider>();
     final plans = _filteredPlans;
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -260,7 +256,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                     Text(
                       _trial.enabled && _trial.eligible
                           ? 'Pick a category and plan. You can start a ${_trial.days}-day free trial when enabled for that plan.'
-                          : 'Subscribe to a plan to start using Hiraal Lifecare — daily monitoring, nurse & doctor review, medicine delivery and more.',
+                          : 'Subscribe to a plan to start using Hiraal Lifecare – daily monitoring, nurse & doctor review, medicine delivery and more.',
                       style: const TextStyle(
                           fontSize: 14,
                           color: AppColors.textSecondary,
@@ -348,6 +344,14 @@ class _PaywallScreenState extends State<PaywallScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
+                    Center(
+                      child: TextButton(
+                        onPressed: () async {
+                          await provider.visitCaregiverPortalFromPaywall();
+                        },
+                        child: Text(l10n.supportLovedOneTitle),
+                      ),
+                    ),
                     Center(
                       child: TextButton(
                         onPressed: () => context.read<AppProvider>().logout(),

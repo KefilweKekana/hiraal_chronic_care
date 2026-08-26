@@ -289,7 +289,7 @@ class _BookDoctorScreenState extends State<BookDoctorScreen> {
                 items: _doctors.map((d) => DropdownMenuItem<String>(
                   value: d['name'] as String?,
                   child: Text(
-                    '${d['practitioner_name'] ?? d['name']} — ${d['department'] ?? l10n.departmentGeneral}',
+                    '${d['practitioner_name'] ?? d['name']} – ${d['department'] ?? l10n.departmentGeneral}',
                     overflow: TextOverflow.ellipsis,
                   ),
                 )).toList(),

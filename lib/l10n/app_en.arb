@@ -101,15 +101,15 @@
   "navServices": "Services",
   "navHistory": "History",
   "navProfile": "Profile",
-  "offlineBanner": "You're offline — readings will be saved on this phone",
-  "backOnlineSyncing": "Back online — syncing…",
+  "offlineBanner": "You're offline – readings will be saved on this phone",
+  "backOnlineSyncing": "Back online – syncing…",
 
   "greetingMorning": "Good morning,",
   "greetingAfternoon": "Good afternoon,",
   "greetingEvening": "Good evening,",
   "patientFallback": "Patient",
   "paymentPending": "Payment pending",
-  "orderPayToContinue": "Order #{id} — pay {amount} to continue",
+  "orderPayToContinue": "Order #{id} – pay {amount} to continue",
   "@orderPayToContinue": {
     "placeholders": {
       "id": {"type": "String"},
@@ -190,7 +190,7 @@
   "categoryMentalHealth": "Mental Health",
 
   "selectDoctor": "Select Doctor",
-  "noSpecialistsShowingAll": "No {specialty} specialists listed — showing all doctors",
+  "noSpecialistsShowingAll": "No {specialty} specialists listed – showing all doctors",
   "@noSpecialistsShowingAll": {
     "placeholders": {
       "specialty": {"type": "String"}
@@ -391,7 +391,7 @@
       "count": {"type": "int"}
     }
   },
-  "awaitingPharmacistReview": "Awaiting pharmacist review — items will appear here once your prescription is processed.",
+  "awaitingPharmacistReview": "Awaiting pharmacist review – items will appear here once your prescription is processed.",
   "paymentSection": "Payment",
   "subtotal": "Subtotal",
   "deliveryFee": "Delivery fee",
@@ -455,7 +455,7 @@
   },
   "enterPinToConfirm": "Enter your PIN to confirm the payment",
   "pageConfirmsAutomatically": "This page will automatically confirm the payment",
-  "iPaidCheckNow": "I paid — check now",
+  "iPaidCheckNow": "I paid – check now",
   "cancelAndTryAgain": "Cancel and try again",
   "paymentSuccessful": "Payment successful",
   "preparingMedicinesNow": "We're preparing your medicines now.",
@@ -665,7 +665,7 @@
     }
   },
   "availableDevices": "Available Devices",
-  "availableDevicesHint": "Tap Scan — health monitors nearby and any already paired to this phone show up here. Hiraal takes over the Bluetooth link on Connect.",
+  "availableDevicesHint": "Tap Scan – health monitors nearby and any already paired to this phone show up here. Hiraal takes over the Bluetooth link on Connect.",
   "scanForDevices": "Scan for Devices",
   "scanning": "Scanning…",
   "lookingForDevices": "Looking for devices...",
@@ -807,5 +807,35 @@
     "placeholders": {
       "name": {"type": "String"}
     }
-  }
+  },
+  "supportLovedOneTitle": "Support a loved one",
+  "supportLovedOneSubtitle": "Create a free caregiver or sponsor account",
+  "caregiverPortalHome": "My Care",
+  "caregiverPortalConnect": "Connect",
+  "caregiverPortalAccount": "Account",
+  "caregiverPortalWelcome": "Family Care Portal",
+  "caregiverPortalWelcomeHint": "View updates and support the people you care for.",
+  "caregiverPortalAccountTitle": "Supporter account",
+  "caregiverPortalAccountHint": "You are signed in to support loved ones – no patient subscription needed.",
+  "switchToPatientCare": "I also need patient care",
+  "switchToPatientCareHint": "Subscribe to use readings, devices, and clinic services.",
+  "openPatientApp": "Open patient app",
+  "openPatientAppHint": "Log readings, vitals, and use your care plan.",
+  "switchToFamilyCare": "Open Family Care portal",
+  "switchToFamilyCareHint": "View sponsorships and support loved ones.",
+  "roleChooserTitle": "How would you like to continue?",
+  "roleChooserHint": "Your account includes both patient care and family support.",
+  "roleChooserPatientTitle": "My patient care",
+  "roleChooserPatientHint": "Log readings, connect devices, and use clinic services.",
+  "roleChooserCaregiverTitle": "Family Care portal",
+  "roleChooserCaregiverHint": "View updates and support the people you care for.",
+  "signupAsSupporterHint": "Creating a supporter account for caregivers and sponsors.",
+  "sponsorshipPendingHint": "Waiting for {name} to accept your connection. You can pay for their care plan once they approve.",
+  "@sponsorshipPendingHint": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "sponsorshipPayNow": "Pay for care plan",
+  "sponsorshipDetailsTitle": "Sponsorship details"
 }

@@ -207,11 +207,11 @@ class AppLocalizationsSo extends AppLocalizations {
 
   @override
   String get offlineBanner =>
-      'Ma ku xirnidin — cabbirrada waxa lagu kaydinayaa taleefankan';
+      'Ma ku xirnidin – cabbirrada waxa lagu kaydinayaa taleefankan';
 
   @override
   String get backOnlineSyncing =>
-      'Dib ayaad u xirmay — waa la isku-dubbaridayaa…';
+      'Dib ayaad u xirmay – waa la isku-dubbaridayaa…';
 
   @override
   String get greetingMorning => 'Subax wanaagsan,';
@@ -230,7 +230,7 @@ class AppLocalizationsSo extends AppLocalizations {
 
   @override
   String orderPayToContinue(String id, String amount) {
-    return 'Dalab #$id — bixi $amount si aad u sii wadato';
+    return 'Dalab #$id – bixi $amount si aad u sii wadato';
   }
 
   @override
@@ -370,7 +370,7 @@ class AppLocalizationsSo extends AppLocalizations {
   String get referenceId => 'Lambarka tixraaca';
 
   @override
-  String get notAvailable => '—';
+  String get notAvailable => '–';
 
   @override
   String get notifiedWhenReviewed =>
@@ -459,7 +459,7 @@ class AppLocalizationsSo extends AppLocalizations {
 
   @override
   String noSpecialistsShowingAll(String specialty) {
-    return 'Ma jiro dhakhtar ku takhasusay $specialty oo liiska ku jira — dhammaan dhakhaatiirta ayaa lagu tusayaa.';
+    return 'Ma jiro dhakhtar ku takhasusay $specialty oo liiska ku jira – dhammaan dhakhaatiirta ayaa lagu tusayaa.';
   }
 
   @override
@@ -890,7 +890,7 @@ class AppLocalizationsSo extends AppLocalizations {
 
   @override
   String get awaitingPharmacistReview =>
-      'Waxa la sugayaa eegista farmashiistaha — alaabtu waxay halkan ka muuqan doontaa marka warqadda la farsameeyo.';
+      'Waxa la sugayaa eegista farmashiistaha – alaabtu waxay halkan ka muuqan doontaa marka warqadda la farsameeyo.';
 
   @override
   String get paymentSection => 'Lacag-bixinta';
@@ -1000,7 +1000,7 @@ class AppLocalizationsSo extends AppLocalizations {
       'Boggani si toos ah ayuu u xaqiijinayaa lacag-bixinta';
 
   @override
-  String get iPaidCheckNow => 'Waan bixiyey — hadda hubi';
+  String get iPaidCheckNow => 'Waan bixiyey – hadda hubi';
 
   @override
   String get cancelAndTryAgain => 'Jooji oo mar kale isku day';
@@ -1534,7 +1534,7 @@ class AppLocalizationsSo extends AppLocalizations {
 
   @override
   String get availableDevicesHint =>
-      'Taabo Raadi — qalabka caafimaadka ee kuu dhow iyo kuwa hore loogu xidhay taleefankan ayaa halkan ka soo muuqanaya. Hiraal ayaa la wareegaysa xidhiidhka Bluetooth marka qalabka lagu xidho taleefanka.';
+      'Taabo Raadi – qalabka caafimaadka ee kuu dhow iyo kuwa hore loogu xidhay taleefankan ayaa halkan ka soo muuqanaya. Hiraal ayaa la wareegaysa xidhiidhka Bluetooth marka qalabka lagu xidho taleefanka.';
 
   @override
   String get scanForDevices => 'Raadi qalabka';
@@ -1911,4 +1911,91 @@ class AppLocalizationsSo extends AppLocalizations {
   String connectionActiveBody(String name) {
     return 'Xidhiidhkaaga $name waa socdaa. Hadda waxaad maalgelin kartaa daryeelkiisa.';
   }
+
+  @override
+  String get supportLovedOneTitle => 'Taagee qof aad jeceshahay';
+
+  @override
+  String get supportLovedOneSubtitle =>
+      'Samee akoon daryeele ama maalgeliye oo bilaash ah';
+
+  @override
+  String get caregiverPortalHome => 'Daryeelkayga';
+
+  @override
+  String get caregiverPortalConnect => 'Ku xidh';
+
+  @override
+  String get caregiverPortalAccount => 'Akoon';
+
+  @override
+  String get caregiverPortalWelcome => 'Albaabka Daryeelka Qoyska';
+
+  @override
+  String get caregiverPortalWelcomeHint =>
+      'Eeg wararka oo taage dadyowga aad daryeesho.';
+
+  @override
+  String get caregiverPortalAccountTitle => 'Akoonka taageeraha';
+
+  @override
+  String get caregiverPortalAccountHint =>
+      'Waxaad u gashay inaad taageerto qoyskaaga – ma u baahnid qorshe bukaan.';
+
+  @override
+  String get switchToPatientCare =>
+      'Aniguna waxaan u baahanahay daryeel bukaan';
+
+  @override
+  String get switchToPatientCareHint =>
+      'Isdiiwaangeli si aad u isticmaasho akhrinta, qalabka, iyo adeegyada caafimaadka.';
+
+  @override
+  String get openPatientApp => 'Fur app-ka bukaanka';
+
+  @override
+  String get openPatientAppHint =>
+      'Geli akhrinta, calaamadaha nolosha, oo isticmaal qorshaha daryeelkaaga.';
+
+  @override
+  String get switchToFamilyCare => 'Fur Albaabka Daryeelka Qoyska';
+
+  @override
+  String get switchToFamilyCareHint => 'Eeg taageerada oo taageer qoyskaaga.';
+
+  @override
+  String get roleChooserTitle => 'Sidee baad u sii waddaa?';
+
+  @override
+  String get roleChooserHint =>
+      'Akoonkaagu wuxuu leeyahay daryeel bukaan iyo taageero qoys.';
+
+  @override
+  String get roleChooserPatientTitle => 'Daryeelkayga bukaanka';
+
+  @override
+  String get roleChooserPatientHint =>
+      'Geli akhrinta, ku xidh qalabka, oo isticmaal adeegyada caafimaadka.';
+
+  @override
+  String get roleChooserCaregiverTitle => 'Albaabka Daryeelka Qoyska';
+
+  @override
+  String get roleChooserCaregiverHint =>
+      'Eeg wararka oo taageer dadka aad daryeesho.';
+
+  @override
+  String get signupAsSupporterHint =>
+      'Sameynta akoon taageere oo loogu talagalay daryeeleyaasha iyo maalgeliyeyaasha.';
+
+  @override
+  String sponsorshipPendingHint(String name) {
+    return 'Waxaan sugaynaa in $name aqbalo xiriirkaaga. Marka ay aqbasho waad bixin kartaa qorshaha daryeelka.';
+  }
+
+  @override
+  String get sponsorshipPayNow => 'Bixi qorshaha daryeelka';
+
+  @override
+  String get sponsorshipDetailsTitle => 'Faahfaahinta maalgelinta';
 }

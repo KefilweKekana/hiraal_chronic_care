@@ -146,7 +146,7 @@ class _OrderPaymentScreenState extends State<OrderPaymentScreen>
       _busy = true;
       _stage = _Stage.waiting;
       _message = 'Taking longer than usual. If you approved the request, your '
-          'payment will be confirmed automatically within a few minutes — '
+          'payment will be confirmed automatically within a few minutes – '
           'you can close this screen and check the order later.';
     });
     _startCountdown();
@@ -266,7 +266,7 @@ class _OrderPaymentScreenState extends State<OrderPaymentScreen>
       if (mounted) {
         setState(() => _message =
             'Taking longer than usual. If you approved the request, your '
-            'payment will be confirmed automatically within a few minutes — '
+            'payment will be confirmed automatically within a few minutes – '
             'you can close this screen and check the order later.');
       }
     }
@@ -291,7 +291,7 @@ class _OrderPaymentScreenState extends State<OrderPaymentScreen>
           _message = 'The payment was declined or cancelled.';
         });
       } else {
-        _snack('Still pending — approve the prompt on your phone.');
+        _snack('Still pending – approve the prompt on your phone.');
       }
     }
   }

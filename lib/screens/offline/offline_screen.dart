@@ -25,7 +25,7 @@ class OfflineScreen extends StatelessWidget {
             const SizedBox(height: 16),
             const Text("You're Offline", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.warning)),
             const SizedBox(height: 8),
-            const Text('No internet connection detected.\nDon\'t worry — your data is safe.', textAlign: TextAlign.center, style: TextStyle(color: AppColors.textSecondary)),
+            const Text('No internet connection detected.\nDon\'t worry – your data is safe.', textAlign: TextAlign.center, style: TextStyle(color: AppColors.textSecondary)),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(10),

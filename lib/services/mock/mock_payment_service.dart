@@ -118,6 +118,12 @@ class MockPaymentService implements PaymentService {
   }
 
   @override
+  Future<Result<List<SubscriptionPlan>>> getPlans() async {
+    await Future.delayed(const Duration(milliseconds: 400));
+    return const Success(_plans);
+  }
+
+  @override
   Future<Result<SubscribeResult>> subscribe(String plan, {bool startTrial = false}) async {
     await Future.delayed(const Duration(milliseconds: 600));
     for (final p in _plans) {

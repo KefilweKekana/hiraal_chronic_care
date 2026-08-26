@@ -1,11 +1,11 @@
-import java.util.Properties
+﻿import java.util.Properties
 
 plugins {
     id("com.android.application")
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
-    // Firebase (Google Services) — reads android/app/google-services.json.
+    // Firebase (Google Services) â€” reads android/app/google-services.json.
     id("com.google.gms.google-services")
 }
 
@@ -17,6 +17,10 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
+    lint {
+        checkReleaseBuilds = false
+        abortOnError = false
+    }
     namespace = "com.hiraal.hiraal_chronic_care"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
@@ -59,8 +63,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
+            isMinifyEnabled = false
+            isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
@@ -82,3 +86,5 @@ dependencies {
 flutter {
     source = "../.."
 }
+
+

@@ -21,17 +21,22 @@ import '../services/device_auto_submit_service.dart';
 import '../services/push_notification_service.dart';
 import '../services/service_locator.dart';
 
-enum AppState { splash, register, signup, otp, success, paywall, home, sessionExpired }
+enum AppState { splash, register, signup, otp, success, paywall, home, caregiverPortal, roleChooser, sessionExpired }
+
+enum AppUserMode { patient, caregiver }
 
 class AppProvider extends ChangeNotifier {
   static const _patientApiKeyKey = 'patient_api_key';
   static const _patientApiSecretKey = 'patient_api_secret';
   static const _largeTextKey = 'pref_large_text';
   static const _localeKey = 'pref_locale';
+  static const _userModeKey = 'pref_user_mode';
+  static const _portalChoiceMadeKey = 'pref_portal_choice_made';
 
   AppProvider() {
     unawaited(_loadLargeText());
     unawaited(_loadLocale());
+    unawaited(_loadUserMode());
   }
 
   AppState _state = AppState.splash;
@@ -57,6 +62,8 @@ class AppProvider extends ChangeNotifier {
   String? _errorMessage;
   bool _largeText = false;
   Locale _locale = const Locale('en');
+  AppUserMode _userMode = AppUserMode.patient;
+  bool _hasSponsorships = false;
 
   final _services = ServiceLocator.instance;
   final _readingsDao = ReadingsDao();
@@ -81,6 +88,11 @@ class AppProvider extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   bool get largeText => _largeText;
   Locale get locale => _locale;
+  AppUserMode get userMode => _userMode;
+  bool get isCaregiverMode => _userMode == AppUserMode.caregiver;
+  bool get hasSponsorships => _hasSponsorships;
+  bool get isDualRoleUser =>
+      _hasSponsorships && (_patient?.subscriptionActive ?? false);
 
   ApiClient? get apiClient => _services.apiClient;
 
@@ -129,6 +141,139 @@ class AppProvider extends ChangeNotifier {
     if (state == AppState.register || state == AppState.splash) {
       _isSignupFlow = false;
     }
+    if (state == AppState.caregiverPortal) {
+      _currentTab = 0;
+    }
+    notifyListeners();
+  }
+
+  Future<void> setUserMode(AppUserMode mode) async {
+    _userMode = mode;
+    notifyListeners();
+    final prefs = await _prefs;
+    await prefs.setString(
+      _userModeKey,
+      mode == AppUserMode.caregiver ? 'caregiver' : 'patient',
+    );
+  }
+
+  Future<void> beginCaregiverSignup() async {
+    await setUserMode(AppUserMode.caregiver);
+    setState(AppState.signup);
+  }
+
+  void openPatientPaywall() {
+    unawaited(setUserMode(AppUserMode.patient));
+    _state = AppState.paywall;
+    notifyListeners();
+  }
+
+  Future<void> enterPatientApp() async {
+    await _markPortalChoice(AppUserMode.patient);
+    if (_patient?.subscriptionActive == true) {
+      _state = AppState.home;
+      await _loadReadings();
+      _startDeviceServices();
+    } else {
+      _state = AppState.paywall;
+    }
+    notifyListeners();
+  }
+
+  Future<void> enterCaregiverPortal() async {
+    await _markPortalChoice(AppUserMode.caregiver);
+    _state = AppState.caregiverPortal;
+    _currentTab = 0;
+    notifyListeners();
+  }
+
+  /// Paywall "Support a loved one": persist caregiver mode only when they
+  /// already sponsor someone. Unpaid patients without sponsorships get a
+  /// one-shot visit so session restore does not skip the paywall.
+  Future<void> visitCaregiverPortalFromPaywall() async {
+    await _refreshHasSponsorships();
+    if (_hasSponsorships) {
+      await enterCaregiverPortal();
+      return;
+    }
+    _userMode = AppUserMode.caregiver;
+    _state = AppState.caregiverPortal;
+    _currentTab = 0;
+    notifyListeners();
+  }
+
+  Future<void> choosePatientApp() => enterPatientApp();
+
+  Future<void> chooseCaregiverPortal() => enterCaregiverPortal();
+
+  Future<bool> _refreshHasSponsorships() async {
+    final links = await _services.caregivers.listMySponsorships();
+    switch (links) {
+      case Success(data: final data):
+        _hasSponsorships = data.isNotEmpty;
+      case Failure():
+        // Keep the previous value — a list failure is not "no sponsorships".
+        break;
+    }
+    return _hasSponsorships;
+  }
+
+  Future<void> onSponsorshipPaymentSucceeded() async {
+    await _refreshHasSponsorships();
+    if (_hasSponsorships && _state == AppState.caregiverPortal) {
+      await _markPortalChoice(AppUserMode.caregiver);
+    }
+    notifyListeners();
+  }
+
+  Future<void> _markPortalChoice(AppUserMode mode) async {
+    await setUserMode(mode);
+    final prefs = await _prefs;
+    await prefs.setBool(_portalChoiceMadeKey, true);
+  }
+
+  Future<AppState> _resolvePostLoginRoute(Patient patient) async {
+    final hasSponsorships = await _refreshHasSponsorships();
+    final prefs = await _prefs;
+    final choiceMade = prefs.getBool(_portalChoiceMadeKey) ?? false;
+
+    if (hasSponsorships && patient.subscriptionActive) {
+      if (!choiceMade) {
+        return AppState.roleChooser;
+      }
+      if (_userMode == AppUserMode.caregiver) {
+        return AppState.caregiverPortal;
+      }
+      return AppState.home;
+    }
+
+    if (_userMode == AppUserMode.caregiver || hasSponsorships) {
+      if (hasSponsorships) {
+        await setUserMode(AppUserMode.caregiver);
+      }
+      return AppState.caregiverPortal;
+    }
+    if (patient.subscriptionActive) {
+      await setUserMode(AppUserMode.patient);
+      return AppState.home;
+    }
+    return AppState.paywall;
+  }
+
+  Future<void> _completePatientLogin(Patient patient, AppState route) async {
+    _patient = patient;
+    _isLoggedIn = true;
+    _state = route;
+    _services.updatePatientId(patient.id, sex: patient.sex);
+    await _patientDao.save(patient);
+    await _enableBiometricAfterLogin();
+    if (route == AppState.home) {
+      await _loadReadings();
+      _startDeviceServices();
+    } else if (route == AppState.caregiverPortal || route == AppState.roleChooser) {
+      _currentTab = 0;
+    }
+    unawaited(fetchUnreadNotificationCount());
     notifyListeners();
   }
 
@@ -145,6 +290,84 @@ class AppProvider extends ChangeNotifier {
   void setOtpCode(String code) {
     _otpCode = code;
     notifyListeners();
+  }
+
+  /// Mock-only deep links for demo video capture (`?demo=patient|family|otp|…`).
+  /// Skips real OTP/SMS so Playwright can screenshot authenticated flows.
+  Future<void> demoGo(String target) async {
+    if (!EnvConfig.useMock) return;
+    final key = target.trim().toLowerCase();
+    switch (key) {
+      case 'welcome':
+      case 'splash':
+        _isLoggedIn = false;
+        _patient = null;
+        _state = AppState.splash;
+        notifyListeners();
+        return;
+      case 'login':
+      case 'register':
+        _isLoggedIn = false;
+        _patient = null;
+        _phoneNumber = '';
+        _state = AppState.register;
+        notifyListeners();
+        return;
+      case 'otp':
+        _isLoggedIn = false;
+        _patient = null;
+        _phoneNumber = '+252612345678';
+        _otpDelivery = const OtpDelivery(channel: 'sms');
+        _otpRequestedChannel = 'sms';
+        _state = AppState.otp;
+        notifyListeners();
+        return;
+      case 'role':
+      case 'rolechooser':
+        await _demoCompleteLogin(AppState.roleChooser, clearPortalChoice: true);
+        return;
+      case 'patient':
+      case 'home':
+        await setUserMode(AppUserMode.patient);
+        await _demoCompleteLogin(AppState.home, clearPortalChoice: false);
+        return;
+      case 'family':
+      case 'caregiver':
+      case 'sponsor':
+        await setUserMode(AppUserMode.caregiver);
+        await _demoCompleteLogin(AppState.caregiverPortal, clearPortalChoice: false);
+        return;
+      case 'support':
+      case 'supporter':
+        await beginCaregiverSignup();
+        return;
+      default:
+        log.w('demoGo: unknown target "$target"');
+    }
+  }
+
+  Future<void> _demoCompleteLogin(
+    AppState route, {
+    required bool clearPortalChoice,
+  }) async {
+    _phoneNumber = '+252612345678';
+    _otpCode = '123456';
+    final prefs = await _prefs;
+    if (clearPortalChoice) {
+      await prefs.remove(_portalChoiceMadeKey);
+    } else {
+      await prefs.setBool(_portalChoiceMadeKey, true);
+    }
+    final verified = await verifyOtp();
+    if (!verified) {
+      // Still seed local mock patient so the UI is usable for recording.
+      await _completePatientLogin(Patient.mock(), route);
+      return;
+    }
+    final found = await lookupPatient();
+    if (!found || _state != route) {
+      await _completePatientLogin(Patient.mock(), route);
+    }
   }
 
   void clearError() {
@@ -214,19 +437,8 @@ class AppProvider extends ChangeNotifier {
 
     return switch (result) {
       Success(data: final p) => (() async {
-          _patient = p;
-          _isLoggedIn = true;
-          // Feature gate: no active subscription → paywall. A brand-new sign-up
-          // is never active, so it always lands on the paywall. An existing
-          // active patient goes to the normal onboarding/home.
-          _state = p.subscriptionActive ? AppState.home : AppState.paywall;
-          _services.updatePatientId(p.id, sex: p.sex);
-          await _patientDao.save(p);
-          await _enableBiometricAfterLogin();
-          await _loadReadings();
-          _startDeviceServices();
-          unawaited(fetchUnreadNotificationCount());
-          notifyListeners();
+          final route = await _resolvePostLoginRoute(p);
+          await _completePatientLogin(p, route);
           return true;
         })(),
       Failure(message: final msg) => (() async {
@@ -302,10 +514,20 @@ class AppProvider extends ChangeNotifier {
     if (result case Success(data: final p)) {
       _patient = p;
       await _patientDao.save(p);
-      if (p.subscriptionActive) {
+      final prefs = await _prefs;
+      final choiceMade = prefs.getBool(_portalChoiceMadeKey) ?? false;
+      await _refreshHasSponsorships();
+      if (!choiceMade && _hasSponsorships && p.subscriptionActive) {
+        _state = AppState.roleChooser;
+      } else if (_userMode == AppUserMode.caregiver) {
+        _state = AppState.caregiverPortal;
+      } else if (p.subscriptionActive) {
         _state = AppState.home;
+        await _loadReadings();
+        _startDeviceServices();
       } else if (_state != AppState.paywall) {
-        _state = AppState.paywall;
+        final route = await _resolvePostLoginRoute(p);
+        _state = route;
       }
       notifyListeners();
     }
@@ -357,15 +579,11 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<void> expireSession() async {
-    _autoSubmitService?.stopListening();
-    _autoSubmitService = null;
     await _services.auth.logout();
     await _clearSessionPersistence();
     await _patientDao.clear();
-    _isLoggedIn = false;
-    _patient = null;
+    _resetInMemoryState();
     _state = AppState.sessionExpired;
-    _currentTab = 0;
     _errorMessage = 'Session expired. Please log in again.';
     notifyListeners();
   }
@@ -456,11 +674,18 @@ class AppProvider extends ChangeNotifier {
       if (apiKey != null && apiSecret != null) {
         _services.apiClient?.setPatientAuth(apiKey, apiSecret);
       }
-      await _loadReadings();
-      _startDeviceServices();
-      // Gate on the last-known subscription state, then confirm live in case it
-      // changed (paid/expired) since this device last synced.
-      _state = patient.subscriptionActive ? AppState.home : AppState.paywall;
+      final savedMode = prefs.getString(_userModeKey);
+      if (savedMode == 'caregiver') {
+        _userMode = AppUserMode.caregiver;
+      }
+      final route = await _resolvePostLoginRoute(patient);
+      _state = route;
+      if (route == AppState.home) {
+        await _loadReadings();
+        _startDeviceServices();
+      } else if (route == AppState.caregiverPortal || route == AppState.roleChooser) {
+        _currentTab = 0;
+      }
       unawaited(fetchUnreadNotificationCount());
       unawaited(refreshSubscriptionGate());
       notifyListeners();
@@ -494,6 +719,15 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
     final prefs = await _prefs;
     await prefs.setBool(_largeTextKey, value);
+  }
+
+  Future<void> _loadUserMode() async {
+    final prefs = await _prefs;
+    final mode = prefs.getString(_userModeKey);
+    if (mode == 'caregiver') {
+      _userMode = AppUserMode.caregiver;
+      notifyListeners();
+    }
   }
 
   Future<void> _loadLocale() async {
@@ -576,6 +810,8 @@ class AppProvider extends ChangeNotifier {
     final prefs = await _prefs;
     await prefs.remove(_patientApiKeyKey);
     await prefs.remove(_patientApiSecretKey);
+    await prefs.remove(_userModeKey);
+    await prefs.remove(_portalChoiceMadeKey);
     _services.apiClient?.clearPatientAuth();
   }
 
@@ -588,6 +824,8 @@ class AppProvider extends ChangeNotifier {
     _currentTab = 0;
     _errorMessage = null;
     _pendingSyncCount = 0;
+    _userMode = AppUserMode.patient;
+    _hasSponsorships = false;
   }
 
   @override

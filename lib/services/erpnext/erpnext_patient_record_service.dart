@@ -57,7 +57,7 @@ class ErpNextPatientRecordService implements PatientRecordService {
       date: json['encounter_date']?.toString() ?? '',
       title: json['encounter_type']?.toString() ?? 'Consultation',
       subtitle:
-          '${json['practitioner_name'] ?? ''} — ${json['medical_department'] ?? ''}'
+          '${json['practitioner_name'] ?? ''} – ${json['medical_department'] ?? ''}'
               .trim(),
       type: type,
     );

@@ -14,12 +14,15 @@ class RegisterScreen extends StatefulWidget {
   final VoidCallback onBack;
   /// Called when the user taps "Create account" to start self-registration.
   final VoidCallback onCreateAccount;
+  /// Called when the user wants a caregiver/sponsor account instead.
+  final VoidCallback onSupportLovedOne;
 
   const RegisterScreen({
     super.key,
     required this.onSendCode,
     required this.onBack,
     required this.onCreateAccount,
+    required this.onSupportLovedOne,
   });
 
   @override
@@ -498,20 +501,88 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const SizedBox(height: 16),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.lock_outline, size: 14, color: AppColors.textTertiary),
+                    const Icon(Icons.lock_outline, size: 14, color: AppColors.textTertiary),
                     const SizedBox(width: 4),
-                    Text(
-                      l10n.infoSafeWithUs,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textTertiary,
+                    Expanded(
+                      child: Text(
+                        l10n.infoSafeWithUs,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textTertiary,
+                          height: 1.4,
+                        ),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 20),
+                Material(
+                  color: AppColors.primarySurface,
+                  borderRadius: BorderRadius.circular(16),
+                  child: InkWell(
+                    onTap: widget.onSupportLovedOne,
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: AppColors.primary.withValues(alpha: 0.35)),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: AppColors.white,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.favorite_outline,
+                              color: AppColors.primary,
+                              size: 22,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.supportLovedOneTitle,
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.navy,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  l10n.supportLovedOneSubtitle,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    height: 1.3,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            size: 14,
+                            color: AppColors.primary.withValues(alpha: 0.8),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
                 Center(
                   child: TextButton(
                     onPressed: widget.onCreateAccount,

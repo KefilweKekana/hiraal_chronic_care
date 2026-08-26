@@ -73,7 +73,7 @@ class HealthInfoScreen extends StatelessWidget {
                   child: Icon(Icons.person, size: 18, color: AppColors.primary),
                 ),
                 const SizedBox(width: 10),
-                Text(patient?.assignedNurse ?? '—', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+                Text(patient?.assignedNurse ?? '–', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
               ],
             ),
           ),
@@ -83,7 +83,7 @@ class HealthInfoScreen extends StatelessWidget {
               children: [
                 const Icon(Icons.calendar_today, size: 16, color: AppColors.primary),
                 const SizedBox(width: 8),
-                Text(patient?.nextCheckIn ?? '—', style: const TextStyle(fontSize: 14)),
+                Text(patient?.nextCheckIn ?? '–', style: const TextStyle(fontSize: 14)),
               ],
             ),
           ),

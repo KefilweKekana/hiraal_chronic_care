@@ -553,7 +553,7 @@ class BluetoothHealthService extends ChangeNotifier {
           final locStatus = await Permission.locationWhenInUse.serviceStatus;
           if (locStatus.isDisabled) {
             locDisabled = true;
-            locationNote = '\n• Location Services are OFF — some Android versions '
+            locationNote = '\n• Location Services are OFF – some Android versions '
                 'need Location turned on to see Bluetooth devices';
           }
         } catch (_) {}
@@ -569,16 +569,16 @@ class BluetoothHealthService extends ChangeNotifier {
         _lastError = _knownDevices.isEmpty
             ? 'No devices found. Check these, then scan again:\n'
                 '• The monitor is ON and in pairing mode (many cuffs only advertise for ~1 minute after switching on)\n'
-                '• It is not connected to another phone — Bluetooth devices only pair with one phone at a time\n'
+                '• It is not connected to another phone – Bluetooth devices only pair with one phone at a time\n'
                 '• It stayed close to this phone'
                 '$locationNote'
             : 'No new devices in the scan. Use Connect under "Known to this phone" '
-                'below — Hiraal will disconnect any other Bluetooth link and take over.'
+                'below – Hiraal will disconnect any other Bluetooth link and take over.'
                 '$locationNote';
       }
     } catch (e) {
       _lastError = 'Couldn’t scan for devices. Please make sure Bluetooth is on and try again.\n'
-          'If you scanned several times in a row, wait about 30 seconds first — Android limits rapid repeated scans.';
+          'If you scanned several times in a row, wait about 30 seconds first – Android limits rapid repeated scans.';
       log.e('BLE scan error', error: e);
       // #region agent log
       _agentLog('H1', 'bluetooth_service.dart:scanCatch', 'scan threw', {

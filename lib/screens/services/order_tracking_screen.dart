@@ -334,7 +334,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            m.dosage != null && m.dosage!.isNotEmpty ? '${m.name} — ${m.dosage}' : m.name,
+                            m.dosage != null && m.dosage!.isNotEmpty ? '${m.name} – ${m.dosage}' : m.name,
                             style: const TextStyle(fontSize: 14),
                           ),
                           if ((m.frequency ?? '').isNotEmpty)
@@ -377,7 +377,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
 
       // Delivery
       _card(l10n.deliverySection, [
-        _row(l10n.typeLabel, o.deliveryType ?? '—'),
+        _row(l10n.typeLabel, o.deliveryType ?? '–'),
         if ((o.deliveryAddress ?? '').isNotEmpty) _row(l10n.addressLabel, o.deliveryAddress!),
         if (o.estimatedDelivery != null)
           _row(l10n.estimatedLabel, DateFormat('MMM dd, yyyy • HH:mm').format(o.estimatedDelivery!)),

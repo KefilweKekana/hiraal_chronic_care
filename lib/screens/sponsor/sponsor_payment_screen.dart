@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
@@ -8,6 +9,7 @@ import '../../core/utils/result.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/caregiver_link.dart';
 import '../../models/subscription.dart';
+import '../../providers/app_provider.dart';
 import '../../services/payment_service.dart';
 import '../../services/service_locator.dart';
 
@@ -58,7 +60,7 @@ class _SponsorPaymentScreenState extends State<SponsorPaymentScreen> {
       provider: widget.method.provider,
       method: widget.method.method,
       phone: widget.phone,
-      familyMember: widget.match.familyMemberName,
+      familyMember: widget.match.familyMember,
     );
     if (!mounted) return;
     switch (result) {
@@ -89,6 +91,8 @@ class _SponsorPaymentScreenState extends State<SponsorPaymentScreen> {
       if (result case Success(data: final status)) {
         if (status == 'Completed') {
           _pollTimer?.cancel();
+          await context.read<AppProvider>().onSponsorshipPaymentSucceeded();
+          if (!mounted) return;
           setState(() => _stage = _Stage.success);
         } else if (status == 'Failed') {
           _pollTimer?.cancel();
@@ -120,6 +124,8 @@ class _SponsorPaymentScreenState extends State<SponsorPaymentScreen> {
       case Success(data: final status):
         if (status == 'Completed') {
           _pollTimer?.cancel();
+          await context.read<AppProvider>().onSponsorshipPaymentSucceeded();
+          if (!mounted) return;
           setState(() => _stage = _Stage.success);
         } else if (status == 'Failed') {
           _pollTimer?.cancel();

@@ -158,7 +158,10 @@ class _SplashScreenState extends State<SplashScreen>
         if (mounted) {
           setState(() => _checkingSession = false);
           _welcomeController.forward();
+          await _maybeRunDemoDeepLink(provider);
         }
+      } else if (mounted && restored) {
+        await _maybeRunDemoDeepLink(provider);
       }
     } catch (_) {
       // Session restore failed (e.g. corrupt local DB): fall back to the
@@ -166,8 +169,18 @@ class _SplashScreenState extends State<SplashScreen>
       if (mounted) {
         setState(() => _checkingSession = false);
         _welcomeController.forward();
+        await _maybeRunDemoDeepLink(provider);
       }
     }
+  }
+
+  /// Mock demo capture: `http://host/?demo=patient|family|otp|login|role|support`
+  Future<void> _maybeRunDemoDeepLink(AppProvider provider) async {
+    final demo = Uri.base.queryParameters['demo'];
+    if (demo == null || demo.isEmpty) return;
+    await Future.delayed(const Duration(milliseconds: 400));
+    if (!mounted) return;
+    await provider.demoGo(demo);
   }
 
   Future<bool> _biometricEnabled() async {

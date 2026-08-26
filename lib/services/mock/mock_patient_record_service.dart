@@ -10,14 +10,14 @@ class MockPatientRecordService implements PatientRecordService {
         id: 'ENC-001',
         date: 'May 2024',
         title: 'Enrolled in Hypertension Care',
-        subtitle: 'Hiraal Health Center — Started daily monitoring program',
+        subtitle: 'Hiraal Health Center – Started daily monitoring program',
         type: 'enrollment',
       ),
       MedicalRecord(
         id: 'ENC-002',
         date: 'Apr 2024',
         title: 'Diagnosed with Hypertension',
-        subtitle: 'Stage 2 — BP 160/100 mmHg. Started Amlodipine 5mg',
+        subtitle: 'Stage 2 – BP 160/100 mmHg. Started Amlodipine 5mg',
         type: 'diagnosis',
       ),
       MedicalRecord(
@@ -31,7 +31,7 @@ class MockPatientRecordService implements PatientRecordService {
         id: 'ENC-004',
         date: 'Jan 2024',
         title: 'General Health Check-up',
-        subtitle: 'Annual screening — cholesterol, CBC, kidney function all within normal range',
+        subtitle: 'Annual screening – cholesterol, CBC, kidney function all within normal range',
         type: 'checkup',
       ),
       MedicalRecord(

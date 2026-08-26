@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/result.dart';
 import '../../l10n/app_localizations.dart';
+import '../../models/patient.dart';
+import '../../models/subscription.dart';
 import '../../providers/app_provider.dart';
 import '../../services/activity_service.dart';
 import '../../services/service_locator.dart';
@@ -32,12 +35,14 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   ActivityCounts? _counts;
+  SubscriptionInfo? _subscriptionInfo;
   bool _loggingOut = false;
 
   @override
   void initState() {
     super.initState();
     _loadCounts();
+    _loadSubscription();
   }
 
   Future<void> _loadCounts() async {
@@ -46,6 +51,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() {
         if (result case Success(data: final data)) _counts = data;
       });
+    }
+  }
+
+  Future<void> _loadSubscription() async {
+    final result = await ServiceLocator.instance.payments.getSubscription();
+    if (!mounted) return;
+    if (result case Success(data: final info)) {
+      setState(() => _subscriptionInfo = info);
     }
   }
 
@@ -129,7 +142,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: [
                           Text(patient?.name ?? l10n.patientFallback, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
                           Text(
-                            l10n.memberId((patient != null && patient.patientId.isNotEmpty) ? patient.patientId : '—'),
+                            l10n.memberId((patient != null && patient.patientId.isNotEmpty) ? patient.patientId : '–'),
                             style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
                           ),
                           Text(patient?.phone ?? '', style: const TextStyle(fontSize: 12, color: AppColors.textTertiary)),
@@ -155,38 +168,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(height: 12),
               // Program
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.cardBorder),
-                ),
-                child: Row(
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(l10n.yourProgram, style: const TextStyle(fontSize: 12, color: AppColors.textTertiary)),
-                        const SizedBox(height: 2),
-                        Text(l10n.programHypertensionCare, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                        Text(l10n.memberSinceMay2024, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                      ],
-                    ),
-                    const Spacer(),
-                    StatusBadge(text: l10n.statusActive, color: AppColors.success, icon: Icons.check_circle),
-                    const SizedBox(width: 8),
-                    Container(
-                      width: 36, height: 36,
-                      decoration: BoxDecoration(
-                        color: AppColors.success.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(Icons.favorite, color: AppColors.success, size: 20),
-                    ),
-                  ],
-                ),
+              _ProgramCard(
+                patient: patient,
+                subscription: _subscriptionInfo?.subscription,
+                catalogPlans: _subscriptionInfo?.plans ?? const [],
+                l10n: l10n,
               ),
               const SizedBox(height: 20),
               // My Information
@@ -202,11 +188,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 10),
               Row(
                 children: [
-                  Expanded(child: _ActivityCard(icon: Icons.calendar_today, value: l10n.countUpcoming('${_counts?.upcomingAppointments ?? '—'}'), label: l10n.appointments, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AppointmentsScreen())))),
+                  Expanded(child: _ActivityCard(icon: Icons.calendar_today, value: l10n.countUpcoming('${_counts?.upcomingAppointments ?? '–'}'), label: l10n.appointments, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AppointmentsScreen())))),
                   const SizedBox(width: 8),
-                  Expanded(child: _ActivityCard(icon: Icons.science, value: l10n.countScheduled('${_counts?.scheduledLabTests ?? '—'}'), label: l10n.labTests, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MyLabTestsScreen())))),
+                  Expanded(child: _ActivityCard(icon: Icons.science, value: l10n.countScheduled('${_counts?.scheduledLabTests ?? '–'}'), label: l10n.labTests, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MyLabTestsScreen())))),
                   const SizedBox(width: 8),
-                  Expanded(child: _ActivityCard(icon: Icons.shopping_bag, value: l10n.countActive('${_counts?.activeOrders ?? '—'}'), label: l10n.orders, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MyOrdersScreen())))),
+                  Expanded(child: _ActivityCard(icon: Icons.shopping_bag, value: l10n.countActive('${_counts?.activeOrders ?? '–'}'), label: l10n.orders, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MyOrdersScreen())))),
                 ],
               ),
               const SizedBox(height: 20),
@@ -214,6 +200,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Text(l10n.account, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
               const SizedBox(height: 10),
               _buildNavMenuItem(context, Icons.card_membership, l10n.subscription, l10n.subscriptionSubtitle, const SubscriptionScreen()),
+              if (provider.isDualRoleUser)
+                GestureDetector(
+                  onTap: () => provider.enterCaregiverPortal(),
+                  child: _ProfileMenuItem(
+                    icon: Icons.favorite_outline,
+                    title: l10n.switchToFamilyCare,
+                    subtitle: l10n.switchToFamilyCareHint,
+                  ),
+                ),
               _buildNavMenuItem(context, Icons.people_outline, l10n.caregiversMenu, l10n.caregiversMenuSubtitle, const CaregiversScreen()),
               _buildNavMenuItem(context, Icons.volunteer_activism_outlined, l10n.sponsorCareMenu, l10n.sponsorCareMenuSubtitle, const SponsorCareScreen()),
               _buildNavMenuItem(context, Icons.favorite_border, l10n.mySponsorshipMenu, l10n.mySponsorshipMenuSubtitle, const MySponsorshipScreen()),
@@ -308,11 +303,148 @@ class _ActivityCard extends StatelessWidget {
         children: [
           Icon(icon, size: 20, color: AppColors.primary),
           const SizedBox(height: 6),
-          Text(value, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-          Text(label, style: const TextStyle(fontSize: 10, color: AppColors.textTertiary)),
+          Row(
+            children: [
+              Flexible(
+                child: Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 10, color: AppColors.textTertiary),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     ),
+    );
+  }
+}
+
+class _ProgramCard extends StatelessWidget {
+  final Patient? patient;
+  final Subscription? subscription;
+  final List<SubscriptionPlan> catalogPlans;
+  final AppLocalizations l10n;
+
+  const _ProgramCard({
+    required this.patient,
+    required this.subscription,
+    required this.catalogPlans,
+    required this.l10n,
+  });
+
+  String _programName() {
+    final plan = subscription?.plan;
+    if (plan != null && plan.isNotEmpty) {
+      for (final p in catalogPlans) {
+        if (p.name == plan || p.planName == plan) return p.displayName;
+      }
+      return plan;
+    }
+    final carePlan = patient?.carePlan ?? '';
+    if (carePlan.isNotEmpty) return carePlan;
+    final conditions = patient?.conditions ?? const <String>[];
+    if (conditions.isNotEmpty) return conditions.first;
+    return l10n.yourProgram;
+  }
+
+  String _memberSince() {
+    final start = subscription?.startDate;
+    if (start == null) return '';
+    return 'Member since ${DateFormat('MMM yyyy').format(start)}';
+  }
+
+  ({String text, Color color, IconData icon}) _status() {
+    final sub = subscription;
+    if (sub != null) {
+      if (sub.isOnTrial) {
+        return (text: sub.statusLabel, color: AppColors.primary, icon: Icons.hourglass_bottom);
+      }
+      if (sub.isActive) {
+        return (text: l10n.statusActive, color: AppColors.success, icon: Icons.check_circle);
+      }
+      return (text: sub.statusLabel, color: AppColors.warning, icon: Icons.schedule);
+    }
+    if (patient?.subscriptionActive == true) {
+      return (text: l10n.statusActive, color: AppColors.success, icon: Icons.check_circle);
+    }
+    final raw = patient?.subscriptionStatus ?? '';
+    if (raw.isNotEmpty) {
+      return (text: raw, color: AppColors.textSecondary, icon: Icons.info_outline);
+    }
+    return (text: '–', color: AppColors.textTertiary, icon: Icons.info_outline);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final status = _status();
+    final since = _memberSince();
+    return Container(
+      width: double.infinity,
+      clipBehavior: Clip.antiAlias,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.cardBorder),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(l10n.yourProgram, style: const TextStyle(fontSize: 12, color: AppColors.textTertiary)),
+                const SizedBox(height: 2),
+                Text(
+                  _programName(),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+                if (since.isNotEmpty)
+                  Text(
+                    since,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Flexible(
+            child: StatusBadge(text: status.text, color: status.color, icon: status.icon),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: status.color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(Icons.favorite, color: status.color, size: 20),
+          ),
+        ],
+      ),
     );
   }
 }

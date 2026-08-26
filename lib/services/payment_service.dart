@@ -55,6 +55,9 @@ abstract class PaymentService {
   /// recent payment history.
   Future<Result<SubscriptionInfo>> getSubscription();
 
+  /// Active subscription plan catalog (works for sponsors and patients).
+  Future<Result<List<SubscriptionPlan>>> getPlans();
+
   /// Subscribe the patient to a plan. Pass [startTrial] when free trial is
   /// available — then [SubscribeResult.amountDueNow] is 0 and the gate opens.
   Future<Result<SubscribeResult>> subscribe(String plan, {bool startTrial = false});

@@ -11,7 +11,7 @@ class EnvConfig {
 
   static const bool useMock = bool.fromEnvironment(
     'USE_MOCK',
-    defaultValue: true,
+    defaultValue: false,
   );
 
   static const String baseUrl = String.fromEnvironment(

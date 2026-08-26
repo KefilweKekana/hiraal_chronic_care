@@ -287,7 +287,7 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> {
         SnackBar(
           content: Text(backendSynced
               ? 'Device paired successfully'
-              : 'Paired on this phone — will sync to the server later'),
+              : 'Paired on this phone – will sync to the server later'),
         ),
       );
     }
@@ -672,7 +672,7 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> {
         const SizedBox(height: 4),
         const Text(
           'These health devices are paired in Bluetooth settings. Tap Scan '
-          '(or Connect below) — Hiraal will take over the link.',
+          '(or Connect below) – Hiraal will take over the link.',
           style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
         ),
         const SizedBox(height: 12),
@@ -1018,13 +1018,13 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> {
               TextButton.icon(
                 onPressed: () async {
                   final text = agentLogRing.isEmpty
-                      ? 'No agent logs yet — tap Scan first.'
+                      ? 'No agent logs yet – tap Scan first.'
                       : agentLogRing.join('\n');
                   await Clipboard.setData(ClipboardData(text: text));
                   if (!mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Debug logs copied — paste into chat/WhatsApp'),
+                      content: Text('Debug logs copied – paste into chat/WhatsApp'),
                       duration: Duration(seconds: 2),
                     ),
                   );

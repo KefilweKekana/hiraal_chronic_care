@@ -39,7 +39,7 @@ class _SubscriptionPaymentScreenState extends State<SubscriptionPaymentScreen>
   bool _busy = false;
   String? _txn;
 
-  double get _amount => widget.amount ?? AppConstants.standardPlanPrice;
+  double get _amount => widget.amount ?? 0;
   String _message = '';
   Timer? _pollTimer;
   int _polls = 0;
@@ -136,7 +136,7 @@ class _SubscriptionPaymentScreenState extends State<SubscriptionPaymentScreen>
       _stage = _Stage.waiting;
       _message = 'Taking longer than usual. If you approved the request, '
           'your payment will be confirmed automatically within a few '
-          'minutes — you can close this screen and check back later.';
+          'minutes – you can close this screen and check back later.';
     });
     _startCountdown();
     _pulse.repeat();
@@ -238,7 +238,7 @@ class _SubscriptionPaymentScreenState extends State<SubscriptionPaymentScreen>
         setState(() {
           _message = 'Taking longer than usual. If you approved the request, '
               'your payment will be confirmed automatically within a few '
-              'minutes — you can close this screen and check back later.';
+              'minutes – you can close this screen and check back later.';
         });
       }
     }
@@ -259,7 +259,7 @@ class _SubscriptionPaymentScreenState extends State<SubscriptionPaymentScreen>
         _stopWaiting();
         setState(() { _stage = _Stage.failed; _message = 'The payment was declined or cancelled.'; });
       } else {
-        _snack('Still pending — approve the prompt on your phone.');
+        _snack('Still pending – approve the prompt on your phone.');
       }
     }
   }
@@ -386,7 +386,7 @@ class _SubscriptionPaymentScreenState extends State<SubscriptionPaymentScreen>
           width: double.infinity,
           height: 54,
           child: ElevatedButton(
-            onPressed: (_busy || _selected == null) ? null : _pay,
+            onPressed: (_busy || _selected == null || _amount <= 0) ? null : _pay,
             child: _busy
                 ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.white))
                 : Text('Pay ${AppConstants.currencySymbol}${_amount.toStringAsFixed(2)}'),

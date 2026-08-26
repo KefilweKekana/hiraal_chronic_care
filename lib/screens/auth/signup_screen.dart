@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 import '../../providers/app_provider.dart';
 import '../../widgets/shared_widgets.dart';
 
@@ -144,6 +145,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final isSupporter = context.watch<AppProvider>().isCaregiverMode;
     return Scaffold(
       backgroundColor: AppColors.white,
       body: SafeArea(
@@ -161,15 +164,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 8),
                 const Center(child: HiraalLogo(size: 56)),
                 const SizedBox(height: 20),
-                const Center(
-                  child: Text('Create your account',
-                      style: TextStyle(fontSize: 23, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                Center(
+                  child: Text(
+                    isSupporter ? l10n.supportLovedOneTitle : 'Create your account',
+                    style: const TextStyle(fontSize: 23, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                  ),
                 ),
                 const SizedBox(height: 8),
-                const Center(
-                  child: Text('Sign up to get started. You can choose a plan\nright after verifying your number.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 14, color: AppColors.textSecondary, height: 1.5)),
+                Center(
+                  child: Text(
+                    isSupporter
+                        ? l10n.signupAsSupporterHint
+                        : 'Sign up to get started. You can choose a plan\nright after verifying your number.',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 14, color: AppColors.textSecondary, height: 1.5),
+                  ),
                 ),
 
                 _label('Full Name'),

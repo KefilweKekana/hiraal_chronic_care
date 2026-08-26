@@ -49,7 +49,7 @@ class CaregiverLink {
       familyMemberName: (json['family_member_name'] as Object?)?.toString(),
       linkStatus: (json['link_status'] ?? json['status'] ?? 'Pending').toString(),
       permissions: _parsePermissions(permissionsRaw),
-      invitationCode: (json['invitation_code'] as Object?)?.toString(),
+      invitationCode: (json['invitation_code'] ?? json['invite_code'])?.toString(),
       note: (json['note'] as Object?)?.toString(),
       createdAt: _parseDate(json['created_at'] ?? json['creation']),
       updatedAt: _parseDate(json['updated_at'] ?? json['modified']),
@@ -74,7 +74,7 @@ class CaregiverInvitation {
     return CaregiverInvitation(
       caregiverName: (json['caregiver_name'] ?? json['name'] ?? '').toString(),
       whatsappUrl: (json['whatsapp_url'] ?? '').toString(),
-      invitationCode: (json['invitation_code'] as Object?)?.toString(),
+      invitationCode: (json['invitation_code'] ?? json['invite_code'])?.toString(),
       message: (json['message'] ?? '').toString(),
     );
   }
@@ -105,6 +105,7 @@ class SponsorPatientMatch {
   final String? clinic;
   final String? relationshipHint;
   final String? familyMemberName;
+  final String? familyMember;
   final String? invitationCode;
   final bool exactMatch;
 
@@ -116,6 +117,7 @@ class SponsorPatientMatch {
     this.clinic,
     this.relationshipHint,
     this.familyMemberName,
+    this.familyMember,
     this.invitationCode,
     this.exactMatch = true,
   });
@@ -129,7 +131,8 @@ class SponsorPatientMatch {
       clinic: (json['clinic'] as Object?)?.toString(),
       relationshipHint: (json['relationship'] as Object?)?.toString(),
       familyMemberName: (json['family_member_name'] as Object?)?.toString(),
-      invitationCode: (json['invitation_code'] as Object?)?.toString(),
+      familyMember: (json['family_member'] as Object?)?.toString(),
+      invitationCode: (json['invitation_code'] ?? json['invite_code'])?.toString(),
       exactMatch: json['exact_match'] != false,
     );
   }
@@ -145,6 +148,7 @@ class SponsorshipSummary {
   final String? plan;
   final double monthlyAmount;
   final DateTime? nextPaymentDate;
+  final bool canPayForCare;
 
   const SponsorshipSummary({
     required this.name,
@@ -156,19 +160,41 @@ class SponsorshipSummary {
     this.plan,
     this.monthlyAmount = 0,
     this.nextPaymentDate,
+    this.canPayForCare = false,
   });
 
+  bool get isPending => status.toLowerCase() == 'pending';
+  bool get isAccepted => status.toLowerCase() == 'accepted';
+  bool get isActive => status.toLowerCase() == 'active';
+
   factory SponsorshipSummary.fromJson(Map<String, dynamic> json) {
+    final sub = json['subscription'];
+    final permissions = json['permissions'];
+    var plan = (json['plan'] as Object?)?.toString();
+    var monthlyAmount = _toDouble(json['monthly_amount'] ?? json['amount']) ?? 0;
+    var nextPaymentDate = _parseDate(json['next_payment_date']);
+    var canPayForCare = json['can_pay_for_care'] == true || json['can_pay_for_care'] == 1;
+    if (permissions is Map) {
+      canPayForCare = canPayForCare ||
+          permissions['can_pay_for_care'] == true ||
+          permissions['view_subscription'] == true;
+    }
+    if (sub is Map) {
+      plan ??= (sub['plan'] as Object?)?.toString();
+      monthlyAmount = _toDouble(sub['monthly_fee']) ?? monthlyAmount;
+      nextPaymentDate ??= _parseDate(sub['next_billing_date']);
+    }
     return SponsorshipSummary(
       name: (json['name'] ?? '').toString(),
       patient: (json['patient'] ?? '').toString(),
       patientName: (json['patient_name'] ?? '').toString(),
-      patientId: (json['patient_id'] ?? '').toString(),
+      patientId: (json['patient_id'] ?? json['patient'] ?? '').toString(),
       status: (json['status'] ?? json['link_status'] ?? 'Pending').toString(),
       relationship: (json['relationship'] ?? '').toString(),
-      plan: (json['plan'] as Object?)?.toString(),
-      monthlyAmount: _toDouble(json['monthly_amount'] ?? json['amount']) ?? 0,
-      nextPaymentDate: _parseDate(json['next_payment_date']),
+      plan: plan,
+      monthlyAmount: monthlyAmount,
+      nextPaymentDate: nextPaymentDate,
+      canPayForCare: canPayForCare,
     );
   }
 }
@@ -184,6 +210,7 @@ class SponsorshipDashboard {
   final double monthlyAmount;
   final DateTime? nextPaymentDate;
   final List<String> updates;
+  final bool canPayForCare;
   final Map<String, dynamic> raw;
 
   const SponsorshipDashboard({
@@ -197,49 +224,73 @@ class SponsorshipDashboard {
     this.monthlyAmount = 0,
     this.nextPaymentDate,
     this.updates = const [],
+    this.canPayForCare = false,
     this.raw = const {},
   });
 
+  bool get isPending => status.toLowerCase() == 'pending';
+  bool get isAccepted => status.toLowerCase() == 'accepted';
+  bool get isActive => status.toLowerCase() == 'active';
+
   factory SponsorshipDashboard.fromJson(Map<String, dynamic> json) {
+    final link = json['link'];
+    final sub = json['subscription'];
+    final linkMap = link is Map ? Map<String, dynamic>.from(link) : <String, dynamic>{};
+    final subMap = sub is Map ? Map<String, dynamic>.from(sub) : <String, dynamic>{};
     final updateList = (json['updates'] as List? ?? const [])
-        .map((e) => e is Map ? (e['label'] ?? e['message'] ?? '').toString() : e.toString())
+        .map((e) => e is Map ? (e['title'] ?? e['message'] ?? '').toString() : e.toString())
         .where((e) => e.isNotEmpty)
         .toList();
     return SponsorshipDashboard(
-      name: (json['name'] ?? '').toString(),
-      patient: (json['patient'] ?? '').toString(),
-      patientName: (json['patient_name'] ?? '').toString(),
-      patientId: (json['patient_id'] ?? '').toString(),
-      status: (json['status'] ?? 'Pending').toString(),
-      relationship: (json['relationship'] ?? '').toString(),
-      plan: (json['plan'] as Object?)?.toString(),
-      monthlyAmount: _toDouble(json['monthly_amount'] ?? json['amount']) ?? 0,
-      nextPaymentDate: _parseDate(json['next_payment_date']),
+      name: (json['name'] ?? linkMap['name'] ?? '').toString(),
+      patient: (json['patient'] ?? linkMap['patient'] ?? '').toString(),
+      patientName: (json['patient_name'] ?? linkMap['patient_name'] ?? '').toString(),
+      patientId: (json['patient_id'] ?? json['patient'] ?? linkMap['patient'] ?? '').toString(),
+      status: (json['status'] ?? linkMap['link_status'] ?? 'Pending').toString(),
+      relationship: (json['relationship'] ?? linkMap['relationship'] ?? '').toString(),
+      plan: (json['plan'] ?? subMap['plan'])?.toString(),
+      monthlyAmount: _toDouble(json['monthly_amount'] ?? subMap['monthly_fee']) ?? 0,
+      nextPaymentDate: _parseDate(json['next_payment_date'] ?? subMap['next_billing_date']),
       updates: updateList,
+      canPayForCare: json['can_pay_for_care'] == true ||
+          json['can_pay_for_care'] == 1 ||
+          linkMap['can_pay_for_care'] == true ||
+          linkMap['can_pay_for_care'] == 1,
       raw: Map<String, dynamic>.from(json),
     );
   }
 }
 
 Map<String, bool> _parsePermissions(dynamic raw) {
+  final parsed = <String, bool>{};
   if (raw is Map) {
-    return raw.map(
-      (key, value) => MapEntry(
-        key.toString(),
-        value == true || value == 1 || value?.toString().toLowerCase() == 'true',
-      ),
-    );
+    raw.forEach((key, value) {
+      parsed[key.toString()] =
+          value == true || value == 1 || value?.toString().toLowerCase() == 'true';
+    });
+  } else if (raw is List) {
+    for (final item in raw) {
+      parsed[item.toString()] = true;
+    }
   }
-  if (raw is List) {
-    return {
-      for (final item in raw)
-        item.toString(): true,
+
+  if (parsed.isEmpty) {
+    return const {
+      'view_readings': true,
+      'view_medicines': true,
+      'view_appointments': true,
     };
   }
-  return const {
-    'view_readings': true,
-    'view_medicines': true,
-    'view_appointments': true,
+
+  return {
+    'view_readings':
+        parsed['view_readings'] ?? parsed['can_view_vitals'] ?? false,
+    'view_medicines':
+        parsed['view_medicines'] ?? parsed['can_view_medications'] ?? false,
+    'view_appointments':
+        parsed['view_appointments'] ?? parsed['can_view_appointments'] ?? false,
+    'view_subscription':
+        parsed['view_subscription'] ?? parsed['can_pay_for_care'] ?? false,
   };
 }
 

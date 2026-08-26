@@ -23,9 +23,11 @@ import 'screens/auth/splash_screen.dart';
 import 'screens/auth/register_screen.dart';
 import 'screens/auth/signup_screen.dart';
 import 'screens/auth/paywall_screen.dart';
+import 'screens/auth/role_chooser_screen.dart';
 import 'screens/auth/otp_screen.dart';
 import 'screens/auth/registration_success_screen.dart';
 import 'screens/navigation/app_shell.dart';
+import 'screens/caregiver_portal/caregiver_portal_shell.dart';
 import 'screens/services/book_doctor_screen.dart';
 import 'screens/services/lab_test_screen.dart';
 import 'screens/services/medicine_order_screen.dart';
@@ -248,6 +250,7 @@ class _AppRoot extends StatelessWidget {
             }
           },
           onCreateAccount: () => provider.setState(AppState.signup),
+          onSupportLovedOne: () => provider.beginCaregiverSignup(),
           onBack: () => provider.setState(AppState.splash),
         );
       case AppState.signup:
@@ -299,7 +302,14 @@ class _AppRoot extends StatelessWidget {
         );
       case AppState.paywall:
         return const PaywallScreen();
+      case AppState.roleChooser:
+        return const RoleChooserScreen();
+      case AppState.caregiverPortal:
+        return const CaregiverPortalShell();
       case AppState.home:
+        if (provider.isCaregiverMode) {
+          return const CaregiverPortalShell();
+        }
         return const AppShell();
       case AppState.sessionExpired:
         return SessionExpiredScreen(

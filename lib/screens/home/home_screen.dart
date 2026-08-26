@@ -195,7 +195,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text(l10n.nextAppointment, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                     const SizedBox(height: 2),
                     Text(
-                      '$practitioner — ${DateFormat('EEE, MMM d').format(a.date)}${time.isNotEmpty ? ' · $time' : ''}',
+                      '$practitioner – ${DateFormat('EEE, MMM d').format(a.date)}${time.isNotEmpty ? ' · $time' : ''}',
                       style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                     ),
                   ],
@@ -431,7 +431,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               Text(
                                 provider.readings.isNotEmpty
                                     ? DateFormat('MMM dd, yyyy').format(provider.readings.first.date)
-                                    : '—',
+                                    : '–',
                                 style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,

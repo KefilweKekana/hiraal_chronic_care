@@ -10,7 +10,9 @@ import 'sponsor_connection_sent_screen.dart';
 import 'sponsor_patient_screen.dart';
 
 class SponsorCareScreen extends StatefulWidget {
-  const SponsorCareScreen({super.key});
+  final bool showAppBar;
+
+  const SponsorCareScreen({super.key, this.showAppBar = true});
 
   @override
   State<SponsorCareScreen> createState() => _SponsorCareScreenState();
@@ -135,22 +137,40 @@ class _SponsorCareScreenState extends State<SponsorCareScreen> with SingleTicker
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(l10n.sponsorCareTitle),
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.textPrimary,
-        elevation: 0,
-        bottom: TabBar(
-          controller: _controller,
-          labelColor: AppColors.primary,
-          unselectedLabelColor: AppColors.textSecondary,
-          indicatorColor: AppColors.primary,
-          tabs: [
-            Tab(text: l10n.findPatientTab),
-            Tab(text: l10n.connectByWhatsappTab),
-          ],
-        ),
-      ),
+      appBar: widget.showAppBar
+          ? AppBar(
+              title: Text(l10n.sponsorCareTitle),
+              backgroundColor: AppColors.white,
+              foregroundColor: AppColors.textPrimary,
+              elevation: 0,
+              bottom: TabBar(
+                controller: _controller,
+                labelColor: AppColors.primary,
+                unselectedLabelColor: AppColors.textSecondary,
+                indicatorColor: AppColors.primary,
+                tabs: [
+                  Tab(text: l10n.findPatientTab),
+                  Tab(text: l10n.connectByWhatsappTab),
+                ],
+              ),
+            )
+          : AppBar(
+              title: Text(l10n.sponsorCareTitle),
+              automaticallyImplyLeading: false,
+              backgroundColor: AppColors.white,
+              foregroundColor: AppColors.textPrimary,
+              elevation: 0,
+              bottom: TabBar(
+                controller: _controller,
+                labelColor: AppColors.primary,
+                unselectedLabelColor: AppColors.textSecondary,
+                indicatorColor: AppColors.primary,
+                tabs: [
+                  Tab(text: l10n.findPatientTab),
+                  Tab(text: l10n.connectByWhatsappTab),
+                ],
+              ),
+            ),
       body: TabBarView(
         controller: _controller,
         children: [

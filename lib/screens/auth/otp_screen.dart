@@ -275,8 +275,9 @@ class _OtpScreenState extends State<OtpScreen> {
                         },
                       ),
                       const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           Text(
                             '${l10n.didntReceiveCode} ',
@@ -304,14 +305,19 @@ class _OtpScreenState extends State<OtpScreen> {
                       ),
                       const SizedBox(height: 12),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Icon(Icons.verified_outlined, size: 14, color: AppColors.primary),
                           const SizedBox(width: 6),
-                          Flexible(
+                          Expanded(
                             child: Text(
                               l10n.otpExpiresInMinutes(AppConstants.otpExpiryMinutes),
-                              style: const TextStyle(fontSize: 12, color: AppColors.primary),
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.primary,
+                                height: 1.4,
+                              ),
                             ),
                           ),
                         ],

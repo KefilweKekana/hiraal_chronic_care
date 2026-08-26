@@ -83,7 +83,7 @@ class ErpNextPaymentService implements PaymentService {
       log.e('paySubscription failed', error: e);
       if (e.type == DioExceptionType.receiveTimeout) {
         return const Failure(
-            'The payment is taking longer than usual. If you approved it on your phone, it will complete automatically — check again in a few minutes.');
+            'The payment is taking longer than usual. If you approved it on your phone, it will complete automatically – check again in a few minutes.');
       }
       return Failure(_parseServerError(e.response?.data, 'Could not start the payment'),
           statusCode: e.response?.statusCode);
@@ -134,7 +134,7 @@ class ErpNextPaymentService implements PaymentService {
       log.e('payOrder failed', error: e);
       if (e.type == DioExceptionType.receiveTimeout) {
         return const Failure(
-            'The payment is taking longer than usual. If you approved it on your phone, it will complete automatically — check again in a few minutes.');
+            'The payment is taking longer than usual. If you approved it on your phone, it will complete automatically – check again in a few minutes.');
       }
       return Failure(_parseServerError(e.response?.data, 'Could not start the payment'),
           statusCode: e.response?.statusCode);
@@ -173,6 +173,26 @@ class ErpNextPaymentService implements PaymentService {
     } on DioException catch (e) {
       log.e('getSubscription failed', error: e);
       return Failure(_parseServerError(e.response?.data, 'Failed to load your subscription'),
+          statusCode: e.response?.statusCode);
+    } catch (e) {
+      return Failure(e.toString());
+    }
+  }
+
+  @override
+  Future<Result<List<SubscriptionPlan>>> getPlans() async {
+    try {
+      final r = await _api.dio.post('/method/hiraal_emr.api.get_subscription_plans');
+      final msg = r.data?['message'] as Map<String, dynamic>?;
+      final list = (msg?['plans'] as List?) ?? [];
+      final plans = list
+          .whereType<Map>()
+          .map((e) => SubscriptionPlan.fromJson(Map<String, dynamic>.from(e)))
+          .toList();
+      return Success(plans);
+    } on DioException catch (e) {
+      log.e('getPlans failed', error: e);
+      return Failure(_parseServerError(e.response?.data, 'Failed to load subscription plans'),
           statusCode: e.response?.statusCode);
     } catch (e) {
       return Failure(e.toString());

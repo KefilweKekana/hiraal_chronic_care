@@ -322,8 +322,8 @@ class _DeviceMeasureScreenState extends State<DeviceMeasureScreen> {
       case _Phase.measuring:
         return Text(
           _isGlucose
-              ? 'Asking the meter for your reading — keep Bluetooth connected.'
-              : 'Measuring, please wait — keep still.',
+              ? 'Asking the meter for your reading – keep Bluetooth connected.'
+              : 'Measuring, please wait – keep still.',
           textAlign: TextAlign.center,
           style: const TextStyle(
               fontSize: 15,

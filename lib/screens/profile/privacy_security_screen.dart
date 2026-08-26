@@ -89,9 +89,9 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
   /// Build a human-readable health report from the server export payload.
   String _formatExport(Map<String, dynamic> d) {
     final b = StringBuffer();
-    String s(dynamic v) => (v == null || '$v'.isEmpty) ? '—' : '$v';
+    String s(dynamic v) => (v == null || '$v'.isEmpty) ? '–' : '$v';
 
-    b.writeln('HIRAAL LIFECARE — MY HEALTH DATA');
+    b.writeln('HIRAAL LIFECARE – MY HEALTH DATA');
     b.writeln('Generated: ${s(d['generated_at'])}');
     b.writeln('=' * 44);
 

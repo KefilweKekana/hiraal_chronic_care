@@ -87,7 +87,7 @@ class Subscription {
   final String? lastPaymentStatus;
   final bool autoRenew;
   final double totalCollected;
-  final bool isOnTrial;
+  final bool _onTrialFlag;
   final DateTime? trialEndDate;
 
   const Subscription({
@@ -101,9 +101,20 @@ class Subscription {
     this.lastPaymentStatus,
     this.autoRenew = false,
     this.totalCollected = 0,
-    this.isOnTrial = false,
+    bool isOnTrial = false,
     this.trialEndDate,
-  });
+  }) : _onTrialFlag = isOnTrial;
+
+  /// True while a free trial is still in date (not merely while the flag is set).
+  bool get isOnTrial {
+    if (!_onTrialFlag) return false;
+    final end = trialEndDate;
+    if (end == null) return true;
+    final now = DateTime.now();
+    final endDay = DateTime(end.year, end.month, end.day);
+    final today = DateTime(now.year, now.month, now.day);
+    return !endDay.isBefore(today);
+  }
 
   /// True once the subscription has been paid and is live (or on trial).
   bool get isActive => status == 'Active' || status == 'Expiring Soon';
@@ -154,7 +165,7 @@ class Subscription {
 class SubscribeResult {
   final double amountDueNow;
   final double monthlyFee;
-  final bool isOnTrial;
+  final bool _onTrialFlag;
   final DateTime? trialEndDate;
   final String? plan;
   final String? status;
@@ -162,11 +173,21 @@ class SubscribeResult {
   const SubscribeResult({
     required this.amountDueNow,
     required this.monthlyFee,
-    this.isOnTrial = false,
+    bool isOnTrial = false,
     this.trialEndDate,
     this.plan,
     this.status,
-  });
+  }) : _onTrialFlag = isOnTrial;
+
+  bool get isOnTrial {
+    if (!_onTrialFlag) return false;
+    final end = trialEndDate;
+    if (end == null) return true;
+    final now = DateTime.now();
+    final endDay = DateTime(end.year, end.month, end.day);
+    final today = DateTime(now.year, now.month, now.day);
+    return !endDay.isBefore(today);
+  }
 
   factory SubscribeResult.fromJson(Map<String, dynamic> j) => SubscribeResult(
         amountDueNow: _toDouble(j['amount_due_now']) ??

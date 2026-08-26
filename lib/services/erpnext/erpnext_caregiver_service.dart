@@ -40,6 +40,15 @@ class ErpNextCaregiverService implements CaregiverService {
     return <String, dynamic>{};
   }
 
+  Map<String, dynamic> _toApiPermissions(Map<String, bool> permissions) {
+    return {
+      'can_view_vitals': permissions['view_readings'] ?? false,
+      'can_view_medications': permissions['view_medicines'] ?? false,
+      'can_view_appointments': permissions['view_appointments'] ?? false,
+      'can_pay_for_care': permissions['view_subscription'] ?? false,
+    };
+  }
+
   @override
   Future<Result<CaregiverInvitation>> inviteCaregiver({
     required String countryCode,
@@ -57,7 +66,7 @@ class ErpNextCaregiverService implements CaregiverService {
           'relationship': relationship,
           if (familyMemberName != null && familyMemberName.isNotEmpty)
             'family_member_name': familyMemberName,
-          if (permissions != null) 'permissions': permissions,
+          if (permissions != null) 'permissions': _toApiPermissions(permissions),
         },
       );
       return Success(CaregiverInvitation.fromJson(_messageMap(response)));
@@ -132,7 +141,12 @@ class ErpNextCaregiverService implements CaregiverService {
         '/method/hiraal_emr.api.redeem_invitation_code',
         data: {'code': code},
       );
-      return Success(CaregiverLink.fromJson(_messageMap(response)));
+      final message = _messageMap(response);
+      final link = message['link'];
+      final payload = link is Map
+          ? Map<String, dynamic>.from(link)
+          : message;
+      return Success(CaregiverLink.fromJson(payload));
     } on DioException catch (e) {
       return Failure(
         _parseServerError(e.response?.data, 'Could not redeem the invitation code'),
@@ -188,7 +202,7 @@ class ErpNextCaregiverService implements CaregiverService {
     try {
       final response = await _api.dio.post(
         '/method/hiraal_emr.api.update_caregiver_permissions',
-        data: {'name': name, 'permissions': permissions},
+        data: {'name': name, 'permissions': _toApiPermissions(permissions)},
       );
       final message = _messageMap(response);
       return Success((message['message'] ?? 'Permissions updated').toString());

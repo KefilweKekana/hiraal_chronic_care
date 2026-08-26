@@ -132,7 +132,7 @@ class PaymentWaitingView extends StatelessWidget {
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.white),
                     )
-                  : const Text("I've paid — check now"),
+                  : const Text("I've paid – check now"),
             ),
           ),
           const SizedBox(height: 8),

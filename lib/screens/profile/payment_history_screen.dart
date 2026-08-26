@@ -193,7 +193,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                       style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 2),
                   Text(
-                    e.date != null ? DateFormat('MMM dd, yyyy').format(e.date!) : '—',
+                    e.date != null ? DateFormat('MMM dd, yyyy').format(e.date!) : '–',
                     style: const TextStyle(fontSize: 12, color: AppColors.textTertiary),
                   ),
                 ],
@@ -214,7 +214,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
   }
 
   // ── receipt ────────────────────────────────────────────
-  String _fmtDate(DateTime? d) => d != null ? DateFormat('MMM dd, yyyy').format(d) : '—';
+  String _fmtDate(DateTime? d) => d != null ? DateFormat('MMM dd, yyyy').format(d) : '–';
 
   void _showReceipt(AppLocalizations l10n, _PaymentEntry e) {
     showModalBottomSheet<void>(
@@ -244,7 +244,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
               Text(l10n.paymentReceipt, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
               const SizedBox(height: 12),
               _receiptRow(l10n.item, e.title),
-              _receiptRow(l10n.reference, e.reference ?? '—'),
+              _receiptRow(l10n.reference, e.reference ?? '–'),
               _receiptRow(l10n.date, _fmtDate(e.date)),
               _receiptRow(l10n.amount, '$_cur${e.amount.toStringAsFixed(2)}'),
               _receiptRow(l10n.status, e.status),
@@ -287,7 +287,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     final text = StringBuffer()
       ..writeln('Hiraal Lifecare payment receipt')
       ..writeln('Item: ${e.title}')
-      ..writeln('Reference: ${e.reference ?? '—'}')
+      ..writeln('Reference: ${e.reference ?? '–'}')
       ..writeln('Date: ${_fmtDate(e.date)}')
       ..writeln('Amount: $_cur${e.amount.toStringAsFixed(2)}')
       ..writeln('Status: ${e.status}');

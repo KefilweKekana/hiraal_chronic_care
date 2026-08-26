@@ -201,10 +201,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get offlineBanner =>
-      'You\'re offline — readings will be saved on this phone';
+      'You\'re offline – readings will be saved on this phone';
 
   @override
-  String get backOnlineSyncing => 'Back online — syncing…';
+  String get backOnlineSyncing => 'Back online – syncing…';
 
   @override
   String get greetingMorning => 'Good morning,';
@@ -223,7 +223,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String orderPayToContinue(String id, String amount) {
-    return 'Order #$id — pay $amount to continue';
+    return 'Order #$id – pay $amount to continue';
   }
 
   @override
@@ -451,7 +451,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String noSpecialistsShowingAll(String specialty) {
-    return 'No $specialty specialists listed — showing all doctors';
+    return 'No $specialty specialists listed – showing all doctors';
   }
 
   @override
@@ -879,7 +879,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get awaitingPharmacistReview =>
-      'Awaiting pharmacist review — items will appear here once your prescription is processed.';
+      'Awaiting pharmacist review – items will appear here once your prescription is processed.';
 
   @override
   String get paymentSection => 'Payment';
@@ -988,7 +988,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'This page will automatically confirm the payment';
 
   @override
-  String get iPaidCheckNow => 'I paid — check now';
+  String get iPaidCheckNow => 'I paid – check now';
 
   @override
   String get cancelAndTryAgain => 'Cancel and try again';
@@ -1515,7 +1515,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get availableDevicesHint =>
-      'Tap Scan — health monitors nearby and any already paired to this phone show up here. Hiraal takes over the Bluetooth link on Connect.';
+      'Tap Scan – health monitors nearby and any already paired to this phone show up here. Hiraal takes over the Bluetooth link on Connect.';
 
   @override
   String get scanForDevices => 'Scan for Devices';
@@ -1889,4 +1889,91 @@ class AppLocalizationsEn extends AppLocalizations {
   String connectionActiveBody(String name) {
     return 'Your connection with $name is active. You can now sponsor their care.';
   }
+
+  @override
+  String get supportLovedOneTitle => 'Support a loved one';
+
+  @override
+  String get supportLovedOneSubtitle =>
+      'Create a free caregiver or sponsor account';
+
+  @override
+  String get caregiverPortalHome => 'My Care';
+
+  @override
+  String get caregiverPortalConnect => 'Connect';
+
+  @override
+  String get caregiverPortalAccount => 'Account';
+
+  @override
+  String get caregiverPortalWelcome => 'Family Care Portal';
+
+  @override
+  String get caregiverPortalWelcomeHint =>
+      'View updates and support the people you care for.';
+
+  @override
+  String get caregiverPortalAccountTitle => 'Supporter account';
+
+  @override
+  String get caregiverPortalAccountHint =>
+      'You are signed in to support loved ones – no patient subscription needed.';
+
+  @override
+  String get switchToPatientCare => 'I also need patient care';
+
+  @override
+  String get switchToPatientCareHint =>
+      'Subscribe to use readings, devices, and clinic services.';
+
+  @override
+  String get openPatientApp => 'Open patient app';
+
+  @override
+  String get openPatientAppHint =>
+      'Log readings, vitals, and use your care plan.';
+
+  @override
+  String get switchToFamilyCare => 'Open Family Care portal';
+
+  @override
+  String get switchToFamilyCareHint =>
+      'View sponsorships and support loved ones.';
+
+  @override
+  String get roleChooserTitle => 'How would you like to continue?';
+
+  @override
+  String get roleChooserHint =>
+      'Your account includes both patient care and family support.';
+
+  @override
+  String get roleChooserPatientTitle => 'My patient care';
+
+  @override
+  String get roleChooserPatientHint =>
+      'Log readings, connect devices, and use clinic services.';
+
+  @override
+  String get roleChooserCaregiverTitle => 'Family Care portal';
+
+  @override
+  String get roleChooserCaregiverHint =>
+      'View updates and support the people you care for.';
+
+  @override
+  String get signupAsSupporterHint =>
+      'Creating a supporter account for caregivers and sponsors.';
+
+  @override
+  String sponsorshipPendingHint(String name) {
+    return 'Waiting for $name to accept your connection. You can pay for their care plan once they approve.';
+  }
+
+  @override
+  String get sponsorshipPayNow => 'Pay for care plan';
+
+  @override
+  String get sponsorshipDetailsTitle => 'Sponsorship details';
 }

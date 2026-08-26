@@ -443,13 +443,13 @@ abstract class AppLocalizations {
   /// No description provided for @offlineBanner.
   ///
   /// In en, this message translates to:
-  /// **'You\'re offline — readings will be saved on this phone'**
+  /// **'You\'re offline – readings will be saved on this phone'**
   String get offlineBanner;
 
   /// No description provided for @backOnlineSyncing.
   ///
   /// In en, this message translates to:
-  /// **'Back online — syncing…'**
+  /// **'Back online – syncing…'**
   String get backOnlineSyncing;
 
   /// No description provided for @greetingMorning.
@@ -485,7 +485,7 @@ abstract class AppLocalizations {
   /// No description provided for @orderPayToContinue.
   ///
   /// In en, this message translates to:
-  /// **'Order #{id} — pay {amount} to continue'**
+  /// **'Order #{id} – pay {amount} to continue'**
   String orderPayToContinue(String id, String amount);
 
   /// No description provided for @nextAppointment.
@@ -923,7 +923,7 @@ abstract class AppLocalizations {
   /// No description provided for @noSpecialistsShowingAll.
   ///
   /// In en, this message translates to:
-  /// **'No {specialty} specialists listed — showing all doctors'**
+  /// **'No {specialty} specialists listed – showing all doctors'**
   String noSpecialistsShowingAll(String specialty);
 
   /// No description provided for @retry.
@@ -1703,7 +1703,7 @@ abstract class AppLocalizations {
   /// No description provided for @awaitingPharmacistReview.
   ///
   /// In en, this message translates to:
-  /// **'Awaiting pharmacist review — items will appear here once your prescription is processed.'**
+  /// **'Awaiting pharmacist review – items will appear here once your prescription is processed.'**
   String get awaitingPharmacistReview;
 
   /// No description provided for @paymentSection.
@@ -1895,7 +1895,7 @@ abstract class AppLocalizations {
   /// No description provided for @iPaidCheckNow.
   ///
   /// In en, this message translates to:
-  /// **'I paid — check now'**
+  /// **'I paid – check now'**
   String get iPaidCheckNow;
 
   /// No description provided for @cancelAndTryAgain.
@@ -2879,7 +2879,7 @@ abstract class AppLocalizations {
   /// No description provided for @availableDevicesHint.
   ///
   /// In en, this message translates to:
-  /// **'Tap Scan — health monitors nearby and any already paired to this phone show up here. Hiraal takes over the Bluetooth link on Connect.'**
+  /// **'Tap Scan – health monitors nearby and any already paired to this phone show up here. Hiraal takes over the Bluetooth link on Connect.'**
   String get availableDevicesHint;
 
   /// No description provided for @scanForDevices.
@@ -3577,6 +3577,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your connection with {name} is active. You can now sponsor their care.'**
   String connectionActiveBody(String name);
+
+  /// No description provided for @supportLovedOneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Support a loved one'**
+  String get supportLovedOneTitle;
+
+  /// No description provided for @supportLovedOneSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a free caregiver or sponsor account'**
+  String get supportLovedOneSubtitle;
+
+  /// No description provided for @caregiverPortalHome.
+  ///
+  /// In en, this message translates to:
+  /// **'My Care'**
+  String get caregiverPortalHome;
+
+  /// No description provided for @caregiverPortalConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect'**
+  String get caregiverPortalConnect;
+
+  /// No description provided for @caregiverPortalAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get caregiverPortalAccount;
+
+  /// No description provided for @caregiverPortalWelcome.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Care Portal'**
+  String get caregiverPortalWelcome;
+
+  /// No description provided for @caregiverPortalWelcomeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'View updates and support the people you care for.'**
+  String get caregiverPortalWelcomeHint;
+
+  /// No description provided for @caregiverPortalAccountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Supporter account'**
+  String get caregiverPortalAccountTitle;
+
+  /// No description provided for @caregiverPortalAccountHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You are signed in to support loved ones – no patient subscription needed.'**
+  String get caregiverPortalAccountHint;
+
+  /// No description provided for @switchToPatientCare.
+  ///
+  /// In en, this message translates to:
+  /// **'I also need patient care'**
+  String get switchToPatientCare;
+
+  /// No description provided for @switchToPatientCareHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe to use readings, devices, and clinic services.'**
+  String get switchToPatientCareHint;
+
+  /// No description provided for @openPatientApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Open patient app'**
+  String get openPatientApp;
+
+  /// No description provided for @openPatientAppHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Log readings, vitals, and use your care plan.'**
+  String get openPatientAppHint;
+
+  /// No description provided for @switchToFamilyCare.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Family Care portal'**
+  String get switchToFamilyCare;
+
+  /// No description provided for @switchToFamilyCareHint.
+  ///
+  /// In en, this message translates to:
+  /// **'View sponsorships and support loved ones.'**
+  String get switchToFamilyCareHint;
+
+  /// No description provided for @roleChooserTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How would you like to continue?'**
+  String get roleChooserTitle;
+
+  /// No description provided for @roleChooserHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account includes both patient care and family support.'**
+  String get roleChooserHint;
+
+  /// No description provided for @roleChooserPatientTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My patient care'**
+  String get roleChooserPatientTitle;
+
+  /// No description provided for @roleChooserPatientHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Log readings, connect devices, and use clinic services.'**
+  String get roleChooserPatientHint;
+
+  /// No description provided for @roleChooserCaregiverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Care portal'**
+  String get roleChooserCaregiverTitle;
+
+  /// No description provided for @roleChooserCaregiverHint.
+  ///
+  /// In en, this message translates to:
+  /// **'View updates and support the people you care for.'**
+  String get roleChooserCaregiverHint;
+
+  /// No description provided for @signupAsSupporterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating a supporter account for caregivers and sponsors.'**
+  String get signupAsSupporterHint;
+
+  /// No description provided for @sponsorshipPendingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for {name} to accept your connection. You can pay for their care plan once they approve.'**
+  String sponsorshipPendingHint(String name);
+
+  /// No description provided for @sponsorshipPayNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay for care plan'**
+  String get sponsorshipPayNow;
+
+  /// No description provided for @sponsorshipDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sponsorship details'**
+  String get sponsorshipDetailsTitle;
 }
 
 class _AppLocalizationsDelegate

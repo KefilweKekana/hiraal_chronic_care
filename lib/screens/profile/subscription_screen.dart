@@ -26,6 +26,15 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
 
   String get _cur => AppConstants.currencySymbol;
 
+  double _catalogFee(String? planName) {
+    final plans = _info?.plans ?? const <SubscriptionPlan>[];
+    if (planName == null || planName.isEmpty) return 0;
+    for (final p in plans) {
+      if (p.name == planName || p.planName == planName) return p.monthlyFee;
+    }
+    return 0;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -212,8 +221,9 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
             ],
           ),
           const SizedBox(height: 6),
-          Text('$_cur${s.monthlyFee.toStringAsFixed(2)} / month',
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.primary)),
+          if (_catalogFee(s.plan) > 0)
+            Text('$_cur${_catalogFee(s.plan).toStringAsFixed(2)} / month',
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.primary)),
           const SizedBox(height: 14),
           if (s.isOnTrial && s.trialEndDate != null)
             _row(Icons.hourglass_bottom, 'Trial ends', DateFormat('MMM dd, yyyy').format(s.trialEndDate!)),
@@ -230,7 +240,20 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
               width: double.infinity,
               height: 52,
               child: ElevatedButton.icon(
-                onPressed: _busy ? null : () => _openPay(amount: s.monthlyFee, planName: s.plan),
+                onPressed: _busy
+                    ? null
+                    : () {
+                        final planName = s.plan;
+                        if (planName == null || planName.isEmpty) return;
+                        final match = _info?.plans.where(
+                          (p) => p.name == planName || p.planName == planName,
+                        );
+                        if (match != null && match.isNotEmpty) {
+                          _subscribe(match.first);
+                          return;
+                        }
+                        _subscribe(SubscriptionPlan(name: planName, monthlyFee: 0));
+                      },
                 icon: const Icon(Icons.payment, size: 20),
                 label: Text(needsPay ? 'Complete payment' : 'Pay / renew now'),
                 style: ElevatedButton.styleFrom(
@@ -243,7 +266,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
             const Padding(
               padding: EdgeInsets.only(top: 12),
               child: Text(
-                'Enjoy your free trial — payment will be due when it ends.',
+                'Enjoy your free trial – payment will be due when it ends.',
                 style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
               ),
             ),
@@ -330,7 +353,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
               onPressed: _busy ? null : () => _subscribe(plan),
               child: _busy
                   ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.white))
-                  : Text('Subscribe — $_cur${plan.monthlyFee.toStringAsFixed(0)}/mo'),
+                  : Text('Subscribe – $_cur${plan.monthlyFee.toStringAsFixed(0)}/mo'),
             ),
           ),
         ],

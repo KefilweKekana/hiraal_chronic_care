@@ -35,14 +35,14 @@ class _SponsorPatientScreenState extends State<SponsorPatientScreen> {
       _loading = true;
       _error = null;
     });
-    final result = await ServiceLocator.instance.payments.getSubscription();
+    final result = await ServiceLocator.instance.payments.getPlans();
     if (!mounted) return;
     setState(() {
       _loading = false;
       switch (result) {
         case Success(data: final data):
-          _plans = data.plans;
-          _selectedPlan = data.plans.isNotEmpty ? data.plans.first : null;
+          _plans = data;
+          _selectedPlan = data.isNotEmpty ? data.first : null;
         case Failure(message: final message):
           _error = message;
       }
