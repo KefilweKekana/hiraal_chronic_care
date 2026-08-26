@@ -13,8 +13,9 @@ class CareSubscription(Document):
                 as_dict=True,
             )
             if plan:
-                if not self.monthly_fee:
-                    self.monthly_fee = flt(plan.monthly_fee)
+                plan_fee = flt(plan.monthly_fee)
+                if not self.monthly_fee or self.has_value_changed("plan"):
+                    self.monthly_fee = plan_fee
                 if hasattr(self, "plan_category") and not self.plan_category:
                     self.plan_category = plan.category
         if not self.next_billing_date:

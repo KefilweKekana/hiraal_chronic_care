@@ -132,8 +132,8 @@ class PatientManagement {
                   </td>
                   <td><span class="indicator-pill ${this.risk_indicator(p.risk_level)}">${p.risk_level}</span></td>
                   <td>${p.last_reading_date ? frappe.datetime.str_to_user(p.last_reading_date) : '<span class="text-muted">Never</span>'}</td>
-                  <td>${p.last_bp || '<span class="text-muted">—</span>'}</td>
-                  <td>${p.last_sugar != null ? p.last_sugar : '<span class="text-muted">—</span>'}</td>
+                  <td>${p.last_bp || '<span class="text-muted">–</span>'}</td>
+                  <td>${p.last_sugar != null ? p.last_sugar : '<span class="text-muted">–</span>'}</td>
                   <td>
                     <span class="indicator-pill ${p.subscription_status === "Active" ? "green" : p.subscription_status === "Overdue" ? "orange" : "grey"}">
                       ${p.subscription_plan}${p.subscription_plan !== "None" ? " · " + p.subscription_status : ""}
@@ -217,7 +217,7 @@ class PatientManagement {
         ${p.subscription ? `
           <div class="pm-profile-section">
             <h4>Subscription</h4>
-            <p><strong>${p.subscription.plan}</strong> — $${p.subscription.monthly_fee}/mo — Status: <span class="indicator-pill ${p.subscription.status === "Active" ? "green" : "orange"}">${p.subscription.status}</span></p>
+            <p><strong>${p.subscription.plan}</strong> – $${p.subscription.monthly_fee}/mo – Status: <span class="indicator-pill ${p.subscription.status === "Active" ? "green" : "orange"}">${p.subscription.status}</span></p>
             <p class="text-muted">Next billing: ${p.subscription.next_billing_date ? frappe.datetime.str_to_user(p.subscription.next_billing_date) : "N/A"}</p>
           </div>
         ` : '<div class="pm-profile-section"><h4>Subscription</h4><p class="text-muted">No active subscription</p></div>'}
@@ -235,7 +235,7 @@ class PatientManagement {
             <div class="pm-alert-item">
               <span class="indicator-pill ${this.risk_indicator(a.alert_level)}">${a.alert_level}</span>
               <strong>${a.alert_type}</strong>
-              <span class="text-muted"> — ${frappe.datetime.prettyDate(a.creation)}</span>
+              <span class="text-muted"> – ${frappe.datetime.prettyDate(a.creation)}</span>
             </div>
           `).join("") : '<p class="text-muted">No active alerts</p>'}
         </div>
@@ -246,9 +246,9 @@ class PatientManagement {
           ${p.reviews.length ? p.reviews.map(r => `
             <div class="pm-review-item">
               <span class="indicator-pill ${r.review_status === "Reviewed" ? "green" : "orange"}">${r.review_status}</span>
-              ${r.assessment ? `<strong>${r.assessment}</strong> — ` : ""}
+              ${r.assessment ? `<strong>${r.assessment}</strong> – ` : ""}
               ${r.plan_notes || "No notes"}
-              <span class="text-muted"> — ${frappe.datetime.prettyDate(r.creation)}</span>
+              <span class="text-muted"> – ${frappe.datetime.prettyDate(r.creation)}</span>
             </div>
           `).join("") : '<p class="text-muted">No reviews yet</p>'}
         </div>
@@ -259,7 +259,7 @@ class PatientManagement {
           ${p.nurse_notes.length ? p.nurse_notes.map(n => `
             <div class="pm-note-item">
               <strong>${n.task_type}</strong>: ${n.completion_note || "Completed"}
-              <span class="text-muted"> — ${frappe.datetime.prettyDate(n.completed_at)}</span>
+              <span class="text-muted"> – ${frappe.datetime.prettyDate(n.completed_at)}</span>
             </div>
           `).join("") : '<p class="text-muted">No notes yet</p>'}
         </div>
@@ -270,7 +270,7 @@ class PatientManagement {
           ${p.devices.length ? p.devices.map(d => `
             <div class="pm-device-item">
               <strong>${d.device_name}</strong> (${d.device_type})
-              — <span class="indicator-pill ${d.status === "Online" ? "green" : "red"}">${d.status}</span>
+              – <span class="indicator-pill ${d.status === "Online" ? "green" : "red"}">${d.status}</span>
               ${d.battery_level ? ` · Battery: ${d.battery_level}%` : ""}
               ${d.last_sync ? ` · Last sync: ${frappe.datetime.prettyDate(d.last_sync)}` : ""}
             </div>

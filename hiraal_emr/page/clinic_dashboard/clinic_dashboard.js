@@ -244,11 +244,11 @@ class ClinicDashboard {
             '<span class="hd-pt-cell"><span class="hd-pt-avatar" style="background:' + this.avatarColor(a.patient_name) + '">' +
               this.initials(a.patient_name) + '</span><span><span class="hd-pt-name">' + this.esc(a.patient_name) +
               '</span><br><span class="hd-pt-id">' + this.esc(a.patient) + "</span></span></span>" +
-            "<span>" + this.esc(a.latest_reading_display || "—") + "</span>" +
+            "<span>" + this.esc(a.latest_reading_display || "–") + "</span>" +
             '<span><span class="hd-reason ' + this.alertClass(a.alert_level) + '"><span class="dot"></span>' +
               this.esc(a.alert_type) + "</span></span>" +
             '<span class="hd-cell-muted">' + frappe.datetime.prettyDate(a.creation) + "</span>" +
-            '<span class="hd-cell-muted">' + this.esc(a.assigned_nurse_name || "—") + "</span>" +
+            '<span class="hd-cell-muted">' + this.esc(a.assigned_nurse_name || "–") + "</span>" +
           "</div>";
       });
       body =
@@ -324,12 +324,12 @@ class ClinicDashboard {
         const st = (a.status || "").toLowerCase();
         rows +=
           '<div class="hd-trow" style="' + cols + '">' +
-            '<span class="hd-time-badge">' + this.esc(a.appointment_time || "—") + "</span>" +
+            '<span class="hd-time-badge">' + this.esc(a.appointment_time || "–") + "</span>" +
             '<span class="hd-pt-cell"><span class="hd-pt-avatar" style="background:' + this.avatarColor(a.patient_name) + '">' +
               this.initials(a.patient_name) + '</span><span class="hd-pt-name">' + this.esc(a.patient_name) + "</span></span>" +
             "<span>" + this.esc(a.appointment_type || "Visit") + "</span>" +
-            '<span class="hd-cell-muted">' + this.esc(a.practitioner_name || "—") + "</span>" +
-            '<span><span class="hd-status-pill ' + st + '">' + this.esc(a.status || "—") + "</span></span>" +
+            '<span class="hd-cell-muted">' + this.esc(a.practitioner_name || "–") + "</span>" +
+            '<span><span class="hd-status-pill ' + st + '">' + this.esc(a.status || "–") + "</span></span>" +
           "</div>";
       });
       body =

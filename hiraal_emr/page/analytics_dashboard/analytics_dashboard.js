@@ -92,7 +92,7 @@ class AnalyticsDashboard {
       '<div class="hd-trow" style="' + riskCols + '">' +
         '<span><span class="hd-reason ' + cls + '"><span class="dot"></span>' + label + "</span></span>" +
         "<span>" + (count || 0) + "</span><span>" + (pct || 0) + '%</span>' +
-        '<span class="hd-cell-muted">' + S.esc(trend || "—") + "</span></div>";
+        '<span class="hd-cell-muted">' + S.esc(trend || "–") + "</span></div>";
     const riskTable =
       '<div class="hd-thead" style="' + riskCols + '"><span>RISK LEVEL</span><span>PATIENTS</span><span>%</span><span>TREND</span></div>' +
       riskRow("high", "High Risk", d.risk_high, d.risk_high_pct, d.risk_high_trend) +

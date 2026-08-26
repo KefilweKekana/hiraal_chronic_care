@@ -114,6 +114,39 @@ def patient_trial_eligible(patient):
 	return not bool(frappe.db.exists("Care Subscription", {"patient": patient}))
 
 
+def charge_amount_for_plan(plan_name):
+	"""Authoritative monthly charge for a plan — always use this at payment time."""
+	row = resolve_plan(plan_name)
+	if not row:
+		return 0.0
+	return flt(row.get("monthly_fee"))
+
+
+def subscription_charge_amount(subscription):
+	"""Resolve the amount to charge from the linked Subscription Plan record."""
+	plan_name = None
+	monthly_fee = 0.0
+	if isinstance(subscription, dict):
+		plan_name = subscription.get("plan")
+		monthly_fee = flt(subscription.get("monthly_fee"))
+	else:
+		plan_name = getattr(subscription, "plan", None)
+		monthly_fee = flt(getattr(subscription, "monthly_fee", 0))
+	if plan_name:
+		fee = charge_amount_for_plan(plan_name)
+		if fee > 0:
+			return fee
+	return monthly_fee
+
+
+def apply_plan_to_subscription(sub_doc, plan_row):
+	"""Set plan, category, and monthly fee from a resolved catalog row."""
+	sub_doc.plan = plan_row["name"]
+	if hasattr(sub_doc, "plan_category"):
+		sub_doc.plan_category = plan_row.get("category") or "General"
+	sub_doc.monthly_fee = flt(plan_row["monthly_fee"])
+
+
 def resolve_plan(plan_name):
 	if not plan_name:
 		return None
@@ -153,6 +186,28 @@ def resolve_plan(plan_name):
 	return None
 
 
+def trial_is_active(sub):
+	"""True while a free trial is still in date — not merely while is_on_trial is set.
+
+	The daily billing job is what clears is_on_trial after trial_end_date. Until
+	that job runs, callers must use this date check so expired trials can pay
+	immediately instead of being blocked as "still on trial".
+	"""
+	if not sub:
+		return False
+	if isinstance(sub, dict):
+		flag = int(sub.get("is_on_trial") or 0)
+		end = sub.get("trial_end_date")
+	else:
+		flag = int(getattr(sub, "is_on_trial", 0) or 0)
+		end = getattr(sub, "trial_end_date", None)
+	if not flag:
+		return False
+	if not end:
+		return True
+	return getdate(end) >= getdate(today())
+
+
 def has_active_subscription(patient):
 	"""True when the patient may use paid app features (Active, including trial)."""
 	if not patient:
@@ -166,9 +221,8 @@ def has_active_subscription(patient):
 	)
 	if not sub:
 		return False
-	if int(sub.get("is_on_trial") or 0) and sub.get("trial_end_date"):
-		if getdate(sub.trial_end_date) < getdate(today()):
-			return False
+	if int(sub.get("is_on_trial") or 0) and not trial_is_active(sub):
+		return False
 	return True
 
 

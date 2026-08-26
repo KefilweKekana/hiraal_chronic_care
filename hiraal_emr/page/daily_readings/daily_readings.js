@@ -118,15 +118,15 @@ class DailyReadingsDashboard {
                   </td>
                   <td>${r.reading_time || frappe.datetime.str_to_user(r.creation)}</td>
                   <td>
-                    ${r.bp_systolic ? `<strong>${r.bp_systolic}/${r.bp_diastolic}</strong>` : '<span class="text-muted">—</span>'}
+                    ${r.bp_systolic ? `<strong>${r.bp_systolic}/${r.bp_diastolic}</strong>` : '<span class="text-muted">–</span>'}
                   </td>
                   <td>
-                    ${r.blood_sugar ? `<strong>${r.blood_sugar}</strong> <small>${r.blood_sugar_unit || "mg/dL"}</small>` : '<span class="text-muted">—</span>'}
+                    ${r.blood_sugar ? `<strong>${r.blood_sugar}</strong> <small>${r.blood_sugar_unit || "mg/dL"}</small>` : '<span class="text-muted">–</span>'}
                   </td>
                   <td>${r.medicine_taken === 'Yes' ? '✅ Yes' : '<span class="text-muted">No</span>'}</td>
                   <td><span class="rd-source-badge">${this.source_icon(r.source)} ${r.source}</span></td>
                   <td><span class="indicator-pill ${this.risk_color(r.risk_level)}">${r.risk_level || "Normal"}</span></td>
-                  <td>${r.alert_generated ? '🚨' : '—'}</td>
+                  <td>${r.alert_generated ? '🚨' : '–'}</td>
                   <td>
                     ${r.reviewed_by_nurse ? '👩‍⚕️' : ''}
                     ${r.reviewed_by_doctor ? '👨‍⚕️' : ''}

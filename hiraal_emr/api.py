@@ -159,7 +159,7 @@ def get_dashboard_data():
         recent_activity.append({
             "icon": "✓",
             "icon_class": "success",
-            "message": f"New reading received from <strong>{r.patient_name}</strong> — {', '.join(filter(None, [bp, sugar]))}",
+            "message": f"New reading received from <strong>{r.patient_name}</strong> – {', '.join(filter(None, [bp, sugar]))}",
             "time": frappe.utils.pretty_date(r.creation),
         })
 
@@ -175,7 +175,7 @@ def get_dashboard_data():
         recent_activity.append({
             "icon": "⚠",
             "icon_class": "warning" if a.alert_level in ("Very High", "High") else "info",
-            "message": f"High alert for <strong>{a.patient_name}</strong> — {a.alert_type}",
+            "message": f"High alert for <strong>{a.patient_name}</strong> – {a.alert_type}",
             "time": frappe.utils.pretty_date(a.creation),
         })
 
@@ -320,7 +320,7 @@ def escalate_alert(alert_name):
     review = frappe.new_doc("Doctor Review")
     review.patient = alert.patient
     review.priority = alert.alert_level
-    review.reason = f"Escalated: {alert.alert_type} — {alert.latest_reading_display}"
+    review.reason = f"Escalated: {alert.alert_type} – {alert.latest_reading_display}"
     review.related_alert = alert.name
     review.insert(ignore_permissions=True)
 
@@ -1449,7 +1449,7 @@ def book_appointment(patient, practitioner, appointment_date,
             frappe.throw(_("Please choose a valid care station for the in-person visit."))
         station_label = station.station_name or station.name
         if station.city:
-            station_label = f"{station_label} — {station.city}"
+            station_label = f"{station_label} – {station.city}"
         if station.address:
             station_label = f"{station_label} ({station.address})"
 
@@ -2192,7 +2192,7 @@ def pay_my_order(order, provider, method, phone):
                 "transaction_log": existing_txn,
                 "amount": amount,
                 "order": order,
-                "message": "Payment already in progress — approve it on your phone.",
+                "message": "Payment already in progress – approve it on your phone.",
             }
         if raw == "completed":
             mark_order_paid(order, existing_txn)
@@ -2508,6 +2508,7 @@ def get_my_subscription():
         patient_trial_eligible,
         subscription_plans_catalog,
         trial_config,
+        trial_is_active,
         has_active_subscription,
     )
 
@@ -2536,6 +2537,10 @@ def get_my_subscription():
             fields=["amount", "payment_date", "payment_method", "status", "reference_id"],
             order_by="payment_date desc", limit_page_length=10,
         )
+    if sub and int(sub.get("is_on_trial") or 0) and not trial_is_active(sub):
+        # Overlay so the app can show Pay immediately; persist on subscribe/pay.
+        sub["is_on_trial"] = 0
+
     plans = subscription_plans_catalog()
     trial = trial_config()
     trial_eligible = bool(trial["enabled"] and patient_trial_eligible(patient))
@@ -2558,6 +2563,14 @@ def get_my_subscription():
     }
 
 
+@frappe.whitelist(allow_guest=False)
+def get_subscription_plans():
+    """Active subscription plan catalog for any logged-in user (e.g. sponsors)."""
+    from hiraal_emr.services.subscription_catalog import subscription_plans_catalog
+
+    return {"success": True, "plans": subscription_plans_catalog()}
+
+
 @frappe.whitelist()
 def subscribe_my_plan(plan, start_trial=0):
     """Create a Care Subscription for the logged-in patient on the chosen plan.
@@ -2567,9 +2580,11 @@ def subscribe_my_plan(plan, start_trial=0):
     Otherwise create an Overdue subscription for the app to collect payment.
     """
     from hiraal_emr.services.subscription_catalog import (
+        apply_plan_to_subscription,
         patient_trial_eligible,
         resolve_plan,
         trial_config,
+        trial_is_active,
     )
 
     patient = _my_patient_name()
@@ -2580,13 +2595,22 @@ def subscribe_my_plan(plan, start_trial=0):
     fee = flt(plan_row["monthly_fee"])
     existing = _my_active_subscription(patient)
     if existing:
-        on_trial = 1 if int(existing.get("is_on_trial") or 0) else 0
+        on_trial = 1 if trial_is_active(existing) else 0
+        if int(existing.get("is_on_trial") or 0) and not on_trial:
+            frappe.db.set_value(
+                "Care Subscription", existing.name, "is_on_trial", 0, update_modified=False
+            )
+        sub_doc = frappe.get_doc("Care Subscription", existing.name)
+        if sub_doc.plan != plan_row["name"] or flt(sub_doc.monthly_fee) != fee:
+            apply_plan_to_subscription(sub_doc, plan_row)
+            sub_doc.save(ignore_permissions=True)
+            frappe.db.commit()
         return {
             "subscription": existing.name,
-            "monthly_fee": flt(existing.monthly_fee),
-            "plan": existing.plan or plan,
+            "monthly_fee": fee,
+            "plan": plan_row["name"],
             "status": "existing",
-            "amount_due_now": 0 if (existing.status == "Active" and on_trial) else flt(existing.monthly_fee),
+            "amount_due_now": 0 if (existing.status == "Active" and on_trial) else fee,
             "is_on_trial": on_trial,
             "trial_end_date": existing.get("trial_end_date"),
         }
@@ -2662,15 +2686,25 @@ def pay_my_subscription(provider, method, phone):
     """Start a mobile-money charge for the logged-in patient's care subscription.
     Sends a USSD prompt to ``phone``; returns a transaction_log to poll with
     check_my_payment."""
+    from hiraal_emr.services.subscription_catalog import subscription_charge_amount, trial_is_active
+
     patient = _my_patient_name()
     sub = _my_active_subscription(patient)
     if not sub:
         frappe.throw(_("No subscription found for your account"))
-    if int(sub.get("is_on_trial") or 0):
+    if trial_is_active(sub):
         frappe.throw(_("You are on a free trial. Payment is due when the trial ends."))
-    amount = flt(sub.monthly_fee)
+    if int(sub.get("is_on_trial") or 0):
+        frappe.db.set_value(
+            "Care Subscription", sub.name, "is_on_trial", 0, update_modified=False
+        )
+    amount = subscription_charge_amount(sub)
     if amount <= 0:
         frappe.throw(_("Your subscription amount is not set"))
+    if flt(sub.monthly_fee) != amount:
+        frappe.db.set_value(
+            "Care Subscription", sub.name, "monthly_fee", amount, update_modified=False
+        )
 
     pos = _mobile_payments_pos()
     if not pos:
@@ -2691,7 +2725,7 @@ def pay_my_subscription(provider, method, phone):
                 "transaction_log": existing_txn,
                 "amount": amount,
                 "subscription": sub.name,
-                "message": "Payment already in progress — approve it on your phone.",
+                "message": "Payment already in progress – approve it on your phone.",
             }
         if raw == "completed":
             _mark_subscription_paid(patient, existing_txn)
@@ -2811,9 +2845,57 @@ def _resolve_payment_method(sub, reference):
     return "Zaad"
 
 
+def _parse_txn_owner(raw):
+    """Normalize hiraal_txn_owner cache values.
+
+    Self-pay stores a patient name string. Sponsor pay stores JSON
+    ``{"patient", "sponsor", "family_member"}``. Bytes/str/dict are accepted.
+    """
+    if raw is None:
+        return None
+    if isinstance(raw, dict):
+        return raw
+    if isinstance(raw, (bytes, bytearray)):
+        raw = raw.decode("utf-8", errors="ignore")
+    text = str(raw).strip()
+    if not text:
+        return None
+    if text.startswith("{"):
+        try:
+            parsed = json.loads(text)
+            if isinstance(parsed, dict):
+                return parsed
+        except Exception:
+            pass
+    return {"patient": text}
+
+
+def _activate_sponsored_care_if_any(family_member=None, owner=None, sub_name=None):
+    """Activate the Family Member sponsor link after a completed payment."""
+    fm = family_member
+    if not fm and isinstance(owner, dict):
+        fm = owner.get("family_member")
+    if not fm and sub_name:
+        try:
+            meta = frappe.get_meta("Care Subscription")
+            if meta.has_field("sponsor_family_member"):
+                fm = frappe.db.get_value("Care Subscription", sub_name, "sponsor_family_member")
+        except Exception:
+            fm = None
+    if not fm:
+        return
+    from hiraal_emr.services.caregiver_service import activate_sponsored_care
+    try:
+        activate_sponsored_care(fm)
+    except Exception:
+        frappe.logger("hiraal_pay").exception("activate_sponsored_care failed for %s", fm)
+
+
 def _mark_subscription_paid(patient, reference):
     """Mirror Care Subscription.process_payment()'s success branch after the
     real gateway confirms payment. Idempotent per transaction reference."""
+    from hiraal_emr.services.subscription_catalog import subscription_charge_amount
+
     if frappe.db.exists("Subscription Payment", {"reference_id": reference}):
         return
     sub_name = frappe.db.get_value(
@@ -2824,7 +2906,11 @@ def _mark_subscription_paid(patient, reference):
     if not sub_name:
         return
     sub = frappe.get_doc("Care Subscription", sub_name)
-    amount = flt(sub.monthly_fee)
+    amount = subscription_charge_amount(sub)
+    if amount <= 0:
+        amount = flt(sub.monthly_fee)
+    if flt(sub.monthly_fee) != amount:
+        sub.db_set("monthly_fee", amount, update_modified=False)
     base_date = getdate(sub.next_billing_date) if sub.next_billing_date else getdate(today())
 
     pay = frappe.new_doc("Subscription Payment")
@@ -3361,24 +3447,11 @@ def get_sponsorship_dashboard(name):
 @frappe.whitelist(allow_guest=False)
 def sponsor_patient_subscription(patient, plan, provider, method, phone, family_member=None):
     """Sponsor pays a patient's care subscription."""
-    from hiraal_emr.services.caregiver_service import activate_sponsored_care
-    from hiraal_emr.services.subscription_catalog import resolve_plan
+    from hiraal_emr.services.caregiver_service import ensure_sponsor_family_member
+    from hiraal_emr.services.subscription_catalog import apply_plan_to_subscription, resolve_plan
 
     sponsor_user = frappe.session.user
-    link_name = family_member
-    if not link_name:
-        link_name = frappe.db.get_value(
-            "Family Member",
-            {
-                "patient": patient,
-                "caregiver_user": sponsor_user,
-                "can_pay_for_care": 1,
-                "link_status": ["in", ["Accepted", "Active", "Pending"]],
-            },
-            "name",
-        )
-    if not link_name:
-        frappe.throw(_("You are not authorized to pay for this patient"))
+    link_name = ensure_sponsor_family_member(patient, sponsor_user, family_member)
 
     link_row = frappe.db.get_value(
         "Family Member",
@@ -3408,8 +3481,7 @@ def sponsor_patient_subscription(patient, plan, provider, method, phone, family_
     if not sub_name:
         sub = frappe.new_doc("Care Subscription")
         sub.patient = patient
-        sub.plan = plan_row["name"]
-        sub.monthly_fee = flt(plan_row["monthly_fee"])
+        apply_plan_to_subscription(sub, plan_row)
         sub.status = "Overdue"
         sub.start_date = today()
         sub.next_billing_date = add_days(getdate(today()), 30)
@@ -3430,14 +3502,56 @@ def sponsor_patient_subscription(patient, plan, provider, method, phone, family_
             sub_doc.sponsor_family_member = link_name
         if hasattr(sub_doc, "paid_by_sponsor"):
             sub_doc.paid_by_sponsor = 1
-        sub_doc.plan = plan_row["name"]
-        sub_doc.monthly_fee = flt(plan_row["monthly_fee"])
+        apply_plan_to_subscription(sub_doc, plan_row)
         sub_doc.save(ignore_permissions=True)
 
     amount = flt(plan_row["monthly_fee"])
     pos = _mobile_payments_pos()
     if not pos:
         frappe.throw(_("Payment gateway is not available"))
+
+    owner_payload = json.dumps({
+        "patient": patient, "sponsor": sponsor_user, "family_member": link_name,
+    })
+
+    # Idempotency: if this subscription already has an initiation in flight, an
+    # app retry must not start a second wallet charge.
+    existing_txn = frappe.db.get_value("Care Subscription", sub_name, "payment_reference")
+    if existing_txn:
+        try:
+            existing = _as_admin(pos.check_pos_payment_status, existing_txn) or {}
+        except Exception:
+            existing = {}
+        raw = (existing.get("status") or "").strip().lower()
+        if raw == "pending":
+            try:
+                frappe.cache().set_value(
+                    f"hiraal_txn_owner:{existing_txn}", owner_payload, expires_in_sec=86400
+                )
+            except Exception:
+                pass
+            return {
+                "success": True,
+                "transaction_log": existing_txn,
+                "amount": amount,
+                "subscription": sub_name,
+                "patient": patient,
+                "family_member": link_name,
+                "message": "Payment already in progress – approve it on your phone.",
+            }
+        if raw == "completed":
+            _mark_subscription_paid(patient, existing_txn)
+            _activate_sponsored_care_if_any(family_member=link_name, sub_name=sub_name)
+            return {
+                "success": True,
+                "transaction_log": existing_txn,
+                "amount": amount,
+                "subscription": sub_name,
+                "patient": patient,
+                "family_member": link_name,
+                "message": "Payment already received.",
+            }
+        # Failed/unknown — proceed with a fresh initiation.
 
     result = _as_admin(
         pos.initiate_pos_payment,
@@ -3447,33 +3561,48 @@ def sponsor_patient_subscription(patient, plan, provider, method, phone, family_
         frappe.throw(result.get("message") or _("Could not start the payment"))
 
     txn = result.get("transaction_log")
+    if not txn:
+        frappe.throw(_("Payment started but no transaction id was returned. Please try again."))
     frappe.cache().set_value(
         f"hiraal_txn_owner:{txn}",
-        json.dumps({"patient": patient, "sponsor": sponsor_user, "family_member": link_name}),
+        owner_payload,
         expires_in_sec=86400,
     )
     frappe.db.set_value("Care Subscription", sub_name, "payment_reference", txn)
+    frappe.db.commit()
     return {
         "success": True,
         "transaction_log": txn,
         "amount": amount,
         "subscription": sub_name,
         "patient": patient,
+        "family_member": link_name,
     }
 
 
 @frappe.whitelist(allow_guest=False)
 def check_sponsor_payment(transaction_log):
     """Poll sponsor payment and activate patient care when complete."""
-    from hiraal_emr.services.caregiver_service import activate_sponsored_care
-
     owner_raw = frappe.cache().get_value(f"hiraal_txn_owner:{transaction_log}")
-    if not owner_raw:
-        frappe.throw(_("Unknown payment"))
-    if isinstance(owner_raw, str) and owner_raw.startswith("{"):
-        owner = json.loads(owner_raw)
-    else:
-        owner = {"patient": owner_raw}
+    owner = _parse_txn_owner(owner_raw)
+    if not owner:
+        persisted = frappe.db.get_value(
+            "Care Subscription",
+            {"payment_reference": transaction_log},
+            ["name", "patient", "sponsor_user"],
+            as_dict=True,
+        )
+        if not persisted:
+            frappe.throw(_("Unknown payment"))
+        owner = {
+            "patient": persisted.patient,
+            "sponsor": persisted.get("sponsor_user"),
+            "family_member": None,
+        }
+        if frappe.get_meta("Care Subscription").has_field("sponsor_family_member"):
+            owner["family_member"] = frappe.db.get_value(
+                "Care Subscription", persisted.name, "sponsor_family_member"
+            )
     sponsor = owner.get("sponsor")
     if sponsor and sponsor != frappe.session.user:
         frappe.throw(_("Not permitted"), frappe.PermissionError)
@@ -3487,11 +3616,12 @@ def check_sponsor_payment(transaction_log):
         patient = owner.get("patient")
         if patient:
             _mark_subscription_paid(patient, transaction_log)
-            fm = owner.get("family_member")
-            if fm:
-                activate_sponsored_care(fm)
+            _activate_sponsored_care_if_any(owner=owner)
         return {"success": True, "status": "Completed"}
-    return {"success": True, "status": status_row.get("status") or "Pending"}
+    status = {
+        "completed": "Completed", "failed": "Failed", "pending": "Pending",
+    }.get(raw, status_row.get("status") or "Pending")
+    return {"success": True, "status": status}
 
 
 @frappe.whitelist(allow_guest=False)

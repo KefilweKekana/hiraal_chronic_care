@@ -65,7 +65,7 @@
   function authHero(invite = false) {
     const lead = invite
       ? `You were invited to support a loved one. Sign in with your phone and code <strong>${escapeHtml(state.inviteCode)}</strong> will be applied automatically.`
-      : "See updates, appointments, medicines, and pay for a loved one's care plan — no app install needed.";
+      : "See updates, appointments, medicines, and pay for a loved one's care plan – no app install needed.";
     return `
       <section class="hp-info-card">
         <span class="hp-kicker">Family Care</span>
@@ -455,7 +455,7 @@
         <div class="hp-kicker">${escapeHtml(link.relationship || "Family")}</div>
         <h1>${escapeHtml(dash.patient_name || link.patient_name)}</h1>
         <div class="hp-row"><span class="hp-muted">Status</span><strong>${escapeHtml(link.link_status || dash.status || "")}</strong></div>
-        <div class="hp-row"><span class="hp-muted">Plan</span><strong>${escapeHtml(dash.plan || "—")}</strong></div>
+        <div class="hp-row"><span class="hp-muted">Plan</span><strong>${escapeHtml(dash.plan || "–")}</strong></div>
         <div class="hp-row"><span class="hp-muted">Monthly</span><strong class="hp-amount">${money(dash.monthly_amount)}</strong></div>
         ${link.can_pay_for_care ? `<button class="hp-btn" id="hp-pay" style="margin-top:16px">Pay for care plan</button>` : ""}
         ${pending ? `<p class="hp-muted" style="margin-top:12px">Waiting for this person to accept your connection. You can still redeem access once they approve.</p>` : ""}
@@ -468,9 +468,9 @@
               <tr><th>Date</th><th>BP</th><th>Sugar</th><th>Risk</th></tr>
               ${readings.map((r) => `<tr>
                 <td>${escapeHtml(r.reading_date || "")}</td>
-                <td>${escapeHtml([r.bp_systolic, r.bp_diastolic].filter(Boolean).join("/") || "—")}</td>
-                <td>${escapeHtml(r.blood_sugar ?? "—")}</td>
-                <td>${escapeHtml(r.risk_level || "—")}</td>
+                <td>${escapeHtml([r.bp_systolic, r.bp_diastolic].filter(Boolean).join("/") || "–")}</td>
+                <td>${escapeHtml(r.blood_sugar ?? "–")}</td>
+                <td>${escapeHtml(r.risk_level || "–")}</td>
               </tr>`).join("")}
             </table>` : `<p class="hp-muted">${pending ? "Available after the patient accepts." : "No readings yet, or you don’t have permission to view them."}</p>`}
         </section>
@@ -497,7 +497,7 @@
         <p class="hp-muted">Choose a plan and pay with ZAAD, eDahab, or another available method.</p>
         <label class="hp-field"><span>Care plan</span>
           <select name="plan" required>
-            ${state.plans.map((p) => `<option value="${escapeHtml(p.name)}">${escapeHtml(p.plan_name || p.name)} — ${money(p.monthly_fee)}</option>`).join("")}
+            ${state.plans.map((p) => `<option value="${escapeHtml(p.name)}">${escapeHtml(p.plan_name || p.name)} – ${money(p.monthly_fee)}</option>`).join("")}
           </select>
         </label>
         <div class="hp-pay-methods">

@@ -178,7 +178,7 @@
     },
     statusPill(status) {
       const cls = (status || "").toLowerCase().replace(/\s+/g, "-");
-      return '<span class="hd-status-pill ' + cls + '">' + this.esc(status || "—") + "</span>";
+      return '<span class="hd-status-pill ' + cls + '">' + this.esc(status || "–") + "</span>";
     },
   };
 

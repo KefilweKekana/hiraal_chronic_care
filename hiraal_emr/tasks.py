@@ -116,7 +116,7 @@ def reconcile_mobile_payments():
         return
 
     from frappe.utils import flt
-    from hiraal_emr.api import mark_order_paid, _mark_subscription_paid
+    from hiraal_emr.api import mark_order_paid, _mark_subscription_paid, _activate_sponsored_care_if_any, _parse_txn_owner
 
     def _txn_status(txn):
         return frappe.db.get_value(
@@ -157,22 +157,40 @@ def reconcile_mobile_payments():
             frappe.log_error(frappe.get_traceback(), f"Reconcile order {o.name}")
 
     # ── Subscriptions awaiting a payment that has since completed ──
+    sub_fields = ["name", "patient", "payment_reference"]
+    try:
+        if frappe.get_meta("Care Subscription").has_field("sponsor_family_member"):
+            sub_fields.append("sponsor_family_member")
+    except Exception:
+        pass
     subs = frappe.get_all(
         "Care Subscription",
         filters={
             "status": ["in", ["Overdue", "Past Due"]],
             "payment_reference": ["!=", ""],
         },
-        fields=["name", "patient", "payment_reference"],
+        fields=sub_fields,
         limit=200,
     )
     for s in subs:
         try:
             if frappe.db.exists("Subscription Payment", {"reference_id": s.payment_reference}):
+                _activate_sponsored_care_if_any(
+                    family_member=s.get("sponsor_family_member"),
+                    sub_name=s.name,
+                )
                 continue  # already credited
             txn = _txn_status(s.payment_reference)
             if txn and (txn.status or "").strip().lower() == "completed":
                 _mark_subscription_paid(s.patient, s.payment_reference)
+                owner = _parse_txn_owner(
+                    frappe.cache().get_value(f"hiraal_txn_owner:{s.payment_reference}")
+                )
+                _activate_sponsored_care_if_any(
+                    family_member=s.get("sponsor_family_member"),
+                    owner=owner,
+                    sub_name=s.name,
+                )
         except Exception:
             frappe.log_error(frappe.get_traceback(), f"Reconcile subscription {s.name}")
 

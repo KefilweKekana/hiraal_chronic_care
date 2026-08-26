@@ -41,15 +41,10 @@ def _mobile_candidates(mobile: str) -> list[str]:
 
 
 def _find_user_by_mobile(mobile: str) -> str | None:
+    """Match a User by exact/normalized mobile only — never LIKE %last9%."""
     candidates = _mobile_candidates(mobile)
     for cand in candidates:
         user = frappe.db.get_value("User", {"mobile_no": cand, "enabled": 1}, "name")
-        if user:
-            return user
-    digits = _digits(mobile)
-    tail = digits[-9:] if len(digits) >= 9 else digits
-    if tail:
-        user = frappe.db.get_value("User", {"mobile_no": ["like", f"%{tail}"], "enabled": 1}, "name")
         if user:
             return user
     patient_user = frappe.db.get_value(

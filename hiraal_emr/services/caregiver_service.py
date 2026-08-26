@@ -257,6 +257,70 @@ def _user_matches_invite_phone(user: str, doc) -> bool:
     return _phone_tail(invite_phone) == _phone_tail(user_phone)
 
 
+def ensure_sponsor_family_member(patient: str, sponsor_user: str, family_member: str | None = None) -> str:
+    """Return a Family Member doc name the sponsor can pay against, creating if needed.
+
+    ``family_member`` is honoured only when it is a real Family Member name
+    (doc id). Human display names are ignored so Find Patient → Pay cannot
+    accidentally look up by "Amina Ahmed" instead of ``FAM-0001``.
+    """
+    if family_member and frappe.db.exists("Family Member", family_member):
+        row = frappe.db.get_value(
+            "Family Member",
+            family_member,
+            ["patient", "caregiver_user", "can_pay_for_care", "link_status"],
+            as_dict=True,
+        )
+        if (
+            row
+            and row.patient == patient
+            and row.caregiver_user == sponsor_user
+            and row.link_status in ("Accepted", "Active", "Pending")
+        ):
+            if not row.can_pay_for_care:
+                frappe.db.set_value("Family Member", family_member, "can_pay_for_care", 1, update_modified=False)
+                frappe.db.set_value("Family Member", family_member, "is_sponsor", 1, update_modified=False)
+            return family_member
+
+    existing = frappe.db.get_value(
+        "Family Member",
+        {
+            "patient": patient,
+            "caregiver_user": sponsor_user,
+            "link_status": ["in", ["Accepted", "Active", "Pending"]],
+        },
+        "name",
+    )
+    if existing:
+        if not frappe.db.get_value("Family Member", existing, "can_pay_for_care"):
+            frappe.db.set_value("Family Member", existing, "can_pay_for_care", 1, update_modified=False)
+            frappe.db.set_value("Family Member", existing, "is_sponsor", 1, update_modified=False)
+        return existing
+
+    sponsor_display = frappe.db.get_value("User", sponsor_user, "full_name") or sponsor_user
+    sponsor_mobile = frappe.db.get_value("User", sponsor_user, "mobile_no") or ""
+    doc = frappe.new_doc("Family Member")
+    doc.patient = patient
+    doc.family_member_name = sponsor_display
+    doc.relationship = "Other"
+    doc.phone = sponsor_mobile
+    doc.invite_direction = "Sponsor Requested"
+    doc.link_status = "Pending"
+    doc.invite_token = _invite_token()
+    doc.invite_code = _invite_code()
+    doc.is_active = 1
+    doc.is_sponsor = 1
+    doc.can_pay_for_care = 1
+    doc.can_view_vitals = 0
+    doc.can_view_appointments = 0
+    doc.can_view_medications = 0
+    doc.can_receive_alerts = 1
+    doc.requested_on = now_datetime()
+    doc.caregiver_user = sponsor_user
+    doc.insert(ignore_permissions=True)
+    return doc.name
+
+
 def find_patient_for_sponsor(query: str):
     rate_limit(client_rate_key("sponsor_search", query), limit=20, window_sec=3600)
     query = (query or "").strip()
@@ -277,6 +341,18 @@ def find_patient_for_sponsor(query: str):
         ["plan", "monthly_fee", "status"],
         as_dict=True,
     )
+    family_member = None
+    user = frappe.session.user
+    if user and user != "Guest":
+        family_member = frappe.db.get_value(
+            "Family Member",
+            {
+                "patient": row.name,
+                "caregiver_user": user,
+                "link_status": ["in", ["Accepted", "Active", "Pending"]],
+            },
+            "name",
+        )
     return {
         "patient": row.name,
         "patient_name": row.patient_name,
@@ -286,6 +362,7 @@ def find_patient_for_sponsor(query: str):
         "care_plan": plan.plan if plan else None,
         "monthly_fee": flt(plan.monthly_fee) if plan else 0,
         "subscription_status": plan.status if plan else None,
+        "family_member": family_member,
     }
 
 

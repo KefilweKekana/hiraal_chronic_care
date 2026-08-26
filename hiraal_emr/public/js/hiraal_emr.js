@@ -5,7 +5,7 @@
 frappe.realtime.on("chronic_care_alert", function (data) {
   frappe.show_alert(
     {
-      message: `<strong>🚨 ${data.alert_level} Alert:</strong> ${data.patient_name} — ${data.reading}`,
+      message: `<strong>🚨 ${data.alert_level} Alert:</strong> ${data.patient_name} – ${data.reading}`,
       indicator: data.alert_level === "Very High" ? "red" : "orange",
     },
     10

@@ -69,7 +69,7 @@ class TelemedWaitingRoom {
       rows.forEach((r) => {
         const isWaiting = r.session_status === "In Progress";
         const name = r.patient_name || r.patient || "Patient";
-        const when = r.start_time ? frappe.datetime.str_to_user(r.start_time) : "—";
+        const when = r.start_time ? frappe.datetime.str_to_user(r.start_time) : "–";
         const url = r.meeting_url || "";
         const pill = isWaiting
           ? '<span class="hd-status-pill in-progress">Waiting now</span>'

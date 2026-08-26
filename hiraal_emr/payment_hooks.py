@@ -52,12 +52,22 @@ def on_mobile_payment_update(doc, method=None):
 
         # 2. Care Subscription — persistent link.
         if not patient:
+            sub_fields = ["name", "patient"]
+            try:
+                if frappe.get_meta("Care Subscription").has_field("sponsor_family_member"):
+                    sub_fields.append("sponsor_family_member")
+            except Exception:
+                pass
             sub = frappe.db.get_value(
-                "Care Subscription", {"payment_reference": doc.name}, ["name", "patient"], as_dict=True
+                "Care Subscription", {"payment_reference": doc.name}, sub_fields, as_dict=True
             )
             if sub:
-                from hiraal_emr.api import _mark_subscription_paid
+                from hiraal_emr.api import _mark_subscription_paid, _activate_sponsored_care_if_any
                 _mark_subscription_paid(sub.patient, doc.name)
+                _activate_sponsored_care_if_any(
+                    family_member=sub.get("sponsor_family_member"),
+                    sub_name=sub.name,
+                )
                 patient = sub.patient
                 notification = {
                     "title": "Subscription active",
@@ -65,21 +75,26 @@ def on_mobile_payment_update(doc, method=None):
                     "data": {"type": "subscription_payment_complete", "subscription": sub.name},
                 }
 
-        # 3. Fallback: cache binding from pay_my_order / pay_my_subscription.
+        # 3. Fallback: cache binding from pay_my_order / pay_my_subscription / sponsor.
         if not patient:
             cached_owner = frappe.cache().get_value(f"hiraal_txn_owner:{doc.name}")
             if cached_owner:
-                # Subscription payment whose DB bind failed at initiation —
-                # settle it here or the paid subscription never activates
-                # (the cron can't find it: it scans by payment_reference).
-                from hiraal_emr.api import _mark_subscription_paid
-                _mark_subscription_paid(cached_owner, doc.name)
-                patient = cached_owner
-                notification = {
-                    "title": "Subscription active",
-                    "body": "Your payment was received. Your Hiraal subscription is now active.",
-                    "data": {"type": "subscription_payment_complete"},
-                }
+                from hiraal_emr.api import (
+                    _mark_subscription_paid,
+                    _parse_txn_owner,
+                    _activate_sponsored_care_if_any,
+                )
+                owner = _parse_txn_owner(cached_owner)
+                owner_patient = (owner or {}).get("patient")
+                if owner_patient:
+                    _mark_subscription_paid(owner_patient, doc.name)
+                    _activate_sponsored_care_if_any(owner=owner)
+                    patient = owner_patient
+                    notification = {
+                        "title": "Subscription active",
+                        "body": "Your payment was received. Your Hiraal subscription is now active.",
+                        "data": {"type": "subscription_payment_complete"},
+                    }
         if not patient:
             cached_order = frappe.cache().get_value(f"hiraal_txn_order:{doc.name}")
             if cached_order:
