@@ -61,4 +61,17 @@ abstract class PaymentService {
   /// Subscribe the patient to a plan. Pass [startTrial] when free trial is
   /// available — then [SubscribeResult.amountDueNow] is 0 and the gate opens.
   Future<Result<SubscribeResult>> subscribe(String plan, {bool startTrial = false});
+
+  /// Charge Zaad / eDahab for an out-of-plan or over-quota service.
+  Future<Result<String>> payOutOfPlan({
+    required String patient,
+    required String serviceType,
+    required String provider,
+    required String method,
+    required String phone,
+    double? amount,
+  });
+
+  /// Poll [payOutOfPlan]. Does not mark the monthly care plan as paid.
+  Future<Result<String>> checkOutOfPlanStatus(String transactionLog);
 }

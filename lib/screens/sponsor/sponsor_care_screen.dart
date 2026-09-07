@@ -5,6 +5,8 @@ import '../../core/utils/result.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/caregiver_link.dart';
 import '../../services/service_locator.dart';
+import '../../widgets/coverage_outcome.dart';
+import '../../widgets/relationship_choices.dart';
 import 'sponsor_connection_active_screen.dart';
 import 'sponsor_connection_sent_screen.dart';
 import 'sponsor_patient_screen.dart';
@@ -121,20 +123,6 @@ class _SponsorCareScreenState extends State<SponsorCareScreen> with SingleTicker
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final relationships = <String>[
-      l10n.relationshipMother,
-      l10n.relationshipFather,
-      l10n.relationshipBrother,
-      l10n.relationshipSister,
-      l10n.relationshipSpouse,
-      l10n.relationshipChild,
-      l10n.relationshipFriend,
-      l10n.relationshipOther,
-    ];
-    if (!relationships.contains(_relationship)) {
-      _relationship = relationships.first;
-    }
-
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: widget.showAppBar
@@ -284,18 +272,19 @@ class _SponsorCareScreenState extends State<SponsorCareScreen> with SingleTicker
                 ],
               ),
               const SizedBox(height: 14),
-              DropdownButtonFormField<String>(
-                value: _relationship,
-                decoration: InputDecoration(
-                  labelText: l10n.relationship,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                items: relationships
-                    .map((item) => DropdownMenuItem<String>(value: item, child: Text(item)))
-                    .toList(),
-                onChanged: (value) {
-                  if (value != null) setState(() => _relationship = value);
-                },
+              Text(l10n.relationship, style: const TextStyle(fontWeight: FontWeight.w700)),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final key in RelationshipChoices.inviteKeys)
+                    BigChoiceButton(
+                      label: RelationshipChoices.label(l10n, key),
+                      selected: _relationship == key,
+                      onTap: () => setState(() => _relationship = key),
+                    ),
+                ],
               ),
               const SizedBox(height: 18),
               SizedBox(

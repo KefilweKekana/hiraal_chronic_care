@@ -380,7 +380,7 @@ class AppLocalizationsSo extends AppLocalizations {
   String get goToHome => 'Tag bogga hore';
 
   @override
-  String get viewHistory => 'Eeg diiwaanka';
+  String get viewHistory => 'Taariikhda';
 
   @override
   String get servicesTitle => 'Adeegyada';
@@ -1929,7 +1929,7 @@ class AppLocalizationsSo extends AppLocalizations {
   String get caregiverPortalAccount => 'Akoon';
 
   @override
-  String get caregiverPortalWelcome => 'Albaabka Daryeelka Qoyska';
+  String get caregiverPortalWelcome => 'Qoyskayga';
 
   @override
   String get caregiverPortalWelcomeHint =>
@@ -1951,17 +1951,18 @@ class AppLocalizationsSo extends AppLocalizations {
       'Isdiiwaangeli si aad u isticmaasho akhrinta, qalabka, iyo adeegyada caafimaadka.';
 
   @override
-  String get openPatientApp => 'Fur app-ka bukaanka';
+  String get openPatientApp => 'Aniga';
 
   @override
   String get openPatientAppHint =>
-      'Geli akhrinta, calaamadaha nolosha, oo isticmaal qorshaha daryeelkaaga.';
+      'Maamul caafimaadkayga, qabso ballamo iyo in ka badan.';
 
   @override
-  String get switchToFamilyCare => 'Fur Albaabka Daryeelka Qoyska';
+  String get switchToFamilyCare => 'Qoyskayga';
 
   @override
-  String get switchToFamilyCareHint => 'Eeg taageerada oo taageer qoyskaaga.';
+  String get switchToFamilyCareHint =>
+      'Maamul caafimaadka iyo daryeelka qofka aad jeceshahay.';
 
   @override
   String get roleChooserTitle => 'Sidee baad u sii waddaa?';
@@ -1971,18 +1972,18 @@ class AppLocalizationsSo extends AppLocalizations {
       'Akoonkaagu wuxuu leeyahay daryeel bukaan iyo taageero qoys.';
 
   @override
-  String get roleChooserPatientTitle => 'Daryeelkayga bukaanka';
+  String get roleChooserPatientTitle => 'Aniga';
 
   @override
   String get roleChooserPatientHint =>
-      'Geli akhrinta, ku xidh qalabka, oo isticmaal adeegyada caafimaadka.';
+      'Maamul caafimaadkayga, qabso ballamo iyo in ka badan.';
 
   @override
-  String get roleChooserCaregiverTitle => 'Albaabka Daryeelka Qoyska';
+  String get roleChooserCaregiverTitle => 'Qoyskayga';
 
   @override
   String get roleChooserCaregiverHint =>
-      'Eeg wararka oo taageer dadka aad daryeesho.';
+      'Maamul caafimaadka iyo daryeelka xubinta qoyska.';
 
   @override
   String get signupAsSupporterHint =>
@@ -1998,4 +1999,398 @@ class AppLocalizationsSo extends AppLocalizations {
 
   @override
   String get sponsorshipDetailsTitle => 'Faahfaahinta maalgelinta';
+
+  @override
+  String get includedInPlanFree =>
+      'Qorshahaaga ayaa ku jira, WAA BILAASH adiga';
+
+  @override
+  String get paymentRequiredNotInPlan =>
+      'Qorshahaaga kuma jiro – Lacag ayaa loo baahan yahay';
+
+  @override
+  String get confirm => 'Xaqiiji';
+
+  @override
+  String get completePayment => 'Dhammaystir lacag-bixinta';
+
+  @override
+  String get chooseDateTime => 'Dooro taariikhda iyo saacadda';
+
+  @override
+  String get noSlotsYet =>
+      'Weli ma jiraan waqtiyo bannaan. Ka codso xarunta inay dejiso jadwalka dhakhtarka.';
+
+  @override
+  String get choosePerson => 'Dooro qofka aad daryeesho';
+
+  @override
+  String get peopleICareFor => 'Dadka aan daryeelo';
+
+  @override
+  String get peopleICareForHint =>
+      'Maamul oo eeg xubnaha qoyska ee aad daryeesho ama aad maalgeliso.';
+
+  @override
+  String get noPeopleYet =>
+      'Weli qof ma aadan darin. Taabo Ku dar xubin qoyska si aad u bilowdo.';
+
+  @override
+  String get addFamilyMember => 'Ku dar xubin qoyska';
+
+  @override
+  String get addFamilyMemberHint =>
+      'Samee ama ku xidh qof aad jeceshahay si aad u maamusho daryeelkiisa.';
+
+  @override
+  String get plansAndPayments => 'Qorshayaasha iyo lacag-bixinta';
+
+  @override
+  String get plansAndPaymentsHint =>
+      'Qorshayaashooda daryeel, lacag-bixinta iyo rasiidhyada.';
+
+  @override
+  String get familyAccess => 'Gelitaanka qoyska';
+
+  @override
+  String get familyAccessHint =>
+      'Dadka loo oggol yahay inay ka caawiyaan daryeelka.';
+
+  @override
+  String get caregiverAccountTitle => 'Akoonka daryeelaha';
+
+  @override
+  String get caregiverAccountHint =>
+      'Maamul kuwa aad jeceshahay, qorshayaasha, lacag-bixinta iyo dejinta.';
+
+  @override
+  String get caregiverServicesTitle => 'Adeegyada';
+
+  @override
+  String get caregiverServicesHint =>
+      'Maamul daryeelka iyo adeegyada caafimaad ee qofka aad jeceshahay.';
+
+  @override
+  String get caregiverHistoryTitle => 'Taariikhda';
+
+  @override
+  String get caregiverHistoryHint =>
+      'Eeg cabbirradii hore, baadhitaannada, ballamaha iyo dawooyinka.';
+
+  @override
+  String get todaysReadings => 'Cabbirrada maanta';
+
+  @override
+  String get upNext => 'Kan xiga';
+
+  @override
+  String get needsYourAttention => 'Wuxuu u baahan yahay fiiro gaar ah';
+
+  @override
+  String get requestRefill => 'Codso buuxinta';
+
+  @override
+  String get prepareNow => 'Diyaarso hadda';
+
+  @override
+  String get whatsDue => 'Waxa dhacaya';
+
+  @override
+  String get viewHealth => 'Eeg caafimaadka';
+
+  @override
+  String get filterAll => 'Dhammaan';
+
+  @override
+  String get filterReadings => 'Cabbirrada';
+
+  @override
+  String get filterAppointments => 'Ballamaha';
+
+  @override
+  String get filterLabs => 'Baadhitaannada';
+
+  @override
+  String get filterMedicines => 'Dawooyinka';
+
+  @override
+  String get viewMoreHistory => 'Eeg taariikh dheeraad ah';
+
+  @override
+  String get darkTheme => 'Mowduuca mugdiga';
+
+  @override
+  String get darkThemeSubtitle =>
+      'Waa fududahay indhaha habeenkii. Wuxuu raacaa taleefankaaga illaa aad doorato Iftiin ama Mugdi.';
+
+  @override
+  String get darkThemeSystem => 'Toos';
+
+  @override
+  String get darkThemeLight => 'Iftiin';
+
+  @override
+  String get darkThemeDark => 'Mugdi';
+
+  @override
+  String get languageScreenHint => 'Dooro luqadda aad doorbidayso ee app-ka.';
+
+  @override
+  String get languageHelper =>
+      'Waxaad luqadda ka beddeli kartaa wakhti kasta Akoonkayga.';
+
+  @override
+  String get languagePreviewTitle =>
+      'Muujinta qaabka taariikhda iyo lambarrada';
+
+  @override
+  String get languageGoodToKnow =>
+      'Beddelidda luqadda waxay cusboonaysiinaysaa dhammaan khibradda app-ka, oo ay ku jiraan ogeysiisyada iyo farriimaha.';
+
+  @override
+  String get selectedBadge => 'La doortay';
+
+  @override
+  String get searchByName => 'Ku raadi magaca';
+
+  @override
+  String get memberSince => 'Xubin tan iyo';
+
+  @override
+  String get safeHandsFooter =>
+      'Kuwa aad jeceshahay waxay ku jiraan gacmo ammaan ah. Waxaad hal meel kaga maamuli kartaa daryeelkooda, ballamaha, dawooyinka iyo in ka badan.';
+
+  @override
+  String get paymentHistoryTab => 'Taariikhda lacag-bixinta';
+
+  @override
+  String get peopleTab => 'Dadka';
+
+  @override
+  String get currentPlan => 'Qorshaha hadda';
+
+  @override
+  String get whatsIncluded => 'Waxa ku jira';
+
+  @override
+  String get viewPlanDetails => 'Eeg faahfaahinta qorshaha';
+
+  @override
+  String get upcomingPayment => 'Lacag-bixinta soo socota';
+
+  @override
+  String get contactSupport => 'La xidhiidh taageerada';
+
+  @override
+  String get myAccountRow => 'Akoonkayga';
+
+  @override
+  String get myAccountRowHint =>
+      'Macluumaadka shakhsi ahaaneed iyo faahfaahinta akoonka.';
+
+  @override
+  String get seeAll => 'Eeg dhammaan';
+
+  @override
+  String get noIssues => 'Dhibaato ma jirto';
+
+  @override
+  String get goodStatus => 'Wanaagsan';
+
+  @override
+  String dueInDays(int days) {
+    return 'Waxaa dhacaya $days maalmood gudahood';
+  }
+
+  @override
+  String get changePlan => 'Beddel qorshaha';
+
+  @override
+  String get bookDoctorCard => 'Ballan dhakhtar';
+
+  @override
+  String get requestMedicineCard => 'Codso dawo';
+
+  @override
+  String get requestLabCard => 'Codso baadhitaan';
+
+  @override
+  String get healthRecordsCard => 'Diiwaanka caafimaadka';
+
+  @override
+  String get careTeamCard => 'Kooxda daryeelka';
+
+  @override
+  String get continueLabel => 'Sii wad';
+
+  @override
+  String get selectClinicButton => 'Dooro xarunta';
+
+  @override
+  String get age => 'Da\'da';
+
+  @override
+  String get ageHint => 'Geli da\'da sannadaha';
+
+  @override
+  String get ageInvalid => 'Geli da\' u dhexeeya 1–120';
+
+  @override
+  String get welcomeHello => 'Soo dhawoow!';
+
+  @override
+  String get welcomeContinueHint =>
+      'Waxaan kaa caawin doonnaa daryeelka aad u baahan tahay.';
+
+  @override
+  String get caregiverSignInTitle => 'Galitaanka daryeelaha';
+
+  @override
+  String get enterMobileCaregiver =>
+      'Geli lambarka aad ku diiwaangashay daryeele ahaan.';
+
+  @override
+  String get seeADoctor => 'Arag dhakhtar';
+
+  @override
+  String get seeADoctorHint => 'Wicitaan muuqaal ama kilinik';
+
+  @override
+  String get getMedicine => 'Hel dawo';
+
+  @override
+  String get getMedicineHint => 'Dir warqadda dhakhtarka, waanu keeni';
+
+  @override
+  String get bloodTest => 'Baaritaanka dhiigga';
+
+  @override
+  String get bloodTestHint => 'Guriga ama kilinikada';
+
+  @override
+  String get talkToCareTeam => 'La hadal kooxdayda daryeelka';
+
+  @override
+  String get talkToCareTeamHint => 'Kooxda Daryeelka Hiraal · 8 AM – 8 PM';
+
+  @override
+  String get howDoYouFeelToday => 'Sidee maanta u dareemaysaa?';
+
+  @override
+  String get sendReadings => 'Dir cabbirrada';
+
+  @override
+  String emergencyCallShort(String number) {
+    return 'Xaalad degdeg ah? Wac $number';
+  }
+
+  @override
+  String get chooseDoctorTitle => 'Dooro dhakhtar';
+
+  @override
+  String get onlineDoctorsHint => 'Kala hadal dhakhtar adiga oo guriga jooga.';
+
+  @override
+  String get reasonOptional => 'Wax aan ogaan lahayn? (ikhtiyaari)';
+
+  @override
+  String bookingOnBehalf(String name) {
+    return 'Loogu talagalay $name · adiga ayaa ku wakiil ah';
+  }
+
+  @override
+  String get createYourAccount => 'Samee xisaabtaada';
+
+  @override
+  String get fourQuickDetails =>
+      'Afar faahfaahin oo degdeg ah. Qorshe waad dooran kartaa ka dib.';
+
+  @override
+  String get areYou => 'Ma tahay…';
+
+  @override
+  String get maleLabel => 'Lab';
+
+  @override
+  String get femaleLabel => 'Dhedig';
+
+  @override
+  String get fullName => 'Magaca oo buuxa';
+
+  @override
+  String get fullNameHint => 'Geli magacaaga oo buuxa';
+
+  @override
+  String get genderLabel => 'Jinsiga';
+
+  @override
+  String get emailOptional => 'Iimayl (ikhtiyaari)';
+
+  @override
+  String get createAccountCta => 'Samee xisaab';
+
+  @override
+  String get alreadyHaveAccount => 'Horey xisaab ma u lahayd?';
+
+  @override
+  String get signInLink => 'Gal';
+
+  @override
+  String get selectADate => 'Dooro taariikh';
+
+  @override
+  String get selectATime => 'Dooro saacad';
+
+  @override
+  String get todayLabel => 'Maanta';
+
+  @override
+  String get upcomingShort => 'Soo socda';
+
+  @override
+  String get relationshipParent => 'Waalid';
+
+  @override
+  String get relationshipSibling => 'Walaal';
+
+  @override
+  String get filterActiveStatus => 'Firfircoon';
+
+  @override
+  String get filterInactiveStatus => 'Aan firfircooneyn';
+
+  @override
+  String yearsOld(int age) {
+    return '$age jir';
+  }
+
+  @override
+  String get totalReadings => 'Wadarta cabbirrada';
+
+  @override
+  String get avgBp => 'Celcelis BP';
+
+  @override
+  String get avgSugar => 'Celcelis sonkor';
+
+  @override
+  String get viewResults => 'Eeg natiijooyinka';
+
+  @override
+  String get resultsNotReady => 'Natiijooyinku weli diyaar maaha.';
+
+  @override
+  String get includedConsultations => 'Wadatashiga dhakhtarka oo aan xadidnayn';
+
+  @override
+  String get includedLabs => 'Baadhitaanno iyo ogaansho';
+
+  @override
+  String get includedMedicine => 'Gaarsiinta dawada';
+
+  @override
+  String get includedPriority => 'Taageero degdeg ah';
+
+  @override
+  String get outOfPlanPaymentTitle => 'Dhammaystir lacag-bixinta';
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/result.dart';
@@ -356,8 +357,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
+                                fontSize: 24,
+                                fontWeight: FontWeight.w800,
                                 color: AppColors.textPrimary,
                               ),
                             ),
@@ -484,8 +485,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       Text(
                         l10n.todaysReading,
                         style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
                           color: AppColors.textPrimary,
                         ),
                       ),
@@ -584,11 +585,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 16),
                   // Add Note
                   Text(
-                    l10n.addNoteOptional,
+                    l10n.howDoYouFeelToday,
                     style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textSecondary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -679,17 +680,22 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: ElevatedButton.icon(
                       onPressed: _isFormValid ? _submitReading : null,
                       icon: const Icon(Icons.send, size: 20),
-                      label: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(l10n.saveAndSend, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                          Text(l10n.sendReadingToCareTeam, style: const TextStyle(fontSize: 11)),
-                        ],
-                      ),
+                      label: Text(l10n.sendReadings, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _isFormValid
                             ? AppColors.primary
                             : AppColors.primary.withValues(alpha: 0.5),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Center(
+                    child: TextButton.icon(
+                      onPressed: () => launchUrl(Uri.parse('tel:${AppConstants.supportShortCode}')),
+                      icon: const Icon(Icons.phone, color: AppColors.error),
+                      label: Text(
+                        l10n.emergencyCallShort(AppConstants.supportShortCode),
+                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.error),
                       ),
                     ),
                   ),

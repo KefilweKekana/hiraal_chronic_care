@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/phone_number.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/app_provider.dart';
 import '../../widgets/shared_widgets.dart';
@@ -187,6 +188,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final isCaregiver = context.watch<AppProvider>().isCaregiverMode;
     return Scaffold(
       backgroundColor: AppColors.white,
       body: SafeArea(
@@ -211,7 +213,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 32),
                 Center(
                   child: Text(
-                    l10n.letsGetStarted,
+                    isCaregiver ? l10n.caregiverSignInTitle : l10n.letsGetStarted,
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w700,
@@ -222,7 +224,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 8),
                 Center(
                   child: Text(
-                    l10n.enterMobileLinkedToRecord,
+                    isCaregiver
+                        ? l10n.enterMobileCaregiver
+                        : l10n.enterMobileLinkedToRecord,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontSize: 14,
@@ -362,7 +366,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           keyboardType: TextInputType.phone,
                           inputFormatters: [
                             FilteringTextInputFormatter.digitsOnly,
-                            LengthLimitingTextInputFormatter(10),
+                            LengthLimitingTextInputFormatter(15),
                           ],
                           onChanged: (_) => _recompute(),
                           decoration: InputDecoration(
@@ -477,7 +481,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ? () => widget.onSendCode(
                                 _channel == 'email'
                                     ? _emailController.text.trim()
-                                    : '$_selectedCountryCode${_phoneController.text}',
+                                    : PhoneNumber.combine(
+                                        _selectedCountryCode,
+                                        _phoneController.text,
+                                      ),
                                 _channel)
                             : null,
                         style: ElevatedButton.styleFrom(
@@ -518,6 +525,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ],
                 ),
                 const SizedBox(height: 20),
+                if (!isCaregiver)
                 Material(
                   color: AppColors.primarySurface,
                   borderRadius: BorderRadius.circular(16),

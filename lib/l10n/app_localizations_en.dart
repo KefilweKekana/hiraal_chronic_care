@@ -373,7 +373,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goToHome => 'Go to Home';
 
   @override
-  String get viewHistory => 'View History';
+  String get viewHistory => 'History';
 
   @override
   String get servicesTitle => 'Services';
@@ -1907,7 +1907,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get caregiverPortalAccount => 'Account';
 
   @override
-  String get caregiverPortalWelcome => 'Family Care Portal';
+  String get caregiverPortalWelcome => 'For My Family';
 
   @override
   String get caregiverPortalWelcomeHint =>
@@ -1928,18 +1928,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'Subscribe to use readings, devices, and clinic services.';
 
   @override
-  String get openPatientApp => 'Open patient app';
+  String get openPatientApp => 'For Myself';
 
   @override
   String get openPatientAppHint =>
-      'Log readings, vitals, and use your care plan.';
+      'Manage my health, book appointments and more.';
 
   @override
-  String get switchToFamilyCare => 'Open Family Care portal';
+  String get switchToFamilyCare => 'For My Family';
 
   @override
-  String get switchToFamilyCareHint =>
-      'View sponsorships and support loved ones.';
+  String get switchToFamilyCareHint => 'Manage a loved one\'s health and care.';
 
   @override
   String get roleChooserTitle => 'How would you like to continue?';
@@ -1949,18 +1948,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your account includes both patient care and family support.';
 
   @override
-  String get roleChooserPatientTitle => 'My patient care';
+  String get roleChooserPatientTitle => 'For Myself';
 
   @override
   String get roleChooserPatientHint =>
-      'Log readings, connect devices, and use clinic services.';
+      'Manage my health, book appointments and more.';
 
   @override
-  String get roleChooserCaregiverTitle => 'Family Care portal';
+  String get roleChooserCaregiverTitle => 'For My Family';
 
   @override
   String get roleChooserCaregiverHint =>
-      'View updates and support the people you care for.';
+      'Manage my family member\'s health and care.';
 
   @override
   String get signupAsSupporterHint =>
@@ -1976,4 +1975,394 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sponsorshipDetailsTitle => 'Sponsorship details';
+
+  @override
+  String get includedInPlanFree => 'Included in your plan, FREE for you';
+
+  @override
+  String get paymentRequiredNotInPlan =>
+      'Not included in your plan – Payment required';
+
+  @override
+  String get confirm => 'Confirm';
+
+  @override
+  String get completePayment => 'Complete Payment';
+
+  @override
+  String get chooseDateTime => 'Choose date and time';
+
+  @override
+  String get noSlotsYet =>
+      'No available times yet. Ask the clinic to set a Practitioner Schedule.';
+
+  @override
+  String get choosePerson => 'Choose who you care for';
+
+  @override
+  String get peopleICareFor => 'People I Care For';
+
+  @override
+  String get peopleICareForHint =>
+      'Manage and view the family members you care for or sponsor.';
+
+  @override
+  String get noPeopleYet =>
+      'You have not added anyone yet. Tap Add Family Member to start.';
+
+  @override
+  String get addFamilyMember => 'Add Family Member';
+
+  @override
+  String get addFamilyMemberHint =>
+      'Create or link a loved one so you can manage their care.';
+
+  @override
+  String get plansAndPayments => 'Plans and Payments';
+
+  @override
+  String get plansAndPaymentsHint => 'Their care plans, payments and receipts.';
+
+  @override
+  String get familyAccess => 'Family Access';
+
+  @override
+  String get familyAccessHint => 'People allowed to help with care.';
+
+  @override
+  String get caregiverAccountTitle => 'Caregiver Account';
+
+  @override
+  String get caregiverAccountHint =>
+      'Manage your loved ones, plans, payments and settings.';
+
+  @override
+  String get caregiverServicesTitle => 'Services';
+
+  @override
+  String get caregiverServicesHint =>
+      'Manage care and health services for your loved one.';
+
+  @override
+  String get caregiverHistoryTitle => 'History';
+
+  @override
+  String get caregiverHistoryHint =>
+      'View past readings, tests, appointments and medicines.';
+
+  @override
+  String get todaysReadings => 'Today\'s Readings';
+
+  @override
+  String get upNext => 'Up Next';
+
+  @override
+  String get needsYourAttention => 'Needs Your Attention';
+
+  @override
+  String get requestRefill => 'Request Refill';
+
+  @override
+  String get prepareNow => 'Prepare Now';
+
+  @override
+  String get whatsDue => 'What\'s Due';
+
+  @override
+  String get viewHealth => 'View Health';
+
+  @override
+  String get filterAll => 'All';
+
+  @override
+  String get filterReadings => 'Readings';
+
+  @override
+  String get filterAppointments => 'Appointments';
+
+  @override
+  String get filterLabs => 'Lab Tests';
+
+  @override
+  String get filterMedicines => 'Medicines';
+
+  @override
+  String get viewMoreHistory => 'View More History';
+
+  @override
+  String get darkTheme => 'Dark theme';
+
+  @override
+  String get darkThemeSubtitle =>
+      'Easier on the eyes at night. Follows your phone unless you pick Light or Dark.';
+
+  @override
+  String get darkThemeSystem => 'Auto';
+
+  @override
+  String get darkThemeLight => 'Light';
+
+  @override
+  String get darkThemeDark => 'Dark';
+
+  @override
+  String get languageScreenHint =>
+      'Choose your preferred language for the app.';
+
+  @override
+  String get languageHelper =>
+      'You can change the language at any time from My Account.';
+
+  @override
+  String get languagePreviewTitle => 'Date and number format preview';
+
+  @override
+  String get languageGoodToKnow =>
+      'Changing the language will update the entire app experience, including notifications and messages.';
+
+  @override
+  String get selectedBadge => 'Selected';
+
+  @override
+  String get searchByName => 'Search by name';
+
+  @override
+  String get memberSince => 'Member since';
+
+  @override
+  String get safeHandsFooter =>
+      'Your loved ones are in safe hands. You can manage their care, appointments, medicines and more in one place.';
+
+  @override
+  String get paymentHistoryTab => 'Payment History';
+
+  @override
+  String get peopleTab => 'People';
+
+  @override
+  String get currentPlan => 'Current Plan';
+
+  @override
+  String get whatsIncluded => 'What\'s Included';
+
+  @override
+  String get viewPlanDetails => 'View Plan Details';
+
+  @override
+  String get upcomingPayment => 'Upcoming Payment';
+
+  @override
+  String get contactSupport => 'Contact Support';
+
+  @override
+  String get myAccountRow => 'My Account';
+
+  @override
+  String get myAccountRowHint => 'Personal information and account details.';
+
+  @override
+  String get seeAll => 'See All';
+
+  @override
+  String get noIssues => 'No issues';
+
+  @override
+  String get goodStatus => 'Good';
+
+  @override
+  String dueInDays(int days) {
+    return 'Due in $days days';
+  }
+
+  @override
+  String get changePlan => 'Change Plan';
+
+  @override
+  String get bookDoctorCard => 'Book Doctor';
+
+  @override
+  String get requestMedicineCard => 'Request Medicine';
+
+  @override
+  String get requestLabCard => 'Request Lab Test';
+
+  @override
+  String get healthRecordsCard => 'Health Records';
+
+  @override
+  String get careTeamCard => 'Care Team';
+
+  @override
+  String get continueLabel => 'Continue';
+
+  @override
+  String get selectClinicButton => 'Select clinic';
+
+  @override
+  String get age => 'Age';
+
+  @override
+  String get ageHint => 'Enter age in years';
+
+  @override
+  String get ageInvalid => 'Enter an age from 1–120';
+
+  @override
+  String get welcomeHello => 'Welcome!';
+
+  @override
+  String get welcomeContinueHint => 'We\'ll help you get the care you need.';
+
+  @override
+  String get caregiverSignInTitle => 'Caregiver sign in';
+
+  @override
+  String get enterMobileCaregiver =>
+      'Enter the mobile number you registered as a caregiver.';
+
+  @override
+  String get seeADoctor => 'See a Doctor';
+
+  @override
+  String get seeADoctorHint => 'Video call or clinic';
+
+  @override
+  String get getMedicine => 'Get Medicine';
+
+  @override
+  String get getMedicineHint => 'Send your doctor\'s paper, we deliver';
+
+  @override
+  String get bloodTest => 'Blood Test';
+
+  @override
+  String get bloodTestHint => 'At home or at the clinic';
+
+  @override
+  String get talkToCareTeam => 'Talk to my care team';
+
+  @override
+  String get talkToCareTeamHint => 'Hiraal Care Team · 8 AM – 8 PM';
+
+  @override
+  String get howDoYouFeelToday => 'How do you feel today?';
+
+  @override
+  String get sendReadings => 'Send Readings';
+
+  @override
+  String emergencyCallShort(String number) {
+    return 'Emergency? Call $number';
+  }
+
+  @override
+  String get chooseDoctorTitle => 'Choose a Doctor';
+
+  @override
+  String get onlineDoctorsHint =>
+      'Talk to a doctor from the comfort of your home.';
+
+  @override
+  String get reasonOptional => 'Anything we should know? (optional)';
+
+  @override
+  String bookingOnBehalf(String name) {
+    return 'For $name · you are doing this on their behalf';
+  }
+
+  @override
+  String get createYourAccount => 'Create your account';
+
+  @override
+  String get fourQuickDetails =>
+      'Four quick details. You can choose a plan after.';
+
+  @override
+  String get areYou => 'Are you…';
+
+  @override
+  String get maleLabel => 'Male';
+
+  @override
+  String get femaleLabel => 'Female';
+
+  @override
+  String get fullName => 'Full Name';
+
+  @override
+  String get fullNameHint => 'Enter your full name';
+
+  @override
+  String get genderLabel => 'Gender';
+
+  @override
+  String get emailOptional => 'Email (optional)';
+
+  @override
+  String get createAccountCta => 'Create Account';
+
+  @override
+  String get alreadyHaveAccount => 'Already have an account?';
+
+  @override
+  String get signInLink => 'Sign in';
+
+  @override
+  String get selectADate => 'Select a Date';
+
+  @override
+  String get selectATime => 'Select a Time';
+
+  @override
+  String get todayLabel => 'Today';
+
+  @override
+  String get upcomingShort => 'Upcoming';
+
+  @override
+  String get relationshipParent => 'Parent';
+
+  @override
+  String get relationshipSibling => 'Sibling';
+
+  @override
+  String get filterActiveStatus => 'Active';
+
+  @override
+  String get filterInactiveStatus => 'Inactive';
+
+  @override
+  String yearsOld(int age) {
+    return '$age years';
+  }
+
+  @override
+  String get totalReadings => 'Total readings';
+
+  @override
+  String get avgBp => 'Avg. BP';
+
+  @override
+  String get avgSugar => 'Avg. Sugar';
+
+  @override
+  String get viewResults => 'View Results';
+
+  @override
+  String get resultsNotReady => 'Results are not ready yet.';
+
+  @override
+  String get includedConsultations => 'Unlimited doctor consultations';
+
+  @override
+  String get includedLabs => 'Lab tests and diagnostics';
+
+  @override
+  String get includedMedicine => 'Medicine delivery';
+
+  @override
+  String get includedPriority => 'Priority support';
+
+  @override
+  String get outOfPlanPaymentTitle => 'Complete Payment';
 }

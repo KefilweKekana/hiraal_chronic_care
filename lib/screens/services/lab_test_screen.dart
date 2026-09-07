@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/result.dart';
 import '../../l10n/app_localizations.dart';
+import '../../providers/app_provider.dart';
 import '../../services/service_locator.dart';
+import '../../widgets/coverage_gate.dart';
 
 class LabTestScreen extends StatefulWidget {
   const LabTestScreen({super.key});
@@ -77,6 +80,37 @@ class _LabTestScreenState extends State<LabTestScreen> {
       return;
     }
     setState(() { _isLoading = true; });
+    final provider = context.read<AppProvider>();
+    final patient = actingPatientId(
+      carePatient: provider.activeCarePerson?.patient,
+      selfPatient: provider.patient?.id,
+    );
+    final serviceType = _collectionType == 'home' ? 'home_sample' : 'lab_test';
+    final coverageResult = await ServiceLocator.instance.bookings.checkServiceCoverage(
+      serviceType: serviceType,
+      patient: patient,
+      template: _selectedTests.first,
+    );
+    if (!mounted) return;
+    switch (coverageResult) {
+      case Success(data: final coverage):
+        setState(() { _isLoading = false; });
+        final proceed = await presentServiceCoverage(
+          context: context,
+          coverage: coverage,
+          title: l10n.labTest,
+          patient: patient,
+          serviceType: serviceType,
+        );
+        if (proceed != true || !mounted) return;
+        setState(() { _isLoading = true; });
+      case Failure(message: final msg):
+        setState(() { _isLoading = false; });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(msg), backgroundColor: AppColors.error),
+        );
+        return;
+    }
     final result = await ServiceLocator.instance.bookings.requestLabTest(
       tests: _selectedTests.toList(),
       preferredDate: _selectedDate ?? DateTime.now().add(const Duration(days: 1)),
@@ -100,7 +134,7 @@ class _LabTestScreenState extends State<LabTestScreen> {
     if (_isScheduled) return _buildScheduledView(context, l10n);
 
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.scaffold(context),
       appBar: AppBar(
         title: Text(l10n.requestLabTest),
         leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
@@ -127,19 +161,8 @@ class _LabTestScreenState extends State<LabTestScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(l10n.whyNeedLabTest, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _reasonController,
-              maxLines: 2,
-              maxLength: 200,
-              decoration: InputDecoration(
-                hintText: l10n.labTestReasonHint,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(l10n.selectTest, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-            const SizedBox(height: 8),
+            Text(l10n.selectTest, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 10),
             TextField(
               controller: _searchController,
               onChanged: _filterTemplates,
@@ -155,81 +178,109 @@ class _LabTestScreenState extends State<LabTestScreen> {
             else if (_templateError != null)
               Text(_templateError!, style: const TextStyle(color: AppColors.error))
             else
-              SizedBox(
-                height: 180,
-                child: ListView.builder(
-                  itemCount: _filteredTemplates.length,
-                  itemBuilder: (context, index) {
-                    final t = _filteredTemplates[index];
-                    final templateName = t['name'] as String? ?? '';
-                    final displayName = t['lab_test_name'] as String? ?? templateName;
-                    final group = t['lab_test_group'] as String? ?? '';
-                    final isSelected = _selectedTests.contains(templateName);
-                    return CheckboxListTile(
-                      dense: true,
-                      contentPadding: EdgeInsets.zero,
-                      value: isSelected,
-                      title: Text(displayName, style: const TextStyle(fontSize: 13)),
-                      subtitle: group.isNotEmpty ? Text(group, style: const TextStyle(fontSize: 11, color: AppColors.textTertiary)) : null,
-                      onChanged: (val) {
+              ..._filteredTemplates.take(12).map((t) {
+                final templateName = t['name'] as String? ?? '';
+                final displayName = t['lab_test_name'] as String? ?? templateName;
+                final group = t['lab_test_group'] as String? ?? '';
+                final isSelected = _selectedTests.contains(templateName);
+                final colors = [
+                  (AppColors.info, AppColors.infoLight),
+                  (AppColors.success, AppColors.successLight),
+                  (AppColors.chartPurple, const Color(0xFFF0EAFD)),
+                  (AppColors.warning, AppColors.warningLight),
+                ];
+                final pair = colors[_filteredTemplates.indexOf(t) % colors.length];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Material(
+                    color: isSelected ? pair.$2 : AppColors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(14),
+                      onTap: () {
                         setState(() {
-                          if (val == true) {
-                            _selectedTests.add(templateName);
-                          } else {
+                          if (isSelected) {
                             _selectedTests.remove(templateName);
+                          } else {
+                            _selectedTests.add(templateName);
                           }
                         });
                       },
-                    );
-                  },
-                ),
-              ),
-            if (_selectedTests.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: _selectedTests.map((name) {
-                    final t = _templates.firstWhere((t) => t['name'] == name, orElse: () => {});
-                    final display = t['lab_test_name'] as String? ?? name;
-                    return Chip(
-                      label: Text(display, style: const TextStyle(fontSize: 12)),
-                      onDeleted: () => setState(() => _selectedTests.remove(name)),
-                      deleteIconColor: AppColors.textSecondary,
-                    );
-                  }).toList(),
-                ),
-              ),
-            const SizedBox(height: 24),
-            Text(l10n.preferredDate, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-            const SizedBox(height: 8),
-            GestureDetector(
-              onTap: () async {
-                final picked = await showDatePicker(
-                  context: context,
-                  initialDate: _selectedDate ?? DateTime.now().add(const Duration(days: 1)),
-                  firstDate: DateTime.now(),
-                  lastDate: DateTime.now().add(const Duration(days: 30)),
+                      child: Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: isSelected ? pair.$1 : AppColors.cardBorder, width: isSelected ? 2 : 1),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(color: pair.$2, shape: BoxShape.circle),
+                              child: Icon(Icons.science, color: pair.$1),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(displayName, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                                  if (group.isNotEmpty)
+                                    Text(group, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                                ],
+                              ),
+                            ),
+                            Icon(isSelected ? Icons.check_circle : Icons.circle_outlined, color: isSelected ? pair.$1 : AppColors.textTertiary),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 );
-                if (picked != null) setState(() => _selectedDate = picked);
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.inputBorder),
-                  color: AppColors.inputBackground,
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.calendar_today, size: 16, color: AppColors.textSecondary),
-                    const SizedBox(width: 8),
-                    Text(_selectedDate != null ? DateFormat('MMM dd, yyyy').format(_selectedDate!) : l10n.selectDate, style: TextStyle(color: _selectedDate != null ? AppColors.textPrimary : AppColors.textTertiary)),
-                    const Spacer(),
-                    const Icon(Icons.keyboard_arrow_down, size: 18, color: AppColors.textSecondary),
-                  ],
-                ),
+              }),
+            const SizedBox(height: 16),
+            Text(l10n.selectADate, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 10),
+            SizedBox(
+              height: 78,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: 7,
+                separatorBuilder: (_, _) => const SizedBox(width: 8),
+                itemBuilder: (context, i) {
+                  final day = DateTime.now().add(Duration(days: i));
+                  final selected = _selectedDate != null &&
+                      _selectedDate!.year == day.year &&
+                      _selectedDate!.month == day.month &&
+                      _selectedDate!.day == day.day;
+                  return InkWell(
+                    onTap: () => setState(() => _selectedDate = day),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      width: 72,
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      decoration: BoxDecoration(
+                        color: selected ? AppColors.successLight : AppColors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: selected ? AppColors.success : AppColors.cardBorder),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            i == 0 ? l10n.todayLabel : DateFormat('E').format(day),
+                            style: TextStyle(fontSize: 13, color: selected ? AppColors.success : AppColors.textSecondary),
+                          ),
+                          Text(
+                            '${day.day}',
+                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: selected ? AppColors.success : AppColors.textPrimary),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
             const SizedBox(height: 24),
@@ -268,7 +319,16 @@ class _LabTestScreenState extends State<LabTestScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
+            Text(l10n.reasonOptional, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _reasonController,
+              maxLines: 2,
+              maxLength: 200,
+              decoration: InputDecoration(hintText: l10n.labTestReasonHint),
+            ),
+            const SizedBox(height: 16),
             SizedBox(
               width: double.infinity, height: 56,
               child: ElevatedButton(
@@ -299,7 +359,7 @@ class _LabTestScreenState extends State<LabTestScreen> {
 
   Widget _buildScheduledView(BuildContext context, AppLocalizations l10n) {
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.scaffold(context),
       appBar: AppBar(title: Text(l10n.labTestShortTitle)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),

@@ -12,8 +12,10 @@ import '../../widgets/shared_widgets.dart';
 
 class SplashScreen extends StatefulWidget {
   final VoidCallback onGetStarted;
+  /// Optional "For My Family" path. Falls back to [onGetStarted] in tests.
+  final VoidCallback? onForFamily;
 
-  const SplashScreen({super.key, required this.onGetStarted});
+  const SplashScreen({super.key, required this.onGetStarted, this.onForFamily});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -420,68 +422,62 @@ class _SplashScreenState extends State<SplashScreen>
           opacity: _welcomeFade,
           child: SlideTransition(
             position: _welcomeSlide,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Column(
-                children: [
-                  const Spacer(flex: 2),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                    child: Column(
+                      children: [
+                  const SizedBox(height: 40),
                   const HiraalLogo(size: 80),
                   const SizedBox(height: 32),
                   Text(
-                    l10n.welcomeHeadline,
+                    l10n.welcomeHello,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
-                      fontSize: 24,
+                      fontSize: 28,
                       fontWeight: FontWeight.w700,
                       color: AppColors.textPrimary,
-                      height: 1.3,
+                      height: 1.2,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   Text(
-                    l10n.appSubtitle,
+                    l10n.roleChooserTitle,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
-                      fontSize: 14,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.welcomeContinueHint,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 15,
                       color: AppColors.textSecondary,
-                      height: 1.5,
+                      height: 1.45,
                     ),
                   ),
-                  const SizedBox(height: 40),
-                  SizedBox(
-                    height: 40,
-                    child: CustomPaint(
-                      size: const Size(200, 40),
-                      painter: _HeartbeatPainter(),
-                    ),
+                  const SizedBox(height: 28),
+                  _WelcomePathCard(
+                    icon: Icons.person_outline,
+                    iconColor: AppColors.primary,
+                    title: l10n.roleChooserPatientTitle,
+                    subtitle: l10n.roleChooserPatientHint,
+                    onTap: widget.onGetStarted,
                   ),
-                  const SizedBox(height: 40),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _TrustBadge(
-                          icon: Icons.verified_user_outlined,
-                          label: l10n.trustBadgeDataSafe,
-                          color: AppColors.success,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: _TrustBadge(
-                          icon: Icons.people_outline,
-                          label: l10n.trustBadgeTrustedClinics,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Spacer(flex: 2),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: widget.onGetStarted,
-                      child: Text(l10n.getStarted),
-                    ),
+                  const SizedBox(height: 12),
+                  _WelcomePathCard(
+                    icon: Icons.groups_outlined,
+                    iconColor: AppColors.info,
+                    title: l10n.roleChooserCaregiverTitle,
+                    subtitle: l10n.roleChooserCaregiverHint,
+                    onTap: widget.onForFamily ?? widget.onGetStarted,
                   ),
                   const SizedBox(height: 16),
                   TextButton(
@@ -530,8 +526,11 @@ class _SplashScreenState extends State<SplashScreen>
                     ),
                   ),
                   const SizedBox(height: 24),
-                ],
-              ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ),
@@ -540,68 +539,79 @@ class _SplashScreenState extends State<SplashScreen>
   }
 }
 
-class _TrustBadge extends StatelessWidget {
+class _WelcomePathCard extends StatelessWidget {
   final IconData icon;
-  final String label;
-  final Color color;
+  final Color iconColor;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
 
-  const _TrustBadge({
+  const _WelcomePathCard({
     required this.icon,
-    required this.label,
-    required this.color,
+    required this.iconColor,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          width: 44,
-          height: 44,
+    return Material(
+      color: AppColors.white,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.cardBorder),
           ),
-          child: Icon(icon, color: color, size: 22),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 12,
-            color: AppColors.textSecondary,
-            height: 1.3,
+          child: Row(
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: iconColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(icon, color: iconColor, size: 28),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 19,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        height: 1.35,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right, color: iconColor, size: 28),
+            ],
           ),
         ),
-      ],
+      ),
     );
   }
-}
-
-class _HeartbeatPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = AppColors.primary.withValues(alpha: 0.3)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
-
-    final path = Path();
-    final midY = size.height / 2;
-    path.moveTo(0, midY);
-    path.lineTo(size.width * 0.3, midY);
-    path.lineTo(size.width * 0.35, midY - 15);
-    path.lineTo(size.width * 0.4, midY + 15);
-    path.lineTo(size.width * 0.45, midY - 20);
-    path.lineTo(size.width * 0.5, midY + 10);
-    path.lineTo(size.width * 0.55, midY);
-    path.lineTo(size.width, midY);
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 /// Animates a heartbeat line that draws itself from left to right, then

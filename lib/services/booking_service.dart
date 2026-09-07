@@ -1,5 +1,6 @@
 import '../../core/utils/result.dart';
 import '../../models/medicine_order.dart';
+import '../../models/service_coverage.dart';
 import '../../models/telemedicine_session.dart';
 
 /// A patient's upcoming appointment, mirroring the server "Patient
@@ -128,4 +129,19 @@ abstract class BookingService {
   Future<Result<List<Map<String, dynamic>>>> getCareStations();
 
   Future<Result<List<Map<String, dynamic>>>> getLabTestTemplates();
+
+  /// Practitioner Schedule slots for the coming days.
+  Future<Result<SlotAvailability>> getAvailableSlots({
+    required String practitioner,
+    int days = 14,
+    String? visitType,
+  });
+
+  /// Server-side plan coverage for a consult / lab / medicine / home sample.
+  Future<Result<ServiceCoverage>> checkServiceCoverage({
+    required String serviceType,
+    String? patient,
+    String? template,
+    String? appointmentType,
+  });
 }

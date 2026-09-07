@@ -277,4 +277,63 @@ class ErpNextPaymentService implements PaymentService {
       return Failure(e.toString());
     }
   }
+
+  @override
+  Future<Result<String>> payOutOfPlan({
+    required String patient,
+    required String serviceType,
+    required String provider,
+    required String method,
+    required String phone,
+    double? amount,
+  }) async {
+    try {
+      final r = await _api.dio.post(
+        '/method/hiraal_emr.api.pay_out_of_plan_service',
+        data: {
+          'patient': patient,
+          'service_type': serviceType,
+          'provider': provider,
+          'method': method,
+          'phone': phone,
+          if (amount != null) 'amount': amount,
+        },
+        options: Options(receiveTimeout: const Duration(seconds: 120)),
+      );
+      final msg = r.data?['message'] as Map<String, dynamic>?;
+      if (msg?['covered'] == true) return const Success('COVERED');
+      final txn = msg?['transaction_log']?.toString() ?? '';
+      if (msg?['success'] == true && txn.isNotEmpty) return Success(txn);
+      return Failure(msg?['message']?.toString() ?? 'Could not start the payment');
+    } on DioException catch (e) {
+      log.e('payOutOfPlan failed', error: e);
+      if (e.type == DioExceptionType.receiveTimeout) {
+        return const Failure(
+            'The payment is taking longer than usual. If you approved it on your phone, it will complete automatically – check again in a few minutes.');
+      }
+      return Failure(_parseServerError(e.response?.data, 'Could not start the payment'),
+          statusCode: e.response?.statusCode);
+    } catch (e) {
+      return Failure(e.toString());
+    }
+  }
+
+  @override
+  Future<Result<String>> checkOutOfPlanStatus(String transactionLog) async {
+    if (transactionLog == 'COVERED') return const Success('Completed');
+    try {
+      final r = await _api.dio.post(
+        '/method/hiraal_emr.api.check_out_of_plan_payment',
+        data: {'transaction_log': transactionLog},
+      );
+      final msg = r.data?['message'] as Map<String, dynamic>?;
+      return Success(msg?['status']?.toString() ?? 'Pending');
+    } on DioException catch (e) {
+      log.e('checkOutOfPlanStatus failed', error: e);
+      return Failure(_parseServerError(e.response?.data, 'Could not check the payment'),
+          statusCode: e.response?.statusCode);
+    } catch (e) {
+      return Failure(e.toString());
+    }
+  }
 }

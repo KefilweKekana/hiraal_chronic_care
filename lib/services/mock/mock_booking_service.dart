@@ -1,5 +1,6 @@
 import '../../core/utils/result.dart';
 import '../../models/medicine_order.dart';
+import '../../models/service_coverage.dart';
 import '../../models/telemedicine_session.dart';
 import '../booking_service.dart';
 
@@ -345,5 +346,53 @@ class MockBookingService implements BookingService {
         'phone': '',
       },
     ]);
+  }
+
+  @override
+  Future<Result<SlotAvailability>> getAvailableSlots({
+    required String practitioner,
+    int days = 14,
+    String? visitType,
+  }) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    final now = DateTime.now();
+    final daysOut = List.generate(7, (i) {
+      final d = now.add(Duration(days: i + 1));
+      const times = ['09:00:00', '10:00:00', '11:00:00', '14:00:00', '15:00:00'];
+      return AppointmentDaySlots(
+        date: d.toIso8601String().substring(0, 10),
+        weekday: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][d.weekday - 1],
+        dayLabel:
+            '${['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][d.weekday - 1]} ${d.day}',
+        slots: [
+          for (var t = 0; t < times.length; t++)
+            AppointmentSlot(
+              time: times[t],
+              label: times[t].startsWith('09')
+                  ? '9:00 AM'
+                  : times[t].startsWith('10')
+                      ? '10:00 AM'
+                      : times[t].startsWith('11')
+                          ? '11:00 AM'
+                          : times[t].startsWith('14')
+                              ? '2:00 PM'
+                              : '3:00 PM',
+              available: t != 2,
+            ),
+        ],
+      );
+    });
+    return Success(SlotAvailability(days: daysOut));
+  }
+
+  @override
+  Future<Result<ServiceCoverage>> checkServiceCoverage({
+    required String serviceType,
+    String? patient,
+    String? template,
+    String? appointmentType,
+  }) async {
+    await Future.delayed(const Duration(milliseconds: 250));
+    return const Success(ServiceCoverage.included);
   }
 }

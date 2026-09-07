@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hiraal_chronic_care/core/config/env_config.dart';
+import 'package:hiraal_chronic_care/l10n/app_localizations.dart';
 import 'package:hiraal_chronic_care/providers/app_provider.dart';
 import 'package:hiraal_chronic_care/screens/auth/splash_screen.dart';
 import 'package:provider/provider.dart';
@@ -31,6 +32,8 @@ void main() {
       ChangeNotifierProvider<AppProvider>(
         create: (_) => _TestAppProvider(),
         child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: SplashScreen(onGetStarted: () {}),
         ),
       ),
@@ -46,6 +49,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400)); // AnimatedSwitcher fade
     await tester.pump(const Duration(milliseconds: 600)); // welcome controller
 
-    expect(find.text('Get Started'), findsOneWidget);
+    expect(find.text('For Myself'), findsOneWidget);
+    expect(find.text('For My Family'), findsOneWidget);
   });
 }

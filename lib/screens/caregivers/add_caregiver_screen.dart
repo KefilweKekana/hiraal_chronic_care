@@ -5,6 +5,8 @@ import '../../core/theme/app_colors.dart';
 import '../../core/utils/result.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/service_locator.dart';
+import '../../widgets/coverage_outcome.dart';
+import '../../widgets/relationship_choices.dart';
 
 class AddCaregiverScreen extends StatefulWidget {
   const AddCaregiverScreen({super.key});
@@ -83,27 +85,10 @@ class _AddCaregiverScreenState extends State<AddCaregiverScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final relationships = <String>[
-      l10n.relationshipMother,
-      l10n.relationshipFather,
-      l10n.relationshipBrother,
-      l10n.relationshipSister,
-      l10n.relationshipSpouse,
-      l10n.relationshipChild,
-      l10n.relationshipFriend,
-      l10n.relationshipOther,
-    ];
-    if (!relationships.contains(_relationship)) {
-      _relationship = relationships.first;
-    }
-
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.scaffold(context),
       appBar: AppBar(
         title: Text(l10n.addCaregiver),
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.textPrimary,
-        elevation: 0,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -144,18 +129,19 @@ class _AddCaregiverScreenState extends State<AddCaregiverScreen> {
                 ],
               ),
               const SizedBox(height: 14),
-              DropdownButtonFormField<String>(
-                value: _relationship,
-                decoration: InputDecoration(
-                  labelText: l10n.relationship,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                items: relationships
-                    .map((item) => DropdownMenuItem<String>(value: item, child: Text(item)))
-                    .toList(),
-                onChanged: (value) {
-                  if (value != null) setState(() => _relationship = value);
-                },
+              Text(l10n.relationship, style: const TextStyle(fontWeight: FontWeight.w700)),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final key in RelationshipChoices.inviteKeys)
+                    BigChoiceButton(
+                      label: RelationshipChoices.label(l10n, key),
+                      selected: _relationship == key,
+                      onTap: () => setState(() => _relationship = key),
+                    ),
+                ],
               ),
               const SizedBox(height: 14),
               TextFormField(
@@ -248,9 +234,9 @@ class _PermissionTile extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.card(context),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.border(context)),
       ),
       child: CheckboxListTile(
         value: value,

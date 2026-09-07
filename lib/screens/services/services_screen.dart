@@ -5,6 +5,7 @@ import '../../core/utils/result.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/app_provider.dart';
 import '../../services/service_locator.dart';
+import '../alerts/contact_care_team_screen.dart';
 import 'book_doctor_screen.dart';
 import 'lab_test_screen.dart';
 import 'medicine_order_screen.dart';
@@ -98,101 +99,48 @@ class _ServicesScreenState extends State<ServicesScreen> {
               const SizedBox(height: 24),
               Text(
                 l10n.servicesTitle,
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
               ),
-              const SizedBox(height: 4),
-              Text(
-                l10n.chooseCareToday,
-                style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+              const SizedBox(height: 14),
+              _ServiceRow(
+                icon: Icons.calendar_month,
+                color: AppColors.info,
+                title: l10n.seeADoctor,
+                subtitle: l10n.seeADoctorHint,
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BookDoctorScreen())),
               ),
-              const SizedBox(height: 12),
-              // Search bar
-              TextField(
-                decoration: InputDecoration(
-                  hintText: l10n.searchServicesHint,
-                  prefixIcon: const Icon(Icons.search, color: AppColors.textTertiary),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.inputBorder)),
-                ),
+              _ServiceRow(
+                icon: Icons.local_pharmacy,
+                color: AppColors.success,
+                title: l10n.getMedicine,
+                subtitle: l10n.getMedicineHint,
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MedicineOrderScreen())),
+              ),
+              _ServiceRow(
+                icon: Icons.science,
+                color: AppColors.warning,
+                title: l10n.bloodTest,
+                subtitle: l10n.bloodTestHint,
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LabTestScreen())),
+              ),
+              const SizedBox(height: 8),
+              _ServiceRow(
+                icon: Icons.headset_mic_outlined,
+                color: AppColors.primary,
+                title: l10n.talkToCareTeam,
+                subtitle: l10n.talkToCareTeamHint,
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ContactCareTeamScreen())),
+              ),
+              _ServiceRow(
+                icon: Icons.volunteer_activism_outlined,
+                color: AppColors.chartPurple,
+                title: l10n.sponsorCareCard,
+                subtitle: l10n.sponsorCareCardSubtitle,
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SponsorCareScreen())),
               ),
               const SizedBox(height: 20),
-              // Service cards
-              Row(
-                children: [
-                  Expanded(
-                    child: _ServiceCard(
-                      icon: Icons.medical_services,
-                      iconColor: AppColors.primary,
-                      title: l10n.bookDoctor,
-                      subtitle: l10n.bookDoctorSubtitle,
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BookDoctorScreen())),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _ServiceCard(
-                      icon: Icons.local_pharmacy,
-                      iconColor: AppColors.success,
-                      title: l10n.hiraalPharma,
-                      subtitle: l10n.uploadPrescription,
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MedicineOrderScreen())),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _ServiceCard(
-                      icon: Icons.science,
-                      iconColor: AppColors.warning,
-                      title: l10n.labTest,
-                      subtitle: l10n.labTestSubtitle,
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LabTestScreen())),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: _ServiceCard(
-                      icon: Icons.volunteer_activism_outlined,
-                      iconColor: AppColors.chartPurple,
-                      title: l10n.sponsorCareCard,
-                      subtitle: l10n.sponsorCareCardSubtitle,
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SponsorCareScreen())),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppColors.primarySurface,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.verified, size: 16, color: AppColors.primary),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        l10n.quickSecureHealthcare,
-                        style: const TextStyle(fontSize: 12, color: AppColors.primary),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              // Recommended
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(l10n.recommendedForYou, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                  Text(l10n.viewAll, style: const TextStyle(fontSize: 13, color: AppColors.primary, fontWeight: FontWeight.w600)),
-                ],
-              ),
+              Text(l10n.upcomingShort, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 8),
               const SizedBox(height: 12),
               if (_loadingDoctors)
                 const Center(child: Padding(padding: EdgeInsets.symmetric(vertical: 8), child: CircularProgressIndicator(strokeWidth: 2)))
@@ -211,33 +159,6 @@ class _ServicesScreenState extends State<ServicesScreen> {
                 subtitle: l10n.joinLiveVideo,
                 onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const VideoVisitsScreen())),
               ),
-              _RecommendedCard(
-                icon: Icons.local_pharmacy,
-                iconColor: AppColors.success,
-                title: l10n.orderFromHiraalPharma,
-                subtitle: l10n.uploadRxForDelivery,
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MedicineOrderScreen())),
-              ),
-              _RecommendedCard(
-                icon: Icons.science,
-                iconColor: AppColors.error,
-                title: 'Complete Blood Count (CBC)',
-                subtitle: 'Common test  •  Results in 24 hrs',
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LabTestScreen())),
-              ),
-              const SizedBox(height: 24),
-              // Popular Categories
-              Text(l10n.popularCategories, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _CategoryChip(icon: Icons.favorite, label: l10n.categoryHeartCare, color: AppColors.error, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => BookDoctorScreen(specialtyLabel: l10n.categoryHeartCare, specialtyKeywords: const ['cardio', 'heart'])))),
-                  _CategoryChip(icon: Icons.air, label: l10n.categoryChestCare, color: AppColors.primary, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => BookDoctorScreen(specialtyLabel: l10n.categoryChestCare, specialtyKeywords: const ['pulmo', 'chest', 'respir', 'thorax'])))),
-                  _CategoryChip(icon: Icons.water_drop, label: l10n.categoryDiabetesCare, color: AppColors.warning, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => BookDoctorScreen(specialtyLabel: l10n.categoryDiabetesCare, specialtyKeywords: const ['endocrin', 'diabet'])))),
-                  _CategoryChip(icon: Icons.psychology, label: l10n.categoryMentalHealth, color: AppColors.chartPurple, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => BookDoctorScreen(specialtyLabel: l10n.categoryMentalHealth, specialtyKeywords: const ['psych', 'mental', 'behavio'])))),
-                ],
-              ),
               const SizedBox(height: 24),
             ],
           ),
@@ -247,16 +168,16 @@ class _ServicesScreenState extends State<ServicesScreen> {
   }
 }
 
-class _ServiceCard extends StatelessWidget {
+class _ServiceRow extends StatelessWidget {
   final IconData icon;
-  final Color iconColor;
+  final Color color;
   final String title;
   final String subtitle;
   final VoidCallback onTap;
 
-  const _ServiceCard({
+  const _ServiceRow({
     required this.icon,
-    required this.iconColor,
+    required this.color,
     required this.title,
     required this.subtitle,
     required this.onTap,
@@ -264,44 +185,52 @@ class _ServiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: AppColors.white,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Material(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: onTap,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.cardBorder),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: iconColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, color: iconColor, size: 24),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+            child: Row(
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, color: color, size: 28),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: const TextStyle(fontSize: 14, color: AppColors.textSecondary, height: 1.3),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(Icons.arrow_forward, color: color, size: 22),
+              ],
             ),
-            const SizedBox(height: 10),
-            Text(
-              title,
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textPrimary, height: 1.25),
-              textAlign: TextAlign.center,
-              softWrap: true,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              subtitle,
-              style: const TextStyle(fontSize: 10, color: AppColors.textTertiary, height: 1.25),
-              textAlign: TextAlign.center,
-              softWrap: true,
-            ),
-            const SizedBox(height: 6),
-            const Icon(Icons.arrow_forward, size: 16, color: AppColors.primary),
-          ],
+          ),
         ),
       ),
     );
@@ -364,42 +293,3 @@ class _RecommendedCard extends StatelessWidget {
   }
 }
 
-class _CategoryChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _CategoryChip({required this.icon, required this.label, required this.color, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        children: [
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(icon, color: color, size: 26),
-          ),
-          const SizedBox(height: 6),
-          SizedBox(
-            width: 72,
-            child: Text(
-              label,
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 10, color: AppColors.textSecondary, height: 1.2),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}

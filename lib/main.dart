@@ -192,6 +192,8 @@ class _AppRoot extends StatelessWidget {
       title: 'Hiraal Lifecare',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: provider.themeMode,
       locale: provider.locale,
       supportedLocales: AppLocalizations.supportedLocales,
       // Somali is supported by AppLocalizations but not by Flutter's stock
@@ -238,7 +240,8 @@ class _AppRoot extends StatelessWidget {
     switch (provider.state) {
       case AppState.splash:
         return SplashScreen(
-          onGetStarted: () => provider.setState(AppState.register),
+          onGetStarted: () => provider.beginPatientSignIn(),
+          onForFamily: () => provider.beginCaregiverSignIn(),
         );
       case AppState.register:
         return RegisterScreen(

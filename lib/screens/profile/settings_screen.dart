@@ -94,11 +94,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final provider = context.watch<AppProvider>();
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.scaffold(context),
       appBar: AppBar(
         title: Text(l10n.settings),
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: AppColors.card(context),
+        foregroundColor: AppColors.text(context),
         elevation: 0,
       ),
       body: ListView(
@@ -140,6 +140,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
             subtitle: l10n.largeTextSubtitle,
             value: provider.largeText,
             onChanged: provider.setLargeText,
+          ),
+          const SizedBox(height: 16),
+          Text(l10n.darkTheme, style: sectionStyle),
+          const SizedBox(height: 8),
+          Text(l10n.darkThemeSubtitle, style: TextStyle(fontSize: 13, color: AppColors.textMuted(context))),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: _ThemeBtn(
+                  label: l10n.darkThemeSystem,
+                  selected: provider.themeMode == ThemeMode.system,
+                  onTap: () => provider.setThemeMode(ThemeMode.system),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _ThemeBtn(
+                  label: l10n.darkThemeLight,
+                  selected: provider.themeMode == ThemeMode.light,
+                  onTap: () => provider.setThemeMode(ThemeMode.light),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _ThemeBtn(
+                  label: l10n.darkThemeDark,
+                  selected: provider.themeMode == ThemeMode.dark,
+                  onTap: () => provider.setThemeMode(ThemeMode.dark),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 16),
           Text(l10n.about, style: sectionStyle),
@@ -278,6 +310,29 @@ class _InfoRow extends StatelessWidget {
           const Spacer(),
           Text(value, style: const TextStyle(fontSize: 13, color: AppColors.textTertiary)),
         ],
+      ),
+    );
+  }
+}
+
+class _ThemeBtn extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  const _ThemeBtn({required this.label, required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 48,
+      child: OutlinedButton(
+        onPressed: onTap,
+        style: OutlinedButton.styleFrom(
+          backgroundColor: selected ? AppColors.primaryLight : AppColors.white,
+          side: BorderSide(color: selected ? AppColors.primary : AppColors.cardBorder, width: selected ? 2 : 1),
+          foregroundColor: selected ? AppColors.primary : AppColors.textPrimary,
+        ),
+        child: Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
       ),
     );
   }

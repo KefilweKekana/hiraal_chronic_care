@@ -149,6 +149,8 @@ class SponsorshipSummary {
   final double monthlyAmount;
   final DateTime? nextPaymentDate;
   final bool canPayForCare;
+  final int? age;
+  final DateTime? memberSince;
 
   const SponsorshipSummary({
     required this.name,
@@ -161,6 +163,8 @@ class SponsorshipSummary {
     this.monthlyAmount = 0,
     this.nextPaymentDate,
     this.canPayForCare = false,
+    this.age,
+    this.memberSince,
   });
 
   bool get isPending => status.toLowerCase() == 'pending';
@@ -195,6 +199,10 @@ class SponsorshipSummary {
       monthlyAmount: monthlyAmount,
       nextPaymentDate: nextPaymentDate,
       canPayForCare: canPayForCare,
+      age: json['age'] is num
+          ? (json['age'] as num).toInt()
+          : int.tryParse('${json['age'] ?? ''}'),
+      memberSince: _parseDate(json['member_since'] ?? json['creation'] ?? json['activated_on']),
     );
   }
 }

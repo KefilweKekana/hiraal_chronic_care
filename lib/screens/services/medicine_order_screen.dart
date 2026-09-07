@@ -3,11 +3,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/result.dart';
 import '../../l10n/app_localizations.dart';
+import '../../providers/app_provider.dart';
 import '../../services/address_service.dart';
 import '../../services/service_locator.dart';
+import '../../widgets/coverage_gate.dart';
 import '../profile/addresses_screen.dart';
 import 'my_orders_screen.dart';
 import 'order_tracking_screen.dart';
@@ -180,6 +183,33 @@ class _MedicineOrderScreenState extends State<MedicineOrderScreen> {
     }
 
     setState(() => _isLoading = true);
+    final provider = context.read<AppProvider>();
+    final patient = actingPatientId(
+      carePatient: provider.activeCarePerson?.patient,
+      selfPatient: provider.patient?.id,
+    );
+    final coverageResult = await ServiceLocator.instance.bookings.checkServiceCoverage(
+      serviceType: 'medicine',
+      patient: patient,
+    );
+    if (!mounted) return;
+    switch (coverageResult) {
+      case Success(data: final coverage):
+        setState(() => _isLoading = false);
+        final proceed = await presentServiceCoverage(
+          context: context,
+          coverage: coverage,
+          title: l10n.hiraalPharma,
+          patient: patient,
+          serviceType: 'medicine',
+        );
+        if (proceed != true || !mounted) return;
+        setState(() => _isLoading = true);
+      case Failure(message: final msg):
+        setState(() => _isLoading = false);
+        _snack(msg);
+        return;
+    }
     final result = await ServiceLocator.instance.bookings.orderWithPrescription(
       imagePath: _prescription!.path,
       deliveryAddress: _selected!.address,
@@ -208,7 +238,7 @@ class _MedicineOrderScreenState extends State<MedicineOrderScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.scaffold(context),
       appBar: AppBar(
         title: Text(l10n.hiraalPharma),
         leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),

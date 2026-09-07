@@ -1,3 +1,4 @@
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
@@ -8,9 +9,13 @@ import '../core/utils/result.dart';
 import 'service_locator.dart';
 
 const String _syncTaskName = 'hiraal.chronic_care.background_sync';
-const String _syncChannelId = 'hiraal_sync_channel';
-const String _syncChannelName = 'Sync Notifications';
-const String _syncChannelDesc = 'Notifications for background data sync';
+const String _syncChannelId = 'hiraal_sync_background';
+const String _syncChannelName = 'Background sync';
+const String _syncChannelDesc =
+    'Low-priority sync status. Disable this channel to keep health alerts on.';
+const String _lastFailSignatureKey = 'hiraal_sync_last_fail_signature';
+const int _syncFailNotificationId = 1002;
+const int _syncSuccessNotificationId = 1001;
 
 /// Global callback dispatcher for WorkManager.
 /// Must be a top-level or static function.
@@ -27,7 +32,8 @@ void _callbackDispatcher() {
     final readingsDao = ReadingsDao();
     final pending = await readingsDao.getPending();
     if (pending.isEmpty) {
-      await _showNotification('Sync complete', 'No pending readings to sync.');
+      // Silent success: never notify when nothing is pending.
+      log.i('Background sync: nothing pending; skipping notification.');
       return true;
     }
 
@@ -38,25 +44,63 @@ void _callbackDispatcher() {
 
       if (syncedCount > 0) {
         await _showNotification(
-          'Sync complete',
-          '$syncedCount reading(s) synced successfully.',
+          id: _syncSuccessNotificationId,
+          title: 'Readings synced',
+          body: '$syncedCount reading(s) saved to your care record.',
         );
       } else {
-        await _showNotification(
-          'Sync failed',
-          'Could not sync ${pending.length} pending reading(s). Will retry later.',
-        );
+        final signature =
+            'fail:${pending.length}:${pending.first.id}:${pending.last.id}';
+        if (await _alreadyNotified(signature)) {
+          log.i('Background sync failed but notification already shown; not repeating.');
+        } else {
+          await _showNotification(
+            id: _syncFailNotificationId,
+            title: 'Sync failed',
+            body:
+                'Could not sync ${pending.length} pending reading(s). Will retry later.',
+          );
+          await _rememberSignature(signature);
+        }
       }
       return syncedCount > 0;
     } catch (e, st) {
       log.e('Background sync error', error: e, stackTrace: st);
-      await _showNotification('Sync error', 'An error occurred during background sync.');
+      final signature = 'error:${pending.length}';
+      if (!await _alreadyNotified(signature)) {
+        await _showNotification(
+          id: _syncFailNotificationId,
+          title: 'Sync error',
+          body: 'An error occurred while saving your readings. Will retry later.',
+        );
+        await _rememberSignature(signature);
+      }
       return false;
     }
   });
 }
 
-Future<void> _showNotification(String title, String body) async {
+Future<bool> _alreadyNotified(String signature) async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_lastFailSignatureKey) == signature;
+  } catch (_) {
+    return false;
+  }
+}
+
+Future<void> _rememberSignature(String signature) async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_lastFailSignatureKey, signature);
+  } catch (_) {}
+}
+
+Future<void> _showNotification({
+  required int id,
+  required String title,
+  required String body,
+}) async {
   final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
   // This runs in the WorkManager background isolate, which never initializes
   // the plugin — Android 8+ silently drops notifications shown without an
@@ -69,7 +113,10 @@ Future<void> _showNotification(String title, String body) async {
     _syncChannelId,
     _syncChannelName,
     description: _syncChannelDesc,
-    importance: Importance.low,
+    importance: Importance.min,
+    playSound: false,
+    enableVibration: false,
+    showBadge: false,
   );
   final androidPlugin = flutterLocalNotificationsPlugin
       .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
@@ -78,12 +125,15 @@ Future<void> _showNotification(String title, String body) async {
     _syncChannelId,
     _syncChannelName,
     channelDescription: _syncChannelDesc,
-    importance: Importance.low,
-    priority: Priority.low,
+    importance: Importance.min,
+    priority: Priority.min,
+    playSound: false,
+    enableVibration: false,
+    channelShowBadge: false,
   );
   const notificationDetails = NotificationDetails(android: androidDetails);
   await flutterLocalNotificationsPlugin.show(
-    0,
+    id,
     title,
     body,
     notificationDetails,
@@ -102,7 +152,6 @@ class BackgroundSyncService {
     if (_initialized) return;
     await Workmanager().initialize(
       _callbackDispatcher,
-      isInDebugMode: false,
     );
     _initialized = true;
     log.i('WorkManager initialized');

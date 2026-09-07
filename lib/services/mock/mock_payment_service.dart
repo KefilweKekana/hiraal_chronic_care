@@ -148,4 +148,25 @@ class MockPaymentService implements PaymentService {
     }
     return const Failure('Unknown plan');
   }
+
+  @override
+  Future<Result<String>> payOutOfPlan({
+    required String patient,
+    required String serviceType,
+    required String provider,
+    required String method,
+    required String phone,
+    double? amount,
+  }) async {
+    await Future.delayed(const Duration(seconds: 1));
+    _polls['MOCK-OOP-001'] = 0;
+    return const Success('MOCK-OOP-001');
+  }
+
+  @override
+  Future<Result<String>> checkOutOfPlanStatus(String transactionLog) async {
+    await Future.delayed(const Duration(seconds: 1));
+    final polls = _polls[transactionLog] = (_polls[transactionLog] ?? 0) + 1;
+    return Success(polls >= 2 ? 'Completed' : 'Pending');
+  }
 }

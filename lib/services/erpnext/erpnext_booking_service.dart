@@ -6,6 +6,7 @@ import '../../core/network/api_client.dart';
 import '../../core/utils/app_logger.dart';
 import '../../core/utils/result.dart';
 import '../../models/medicine_order.dart';
+import '../../models/service_coverage.dart';
 import '../../models/telemedicine_session.dart';
 import '../booking_service.dart';
 
@@ -103,7 +104,12 @@ class ErpNextBookingService implements BookingService {
         try {
           final response = await _api.dio.post(
             '/method/hiraal_emr.api.request_lab_test',
-            data: {'patient': _patientId, 'template': template, 'note': note},
+            data: {
+              'patient': _patientId,
+              'template': template,
+              'note': note,
+              'collection': location.toLowerCase().contains('home') ? 'home' : 'clinic',
+            },
           );
           final msg = response.data?['message'] as Map<String, dynamic>?;
           if (msg?['success'] == true) {
@@ -457,6 +463,66 @@ class ErpNextBookingService implements BookingService {
       return Failure(
         e.response?.data?['message']?.toString() ??
             'Failed to fetch care stations',
+      );
+    } catch (e) {
+      return Failure(e.toString());
+    }
+  }
+
+  @override
+  Future<Result<SlotAvailability>> getAvailableSlots({
+    required String practitioner,
+    int days = 14,
+    String? visitType,
+  }) async {
+    try {
+      final response = await _api.dio.post(
+        '/method/hiraal_emr.api.get_available_slots',
+        data: {
+          'practitioner': practitioner,
+          'days': days,
+          if (visitType != null) 'visit_type': visitType,
+        },
+      );
+      final msg = response.data?['message'];
+      final map = msg is Map ? Map<String, dynamic>.from(msg) : <String, dynamic>{};
+      return Success(SlotAvailability.fromJson(map));
+    } on DioException catch (e) {
+      log.e('getAvailableSlots failed', error: e);
+      return Failure(
+        _parseServerError(e.response?.data, 'Could not load available times'),
+        statusCode: e.response?.statusCode,
+      );
+    } catch (e) {
+      return Failure(e.toString());
+    }
+  }
+
+  @override
+  Future<Result<ServiceCoverage>> checkServiceCoverage({
+    required String serviceType,
+    String? patient,
+    String? template,
+    String? appointmentType,
+  }) async {
+    try {
+      final response = await _api.dio.post(
+        '/method/hiraal_emr.api.check_service_coverage',
+        data: {
+          'patient': (patient != null && patient.isNotEmpty) ? patient : _patientId,
+          'service_type': serviceType,
+          if (template != null) 'template': template,
+          if (appointmentType != null) 'appointment_type': appointmentType,
+        },
+      );
+      final msg = response.data?['message'];
+      final map = msg is Map ? Map<String, dynamic>.from(msg) : <String, dynamic>{};
+      return Success(ServiceCoverage.fromJson(map));
+    } on DioException catch (e) {
+      log.e('checkServiceCoverage failed', error: e);
+      return Failure(
+        _parseServerError(e.response?.data, 'Could not check plan coverage'),
+        statusCode: e.response?.statusCode,
       );
     } catch (e) {
       return Failure(e.toString());

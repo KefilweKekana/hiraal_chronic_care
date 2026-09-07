@@ -64,6 +64,8 @@ class MockCaregiverService implements CaregiverService {
       plan: 'Standard Care',
       monthlyAmount: 5,
       nextPaymentDate: DateTime.now().add(const Duration(days: 12)),
+      age: 68,
+      memberSince: DateTime(2025, 3, 1),
     ),
   ];
 
@@ -294,6 +296,99 @@ class MockCaregiverService implements CaregiverService {
         {'label': 'Blood pressure', 'value': '128/82 mmHg'},
         {'label': 'Medicine adherence', 'value': '6 of 7 days'},
       ],
+    });
+  }
+
+  @override
+  Future<Result<Map<String, dynamic>>> addFamilyMember({
+    required String fullName,
+    required String relationship,
+    required String phone,
+    String countryCode = '+252',
+    String? sex,
+    String? dob,
+    String? email,
+  }) async {
+    await Future.delayed(const Duration(milliseconds: 400));
+    _sponsorships.add(
+      SponsorshipSummary(
+        name: 'SP-${_sponsorships.length + 1}',
+        patient: 'PAT-${_sponsorships.length + 1}',
+        patientName: fullName,
+        patientId: 'HCC-NEW',
+        status: 'Active',
+        relationship: relationship,
+        canPayForCare: true,
+      ),
+    );
+    return Success({'success': true, 'outcome': 'created', 'patient_name': fullName});
+  }
+
+  @override
+  Future<Result<CaregiverInvitation>> grantFamilyAccess({
+    required String patient,
+    required String countryCode,
+    required String whatsappNumber,
+    required String relationship,
+    String? familyMemberName,
+    Map<String, bool>? permissions,
+  }) async {
+    return inviteCaregiver(
+      countryCode: countryCode,
+      whatsappNumber: whatsappNumber,
+      relationship: relationship,
+      familyMemberName: familyMemberName,
+      permissions: permissions,
+    );
+  }
+
+  @override
+  Future<Result<Map<String, dynamic>>> caregiverHome(String patient) async {
+    await Future.delayed(const Duration(milliseconds: 250));
+    return Success({
+      'patient': {'name': patient, 'patient_name': 'Amina Ismail', 'relationship': 'Mother'},
+      'plan': {'plan': 'Daryeel Plan', 'monthly_fee': 34, 'status': 'Active'},
+      'latest_reading': {
+        'bp_systolic': 128,
+        'bp_diastolic': 82,
+        'blood_sugar': 110,
+        'medicine_taken': 1,
+        'reading_date': DateTime.now().toIso8601String().substring(0, 10),
+      },
+      'next_appointment': {
+        'practitioner_name': 'Dr. Hassan',
+        'appointment_date': DateTime.now().add(const Duration(days: 3)).toIso8601String().substring(0, 10),
+        'appointment_time': '10:00:00',
+      },
+      'next_lab': {'template': 'HbA1c', 'status': 'Scheduled'},
+      'refill': {'name': 'MED-1', 'status': 'Preparing'},
+    });
+  }
+
+  @override
+  Future<Result<List<SponsorshipSummary>>> peopleICareFor({String? query}) async {
+    await Future.delayed(const Duration(milliseconds: 200));
+    final needle = (query ?? '').toLowerCase();
+    final list = _sponsorships
+        .where((p) => needle.isEmpty || p.patientName.toLowerCase().contains(needle))
+        .toList();
+    return Success(list);
+  }
+
+  @override
+  Future<Result<Map<String, dynamic>>> plansAndPayments() async {
+    await Future.delayed(const Duration(milliseconds: 250));
+    return Success({
+      'people': _sponsorships.map((p) => {
+            'name': p.name,
+            'patient': p.patient,
+            'patient_name': p.patientName,
+            'plan': p.plan,
+            'monthly_amount': p.monthlyAmount,
+            'next_payment_date': p.nextPaymentDate?.toIso8601String(),
+            'can_pay_for_care': p.canPayForCare,
+          }).toList(),
+      'receipts': const [],
     });
   }
 }

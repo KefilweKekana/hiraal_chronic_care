@@ -55,4 +55,34 @@ class AppColors {
   static const Color badgePending = Color(0xFFFF9500);
   static const Color badgeActive = Color(0xFF34C759);
   static const Color badgeExpired = Color(0xFF9CA3AF);
+
+  // Dark theme tokens (WCAG AA on #121418 / #1C1F26)
+  static const Color darkBackground = Color(0xFF121418);
+  static const Color darkSurface = Color(0xFF1C1F26);
+  static const Color darkCardBorder = Color(0xFF2E3440);
+  static const Color darkTextPrimary = Color(0xFFF3F4F6);
+  static const Color darkTextSecondary = Color(0xFFD1D5DB);
+  static const Color darkTextTertiary = Color(0xFF9CA3AF);
+  static const Color darkInputBackground = Color(0xFF252A33);
+  static const Color darkInputBorder = Color(0xFF3F4654);
+  static const Color darkPrimaryLight = Color(0xFF0E3A40);
+  static const Color darkPrimarySurface = Color(0xFF12363C);
+
+  static bool isDark(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark;
+
+  static Color scaffold(BuildContext context) =>
+      isDark(context) ? darkBackground : background;
+
+  static Color card(BuildContext context) =>
+      isDark(context) ? darkSurface : white;
+
+  static Color border(BuildContext context) =>
+      isDark(context) ? darkCardBorder : cardBorder;
+
+  static Color text(BuildContext context) =>
+      isDark(context) ? darkTextPrimary : textPrimary;
+
+  static Color textMuted(BuildContext context) =>
+      isDark(context) ? darkTextSecondary : textSecondary;
 }

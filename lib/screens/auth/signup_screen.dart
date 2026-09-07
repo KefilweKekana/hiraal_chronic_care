@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/age_dob.dart';
+import '../../core/utils/phone_number.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/app_provider.dart';
+import '../../widgets/age_input_field.dart';
 import '../../widgets/shared_widgets.dart';
 
 /// New-patient self-registration. Collects the details the server needs to
-/// create a Patient (name, gender, date of birth, phone), sends an SMS OTP to
+/// create a Patient (name, gender, age → synthetic DOB, phone), sends an SMS OTP to
 /// verify the phone, then hands off to the OTP screen via [onCreateAccount].
 class SignUpScreen extends StatefulWidget {
   /// Called with the collected details. dob is ISO 'yyyy-MM-dd'.
@@ -38,8 +40,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
+  final _ageController = TextEditingController();
   String? _sex;
-  DateTime? _dob;
 
   String _selectedCountryCode = '+252';
   String _selectedFlag = 'SL';
@@ -63,10 +65,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
     {'code': '+255', 'flag': '🇹🇿', 'name': 'Tanzania'},
   ];
 
+  /// Hidden DOB sent to the API: 1 January of (current year − age).
+  String? get _hiddenDob => AgeDob.isoFromInput(_ageController.text);
+
   bool get _isValid =>
       _nameController.text.trim().length >= 2 &&
       _sex != null &&
-      _dob != null &&
+      _hiddenDob != null &&
       _phoneController.text.replaceAll(' ', '').length >= 8;
 
   @override
@@ -74,19 +79,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _nameController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
+    _ageController.dispose();
     super.dispose();
-  }
-
-  Future<void> _pickDob() async {
-    final now = DateTime.now();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _dob ?? DateTime(now.year - 30, 1, 1),
-      firstDate: DateTime(now.year - 120),
-      lastDate: now,
-      helpText: 'Select your date of birth',
-    );
-    if (picked != null) setState(() => _dob = picked);
   }
 
   Widget _flagWidget(Map<String, String> country) {
@@ -109,7 +103,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         color: AppColors.inputBackground,
       );
 
-  Widget _genderChip(String value, IconData icon) {
+  Widget _genderChip(String value, IconData icon, String label) {
     final selected = _sex == value;
     return Expanded(
       child: InkWell(
@@ -130,9 +124,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
             children: [
               Icon(icon, size: 18, color: selected ? AppColors.primary : AppColors.textSecondary),
               const SizedBox(width: 8),
-              Text(value,
+              Text(label,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: selected ? AppColors.primary : AppColors.textPrimary,
                   )),
@@ -148,7 +142,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     final l10n = AppLocalizations.of(context);
     final isSupporter = context.watch<AppProvider>().isCaregiverMode;
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.scaffold(context),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -166,7 +160,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 20),
                 Center(
                   child: Text(
-                    isSupporter ? l10n.supportLovedOneTitle : 'Create your account',
+                    isSupporter ? l10n.supportLovedOneTitle : l10n.createYourAccount,
                     style: const TextStyle(fontSize: 23, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                   ),
                 ),
@@ -175,110 +169,104 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   child: Text(
                     isSupporter
                         ? l10n.signupAsSupporterHint
-                        : 'Sign up to get started. You can choose a plan\nright after verifying your number.',
+                        : l10n.fourQuickDetails,
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontSize: 14, color: AppColors.textSecondary, height: 1.5),
                   ),
                 ),
 
-                _label('Full Name'),
+                _label(l10n.fullName),
                 Container(
                   decoration: _fieldDecoration,
                   child: TextField(
                     controller: _nameController,
                     textCapitalization: TextCapitalization.words,
                     onChanged: (_) => setState(() {}),
-                    decoration: const InputDecoration(
-                      hintText: 'Enter your full name',
-                      prefixIcon: Icon(Icons.person_outline, size: 20, color: AppColors.textSecondary),
+                    decoration: InputDecoration(
+                      hintText: l10n.fullNameHint,
+                      prefixIcon: const Icon(Icons.person_outline, size: 20, color: AppColors.textSecondary),
                       border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
                     ),
                     style: const TextStyle(fontSize: 16, color: AppColors.textPrimary),
                   ),
                 ),
 
-                _label('Gender'),
+                _label(l10n.areYou),
                 Row(children: [
-                  _genderChip('Male', Icons.male),
+                  _genderChip('Male', Icons.male, l10n.maleLabel),
                   const SizedBox(width: 12),
-                  _genderChip('Female', Icons.female),
+                  _genderChip('Female', Icons.female, l10n.femaleLabel),
                 ]),
 
-                _label('Date of Birth'),
-                InkWell(
-                  onTap: _pickDob,
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    decoration: _fieldDecoration,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                    child: Row(children: [
-                      const Icon(Icons.calendar_today_outlined, size: 20, color: AppColors.textSecondary),
-                      const SizedBox(width: 12),
-                      Text(
-                        _dob == null ? 'Select your date of birth' : DateFormat('d MMMM yyyy').format(_dob!),
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: _dob == null ? AppColors.textTertiary : AppColors.textPrimary,
-                        ),
-                      ),
-                    ]),
-                  ),
+                AgeInputField(
+                  controller: _ageController,
+                  boxed: true,
+                  onChanged: (_) => setState(() {}),
                 ),
 
-                _label('Mobile Number'),
+                _label(l10n.mobileNumber),
                 Container(
                   decoration: _fieldDecoration,
                   child: Row(children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 4),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<int>(
-                          value: _countryCodes
-                              .indexWhere((c) => c['code'] == _selectedCountryCode && c['flag'] == _selectedFlag),
-                          icon: const Icon(Icons.keyboard_arrow_down, size: 20, color: AppColors.textSecondary),
-                          isDense: true,
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          borderRadius: BorderRadius.circular(12),
-                          menuMaxHeight: 350,
-                          selectedItemBuilder: (context) => _countryCodes.map((country) {
-                            return Row(mainAxisSize: MainAxisSize.min, children: [
-                              _flagWidget(country),
-                              const SizedBox(width: 6),
-                              Text(country['code']!,
-                                  style: const TextStyle(
-                                      fontSize: 15, fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
-                            ]);
-                          }).toList(),
-                          items: _countryCodes.asMap().entries.map((entry) {
-                            final country = entry.value;
-                            return DropdownMenuItem<int>(
-                              value: entry.key,
-                              child: Row(children: [
+                    if (isSupporter)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 12),
+                        child: Text(
+                          '+252',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                        ),
+                      )
+                    else
+                      Padding(
+                        padding: const EdgeInsets.only(left: 4),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<int>(
+                            value: _countryCodes
+                                .indexWhere((c) => c['code'] == _selectedCountryCode && c['flag'] == _selectedFlag),
+                            icon: const Icon(Icons.keyboard_arrow_down, size: 20, color: AppColors.textSecondary),
+                            isDense: true,
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            borderRadius: BorderRadius.circular(12),
+                            menuMaxHeight: 350,
+                            selectedItemBuilder: (context) => _countryCodes.map((country) {
+                              return Row(mainAxisSize: MainAxisSize.min, children: [
                                 _flagWidget(country),
-                                const SizedBox(width: 8),
+                                const SizedBox(width: 6),
                                 Text(country['code']!,
-                                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(country['name']!,
-                                      style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
-                                      overflow: TextOverflow.ellipsis),
-                                ),
-                              ]),
-                            );
-                          }).toList(),
-                          onChanged: (index) {
-                            if (index != null) {
-                              setState(() {
-                                _selectedCountryCode = _countryCodes[index]['code']!;
-                                _selectedFlag = _countryCodes[index]['flag']!;
-                              });
-                            }
-                          },
+                                    style: const TextStyle(
+                                        fontSize: 15, fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
+                              ]);
+                            }).toList(),
+                            items: _countryCodes.asMap().entries.map((entry) {
+                              final country = entry.value;
+                              return DropdownMenuItem<int>(
+                                value: entry.key,
+                                child: Row(children: [
+                                  _flagWidget(country),
+                                  const SizedBox(width: 8),
+                                  Text(country['code']!,
+                                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(country['name']!,
+                                        style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                                        overflow: TextOverflow.ellipsis),
+                                  ),
+                                ]),
+                              );
+                            }).toList(),
+                            onChanged: (index) {
+                              if (index != null) {
+                                setState(() {
+                                  _selectedCountryCode = _countryCodes[index]['code']!;
+                                  _selectedFlag = _countryCodes[index]['flag']!;
+                                });
+                              }
+                            },
+                          ),
                         ),
                       ),
-                    ),
                     Container(width: 1, height: 30, color: AppColors.inputBorder),
                     Expanded(
                       child: TextField(
@@ -286,13 +274,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         keyboardType: TextInputType.phone,
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(10),
+                          LengthLimitingTextInputFormatter(15),
                         ],
                         onChanged: (_) => setState(() {}),
-                        decoration: const InputDecoration(
-                          hintText: 'Enter phone number',
+                        decoration: InputDecoration(
+                          hintText: l10n.enterPhoneHint,
                           border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                         ),
                         style: const TextStyle(fontSize: 16, color: AppColors.textPrimary),
                       ),
@@ -300,17 +288,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ]),
                 ),
 
-                _label('Email (optional)'),
+                _label(l10n.emailOptional),
                 Container(
                   decoration: _fieldDecoration,
                   child: TextField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(
-                      hintText: 'Enter your email address',
-                      prefixIcon: Icon(Icons.email_outlined, size: 20, color: AppColors.textSecondary),
+                    decoration: InputDecoration(
+                      hintText: l10n.enterEmailHint,
+                      prefixIcon: const Icon(Icons.email_outlined, size: 20, color: AppColors.textSecondary),
                       border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
                     ),
                     style: const TextStyle(fontSize: 16, color: AppColors.textPrimary),
                   ),
@@ -351,9 +339,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         onPressed: _isValid && !isLoading
                             ? () => widget.onCreateAccount(
                                   _nameController.text.trim(),
-                                  '$_selectedCountryCode${_phoneController.text}',
+                                  PhoneNumber.combine(
+                                    isSupporter ? '+252' : _selectedCountryCode,
+                                    _phoneController.text,
+                                  ),
                                   _sex!,
-                                  DateFormat('yyyy-MM-dd').format(_dob!),
+                                  _hiddenDob!,
                                   _emailController.text.trim().isEmpty ? null : _emailController.text.trim(),
                                 )
                             : null,
@@ -367,7 +358,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 width: 24,
                                 child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
                               )
-                            : const Text('Create Account'),
+                            : Text(l10n.createAccountCta),
                       );
                     },
                   ),
@@ -377,13 +368,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   child: TextButton(
                     onPressed: widget.onBack,
                     child: RichText(
-                      text: const TextSpan(
-                        text: 'Already have an account?  ',
-                        style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                      text: TextSpan(
+                        text: '${l10n.alreadyHaveAccount}  ',
+                        style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
                         children: [
                           TextSpan(
-                            text: 'Sign in',
-                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primary),
+                            text: l10n.signInLink,
+                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primary),
                           ),
                         ],
                       ),

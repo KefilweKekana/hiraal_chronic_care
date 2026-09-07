@@ -377,4 +377,129 @@ class ErpNextCaregiverService implements CaregiverService {
       return Failure(e.toString());
     }
   }
+
+  @override
+  Future<Result<Map<String, dynamic>>> addFamilyMember({
+    required String fullName,
+    required String relationship,
+    required String phone,
+    String countryCode = '+252',
+    String? sex,
+    String? dob,
+    String? email,
+  }) async {
+    try {
+      final response = await _api.dio.post(
+        '/method/hiraal_emr.api.add_family_member',
+        data: {
+          'full_name': fullName,
+          'relationship': relationship,
+          'country_code': countryCode,
+          'phone': phone,
+          if (sex != null) 'sex': sex,
+          if (dob != null) 'dob': dob,
+          if (email != null) 'email': email,
+        },
+      );
+      return Success(_messageMap(response));
+    } on DioException catch (e) {
+      return Failure(
+        _parseServerError(e.response?.data, 'Could not add family member'),
+        statusCode: e.response?.statusCode,
+      );
+    } catch (e) {
+      return Failure(e.toString());
+    }
+  }
+
+  @override
+  Future<Result<CaregiverInvitation>> grantFamilyAccess({
+    required String patient,
+    required String countryCode,
+    required String whatsappNumber,
+    required String relationship,
+    String? familyMemberName,
+    Map<String, bool>? permissions,
+  }) async {
+    try {
+      final response = await _api.dio.post(
+        '/method/hiraal_emr.api.grant_family_access',
+        data: {
+          'patient': patient,
+          'country_code': countryCode,
+          'whatsapp_number': whatsappNumber,
+          'relationship': relationship,
+          if (familyMemberName != null) 'family_member_name': familyMemberName,
+          if (permissions != null) 'permissions': _toApiPermissions(permissions),
+        },
+      );
+      return Success(CaregiverInvitation.fromJson(_messageMap(response)));
+    } on DioException catch (e) {
+      return Failure(
+        _parseServerError(e.response?.data, 'Could not grant family access'),
+        statusCode: e.response?.statusCode,
+      );
+    } catch (e) {
+      return Failure(e.toString());
+    }
+  }
+
+  @override
+  Future<Result<Map<String, dynamic>>> caregiverHome(String patient) async {
+    try {
+      final response = await _api.dio.post(
+        '/method/hiraal_emr.api.caregiver_home',
+        data: {'patient': patient},
+      );
+      return Success(_messageMap(response));
+    } on DioException catch (e) {
+      return Failure(
+        _parseServerError(e.response?.data, 'Could not load caregiver home'),
+        statusCode: e.response?.statusCode,
+      );
+    } catch (e) {
+      return Failure(e.toString());
+    }
+  }
+
+  @override
+  Future<Result<List<SponsorshipSummary>>> peopleICareFor({String? query}) async {
+    try {
+      final response = await _api.dio.post(
+        '/method/hiraal_emr.api.people_i_care_for',
+        data: {if (query != null && query.isNotEmpty) 'query': query},
+      );
+      final message = _messageMap(response);
+      final raw = message['people'] ?? message['sponsorships'] ?? const [];
+      final items = raw is List ? raw : const [];
+      return Success(
+        items
+            .whereType<Map>()
+            .map((e) => SponsorshipSummary.fromJson(Map<String, dynamic>.from(e)))
+            .toList(),
+      );
+    } on DioException catch (e) {
+      return Failure(
+        _parseServerError(e.response?.data, 'Could not load people you care for'),
+        statusCode: e.response?.statusCode,
+      );
+    } catch (e) {
+      return Failure(e.toString());
+    }
+  }
+
+  @override
+  Future<Result<Map<String, dynamic>>> plansAndPayments() async {
+    try {
+      final response = await _api.dio.post('/method/hiraal_emr.api.plans_and_payments');
+      return Success(_messageMap(response));
+    } on DioException catch (e) {
+      return Failure(
+        _parseServerError(e.response?.data, 'Could not load plans and payments'),
+        statusCode: e.response?.statusCode,
+      );
+    } catch (e) {
+      return Failure(e.toString());
+    }
+  }
 }

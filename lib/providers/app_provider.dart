@@ -10,8 +10,10 @@ import '../core/database/patient_dao.dart';
 import '../core/database/readings_dao.dart';
 import '../core/network/sync_manager.dart';
 import '../core/utils/app_logger.dart';
+import '../core/utils/phone_number.dart';
 import '../core/network/api_client.dart';
 import '../core/utils/result.dart';
+import '../models/caregiver_link.dart';
 import '../models/otp_delivery.dart';
 import '../models/patient.dart';
 import '../models/vital_reading.dart';
@@ -32,11 +34,14 @@ class AppProvider extends ChangeNotifier {
   static const _localeKey = 'pref_locale';
   static const _userModeKey = 'pref_user_mode';
   static const _portalChoiceMadeKey = 'pref_portal_choice_made';
+  static const _themeModeKey = 'pref_theme_mode';
+  static const _activeCarePersonKey = 'pref_active_care_person';
 
   AppProvider() {
     unawaited(_loadLargeText());
     unawaited(_loadLocale());
     unawaited(_loadUserMode());
+    unawaited(_loadThemeMode());
   }
 
   AppState _state = AppState.splash;
@@ -64,6 +69,9 @@ class AppProvider extends ChangeNotifier {
   Locale _locale = const Locale('en');
   AppUserMode _userMode = AppUserMode.patient;
   bool _hasSponsorships = false;
+  ThemeMode _themeMode = ThemeMode.system;
+  List<SponsorshipSummary> _peopleICareFor = [];
+  SponsorshipSummary? _activeCarePerson;
 
   final _services = ServiceLocator.instance;
   final _readingsDao = ReadingsDao();
@@ -93,6 +101,9 @@ class AppProvider extends ChangeNotifier {
   bool get hasSponsorships => _hasSponsorships;
   bool get isDualRoleUser =>
       _hasSponsorships && (_patient?.subscriptionActive ?? false);
+  ThemeMode get themeMode => _themeMode;
+  List<SponsorshipSummary> get peopleICareFor => _peopleICareFor;
+  SponsorshipSummary? get activeCarePerson => _activeCarePerson;
 
   ApiClient? get apiClient => _services.apiClient;
 
@@ -158,8 +169,20 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<void> beginCaregiverSignup() async {
-    await setUserMode(AppUserMode.caregiver);
+    await _markPortalChoice(AppUserMode.caregiver);
     setState(AppState.signup);
+  }
+
+  /// Splash "For Myself": remember patient intent and open phone sign-in.
+  Future<void> beginPatientSignIn() async {
+    await _markPortalChoice(AppUserMode.patient);
+    setState(AppState.register);
+  }
+
+  /// Splash "For My Family": remember caregiver intent and open phone sign-in.
+  Future<void> beginCaregiverSignIn() async {
+    await _markPortalChoice(AppUserMode.caregiver);
+    setState(AppState.register);
   }
 
   void openPatientPaywall() {
@@ -170,6 +193,9 @@ class AppProvider extends ChangeNotifier {
 
   Future<void> enterPatientApp() async {
     await _markPortalChoice(AppUserMode.patient);
+    if (_patient != null) {
+      _services.updatePatientId(_patient!.id, sex: _patient!.sex);
+    }
     if (_patient?.subscriptionActive == true) {
       _state = AppState.home;
       await _loadReadings();
@@ -182,6 +208,13 @@ class AppProvider extends ChangeNotifier {
 
   Future<void> enterCaregiverPortal() async {
     await _markPortalChoice(AppUserMode.caregiver);
+    if (_activeCarePerson == null || _peopleICareFor.isEmpty) {
+      await _refreshHasSponsorships();
+    }
+    final lovedOne = _activeCarePerson?.patient;
+    if (lovedOne != null && lovedOne.isNotEmpty) {
+      _services.updatePatientId(lovedOne);
+    }
     _state = AppState.caregiverPortal;
     _currentTab = 0;
     notifyListeners();
@@ -207,15 +240,53 @@ class AppProvider extends ChangeNotifier {
   Future<void> chooseCaregiverPortal() => enterCaregiverPortal();
 
   Future<bool> _refreshHasSponsorships() async {
-    final links = await _services.caregivers.listMySponsorships();
+    final links = await _services.caregivers.peopleICareFor();
     switch (links) {
       case Success(data: final data):
         _hasSponsorships = data.isNotEmpty;
+        _peopleICareFor = data;
+        await _restoreActiveCarePerson();
       case Failure():
-        // Keep the previous value — a list failure is not "no sponsorships".
         break;
     }
     return _hasSponsorships;
+  }
+
+  Future<void> _restoreActiveCarePerson() async {
+    if (_peopleICareFor.isEmpty) {
+      _activeCarePerson = null;
+      return;
+    }
+    final prefs = await _prefs;
+    final saved = prefs.getString(_activeCarePersonKey);
+    SponsorshipSummary? match;
+    if (saved != null) {
+      for (final p in _peopleICareFor) {
+        if (p.patient == saved || p.name == saved) {
+          match = p;
+          break;
+        }
+      }
+    }
+    match ??= _peopleICareFor.first;
+    await setActiveCarePerson(match, persist: saved == null);
+  }
+
+  Future<void> setActiveCarePerson(SponsorshipSummary person, {bool persist = true}) async {
+    _activeCarePerson = person;
+    if (person.patient.isNotEmpty) {
+      _services.updatePatientId(person.patient);
+    }
+    notifyListeners();
+    if (persist) {
+      final prefs = await _prefs;
+      await prefs.setString(_activeCarePersonKey, person.patient);
+    }
+  }
+
+  Future<void> refreshPeopleICareFor() async {
+    await _refreshHasSponsorships();
+    notifyListeners();
   }
 
   Future<void> onSponsorshipPaymentSucceeded() async {
@@ -237,10 +308,11 @@ class AppProvider extends ChangeNotifier {
     final prefs = await _prefs;
     final choiceMade = prefs.getBool(_portalChoiceMadeKey) ?? false;
 
+    if (!choiceMade) {
+      return AppState.roleChooser;
+    }
+
     if (hasSponsorships && patient.subscriptionActive) {
-      if (!choiceMade) {
-        return AppState.roleChooser;
-      }
       if (_userMode == AppUserMode.caregiver) {
         return AppState.caregiverPortal;
       }
@@ -264,7 +336,13 @@ class AppProvider extends ChangeNotifier {
     _patient = patient;
     _isLoggedIn = true;
     _state = route;
-    _services.updatePatientId(patient.id, sex: patient.sex);
+    if (route == AppState.caregiverPortal &&
+        _activeCarePerson != null &&
+        _activeCarePerson!.patient.isNotEmpty) {
+      _services.updatePatientId(_activeCarePerson!.patient);
+    } else {
+      _services.updatePatientId(patient.id, sex: patient.sex);
+    }
     await _patientDao.save(patient);
     await _enableBiometricAfterLogin();
     if (route == AppState.home) {
@@ -283,7 +361,7 @@ class AppProvider extends ChangeNotifier {
   }
 
   void setPhoneNumber(String number) {
-    _phoneNumber = number;
+    _phoneNumber = PhoneNumber.normalize(number);
     notifyListeners();
   }
 
@@ -379,6 +457,9 @@ class AppProvider extends ChangeNotifier {
     _isLoading = true;
     _errorMessage = null;
     _otpRequestedChannel = channel;
+    if (channel != 'email') {
+      _phoneNumber = PhoneNumber.normalize(_phoneNumber);
+    }
     notifyListeners();
 
     final result = await _services.auth.requestOtp(_phoneNumber, channel: channel);
@@ -465,7 +546,7 @@ class AppProvider extends ChangeNotifier {
     _signupSex = sex;
     _signupDob = dob;
     _signupEmail = email;
-    _phoneNumber = phone;
+    _phoneNumber = PhoneNumber.normalize(phone);
     return requestOtp(channel: 'sms');
   }
 
@@ -719,6 +800,32 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
     final prefs = await _prefs;
     await prefs.setBool(_largeTextKey, value);
+  }
+
+  Future<void> _loadThemeMode() async {
+    final prefs = await _prefs;
+    switch (prefs.getString(_themeModeKey)) {
+      case 'light':
+        _themeMode = ThemeMode.light;
+      case 'dark':
+        _themeMode = ThemeMode.dark;
+      default:
+        _themeMode = ThemeMode.system;
+    }
+    notifyListeners();
+  }
+
+  Future<void> setThemeMode(ThemeMode mode) async {
+    if (_themeMode == mode) return;
+    _themeMode = mode;
+    notifyListeners();
+    final prefs = await _prefs;
+    final value = switch (mode) {
+      ThemeMode.light => 'light',
+      ThemeMode.dark => 'dark',
+      ThemeMode.system => 'system',
+    };
+    await prefs.setString(_themeModeKey, value);
   }
 
   Future<void> _loadUserMode() async {

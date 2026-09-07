@@ -14,7 +14,7 @@ class RoleChooserScreen extends StatelessWidget {
     final provider = context.watch<AppProvider>();
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.scaffold(context),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -24,19 +24,19 @@ class RoleChooserScreen extends StatelessWidget {
               const SizedBox(height: 24),
               Text(
                 l10n.roleChooserTitle,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: AppColors.text(context),
                 ),
               ),
               const SizedBox(height: 12),
               Text(
                 l10n.roleChooserHint,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   height: 1.5,
-                  color: AppColors.textSecondary,
+                  color: AppColors.textMuted(context),
                 ),
               ),
               const SizedBox(height: 32),
@@ -88,7 +88,7 @@ class _RoleCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.white,
+      color: AppColors.card(context),
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -98,7 +98,7 @@ class _RoleCard extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.cardBorder),
+            border: Border.all(color: AppColors.border(context)),
           ),
           child: Row(
             children: [
@@ -106,7 +106,7 @@ class _RoleCard extends StatelessWidget {
                 width: 52,
                 height: 52,
                 decoration: BoxDecoration(
-                  color: AppColors.primarySurface,
+                  color: AppColors.primary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Icon(icon, color: AppColors.primary, size: 28),
@@ -118,25 +118,25 @@ class _RoleCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                        color: AppColors.text(context),
                       ),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       subtitle,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         height: 1.4,
-                        color: AppColors.textSecondary,
+                        color: AppColors.textMuted(context),
                       ),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right, color: AppColors.textTertiary),
+              Icon(Icons.chevron_right, color: AppColors.textMuted(context)),
             ],
           ),
         ),

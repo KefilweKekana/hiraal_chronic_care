@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:intl/intl.dart';
@@ -7,6 +9,61 @@ import '../utils/result.dart';
 import '../../models/otp_delivery.dart';
 
 typedef UnauthorizedCallback = Future<void> Function();
+
+/// Human-readable message from a Frappe/Dio failure (not just the fallback).
+String dioErrorMessage(DioException e, String fallback) {
+  final data = e.response?.data;
+  if (data is Map) {
+    try {
+      final raw = data['_server_messages']?.toString();
+      if (raw != null && raw.isNotEmpty) {
+        final msgs = json.decode(raw);
+        if (msgs is List && msgs.isNotEmpty) {
+          final inner = json.decode(msgs.first.toString());
+          final msg = inner['message']?.toString() ?? '';
+          if (msg.trim().isNotEmpty) {
+            return msg.replaceAll(RegExp(r'<[^>]*>'), '');
+          }
+        }
+      }
+    } catch (_) {}
+    final exception = data['exception']?.toString();
+    if (exception != null && exception.isNotEmpty) {
+      final sep = exception.indexOf(': ');
+      final cut = sep > 0 ? exception.substring(sep + 2) : exception;
+      if (cut.trim().isNotEmpty && cut != 'null') {
+        return cut.replaceAll(RegExp(r'<[^>]*>'), '');
+      }
+    }
+    final message = data['message'];
+    if (message is String && message.trim().isNotEmpty) return message;
+    if (message is Map) {
+      final nested = message['message']?.toString();
+      if (nested != null && nested.trim().isNotEmpty && nested != 'null') {
+        return nested;
+      }
+    }
+  }
+  if (e.type == DioExceptionType.connectionTimeout ||
+      e.type == DioExceptionType.receiveTimeout ||
+      e.type == DioExceptionType.sendTimeout) {
+    return 'The server took too long to respond. Please try again.';
+  }
+  if (e.type == DioExceptionType.connectionError ||
+      e.type == DioExceptionType.unknown) {
+    return 'Cannot reach the server. Open the app at http://localhost:8090 '
+        '(local proxy), not the UAT site directly.';
+  }
+  final network = e.message?.trim();
+  if (network != null && network.isNotEmpty) return network;
+  return fallback;
+}
+
+Map<String, dynamic>? _asStringKeyMap(dynamic value) {
+  if (value is Map<String, dynamic>) return value;
+  if (value is Map) return Map<String, dynamic>.from(value);
+  return null;
+}
 
 /// Configured Dio instance for ERPNext API calls.
 /// Auth priority: API-key header → session login.
@@ -141,11 +198,16 @@ class ApiClient {
             ? {'email': identifier, 'channel': 'email'}
             : {'mobile': identifier, 'channel': 'sms'},
       );
-      final msg = response.data?['message'] as Map<String, dynamic>?;
+      final msg = _asStringKeyMap(response.data is Map ? response.data['message'] : null);
+      if (msg != null && msg['success'] == false) {
+        return Failure(
+          msg['message']?.toString() ?? 'Failed to request OTP',
+        );
+      }
       return Success(OtpDelivery.fromMessage(msg));
     } on DioException catch (e) {
       return Failure(
-        e.response?.data?['message']?.toString() ?? 'Failed to request OTP',
+        dioErrorMessage(e, 'Failed to request OTP'),
         statusCode: e.response?.statusCode,
       );
     } catch (e) {
@@ -174,7 +236,7 @@ class ApiClient {
       return Success(credentials);
     } on DioException catch (e) {
       return Failure(
-        e.response?.data?['message']?.toString() ?? 'Invalid or expired OTP',
+        dioErrorMessage(e, 'Invalid or expired OTP'),
         statusCode: e.response?.statusCode,
       );
     } catch (e) {
@@ -217,7 +279,7 @@ class ApiClient {
       });
     } on DioException catch (e) {
       return Failure(
-        e.response?.data?['message']?.toString() ?? 'Registration failed',
+        dioErrorMessage(e, 'Registration failed'),
         statusCode: e.response?.statusCode,
       );
     } catch (e) {
@@ -233,11 +295,14 @@ class ApiClient {
             ? {'email': identifier, 'channel': 'email'}
             : {'mobile': identifier, 'channel': 'sms'},
       );
-      final msg = response.data?['message'] as Map<String, dynamic>?;
+      final msg = _asStringKeyMap(response.data is Map ? response.data['message'] : null);
+      if (msg != null && msg['success'] == false) {
+        return Failure(msg['message']?.toString() ?? 'Failed to resend OTP');
+      }
       return Success(OtpDelivery.fromMessage(msg));
     } on DioException catch (e) {
       return Failure(
-        e.response?.data?['message']?.toString() ?? 'Failed to resend OTP',
+        dioErrorMessage(e, 'Failed to resend OTP'),
         statusCode: e.response?.statusCode,
       );
     } catch (e) {

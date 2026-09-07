@@ -773,7 +773,7 @@ abstract class AppLocalizations {
   /// No description provided for @viewHistory.
   ///
   /// In en, this message translates to:
-  /// **'View History'**
+  /// **'History'**
   String get viewHistory;
 
   /// No description provided for @servicesTitle.
@@ -3611,7 +3611,7 @@ abstract class AppLocalizations {
   /// No description provided for @caregiverPortalWelcome.
   ///
   /// In en, this message translates to:
-  /// **'Family Care Portal'**
+  /// **'For My Family'**
   String get caregiverPortalWelcome;
 
   /// No description provided for @caregiverPortalWelcomeHint.
@@ -3647,25 +3647,25 @@ abstract class AppLocalizations {
   /// No description provided for @openPatientApp.
   ///
   /// In en, this message translates to:
-  /// **'Open patient app'**
+  /// **'For Myself'**
   String get openPatientApp;
 
   /// No description provided for @openPatientAppHint.
   ///
   /// In en, this message translates to:
-  /// **'Log readings, vitals, and use your care plan.'**
+  /// **'Manage my health, book appointments and more.'**
   String get openPatientAppHint;
 
   /// No description provided for @switchToFamilyCare.
   ///
   /// In en, this message translates to:
-  /// **'Open Family Care portal'**
+  /// **'For My Family'**
   String get switchToFamilyCare;
 
   /// No description provided for @switchToFamilyCareHint.
   ///
   /// In en, this message translates to:
-  /// **'View sponsorships and support loved ones.'**
+  /// **'Manage a loved one\'s health and care.'**
   String get switchToFamilyCareHint;
 
   /// No description provided for @roleChooserTitle.
@@ -3683,25 +3683,25 @@ abstract class AppLocalizations {
   /// No description provided for @roleChooserPatientTitle.
   ///
   /// In en, this message translates to:
-  /// **'My patient care'**
+  /// **'For Myself'**
   String get roleChooserPatientTitle;
 
   /// No description provided for @roleChooserPatientHint.
   ///
   /// In en, this message translates to:
-  /// **'Log readings, connect devices, and use clinic services.'**
+  /// **'Manage my health, book appointments and more.'**
   String get roleChooserPatientHint;
 
   /// No description provided for @roleChooserCaregiverTitle.
   ///
   /// In en, this message translates to:
-  /// **'Family Care portal'**
+  /// **'For My Family'**
   String get roleChooserCaregiverTitle;
 
   /// No description provided for @roleChooserCaregiverHint.
   ///
   /// In en, this message translates to:
-  /// **'View updates and support the people you care for.'**
+  /// **'Manage my family member\'s health and care.'**
   String get roleChooserCaregiverHint;
 
   /// No description provided for @signupAsSupporterHint.
@@ -3727,6 +3727,738 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sponsorship details'**
   String get sponsorshipDetailsTitle;
+
+  /// No description provided for @includedInPlanFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Included in your plan, FREE for you'**
+  String get includedInPlanFree;
+
+  /// No description provided for @paymentRequiredNotInPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Not included in your plan – Payment required'**
+  String get paymentRequiredNotInPlan;
+
+  /// No description provided for @confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirm;
+
+  /// No description provided for @completePayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Payment'**
+  String get completePayment;
+
+  /// No description provided for @chooseDateTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose date and time'**
+  String get chooseDateTime;
+
+  /// No description provided for @noSlotsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No available times yet. Ask the clinic to set a Practitioner Schedule.'**
+  String get noSlotsYet;
+
+  /// No description provided for @choosePerson.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose who you care for'**
+  String get choosePerson;
+
+  /// No description provided for @peopleICareFor.
+  ///
+  /// In en, this message translates to:
+  /// **'People I Care For'**
+  String get peopleICareFor;
+
+  /// No description provided for @peopleICareForHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage and view the family members you care for or sponsor.'**
+  String get peopleICareForHint;
+
+  /// No description provided for @noPeopleYet.
+  ///
+  /// In en, this message translates to:
+  /// **'You have not added anyone yet. Tap Add Family Member to start.'**
+  String get noPeopleYet;
+
+  /// No description provided for @addFamilyMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Family Member'**
+  String get addFamilyMember;
+
+  /// No description provided for @addFamilyMemberHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Create or link a loved one so you can manage their care.'**
+  String get addFamilyMemberHint;
+
+  /// No description provided for @plansAndPayments.
+  ///
+  /// In en, this message translates to:
+  /// **'Plans and Payments'**
+  String get plansAndPayments;
+
+  /// No description provided for @plansAndPaymentsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Their care plans, payments and receipts.'**
+  String get plansAndPaymentsHint;
+
+  /// No description provided for @familyAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Access'**
+  String get familyAccess;
+
+  /// No description provided for @familyAccessHint.
+  ///
+  /// In en, this message translates to:
+  /// **'People allowed to help with care.'**
+  String get familyAccessHint;
+
+  /// No description provided for @caregiverAccountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Caregiver Account'**
+  String get caregiverAccountTitle;
+
+  /// No description provided for @caregiverAccountHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage your loved ones, plans, payments and settings.'**
+  String get caregiverAccountHint;
+
+  /// No description provided for @caregiverServicesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Services'**
+  String get caregiverServicesTitle;
+
+  /// No description provided for @caregiverServicesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage care and health services for your loved one.'**
+  String get caregiverServicesHint;
+
+  /// No description provided for @caregiverHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get caregiverHistoryTitle;
+
+  /// No description provided for @caregiverHistoryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'View past readings, tests, appointments and medicines.'**
+  String get caregiverHistoryHint;
+
+  /// No description provided for @todaysReadings.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s Readings'**
+  String get todaysReadings;
+
+  /// No description provided for @upNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Up Next'**
+  String get upNext;
+
+  /// No description provided for @needsYourAttention.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs Your Attention'**
+  String get needsYourAttention;
+
+  /// No description provided for @requestRefill.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Refill'**
+  String get requestRefill;
+
+  /// No description provided for @prepareNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare Now'**
+  String get prepareNow;
+
+  /// No description provided for @whatsDue.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s Due'**
+  String get whatsDue;
+
+  /// No description provided for @viewHealth.
+  ///
+  /// In en, this message translates to:
+  /// **'View Health'**
+  String get viewHealth;
+
+  /// No description provided for @filterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get filterAll;
+
+  /// No description provided for @filterReadings.
+  ///
+  /// In en, this message translates to:
+  /// **'Readings'**
+  String get filterReadings;
+
+  /// No description provided for @filterAppointments.
+  ///
+  /// In en, this message translates to:
+  /// **'Appointments'**
+  String get filterAppointments;
+
+  /// No description provided for @filterLabs.
+  ///
+  /// In en, this message translates to:
+  /// **'Lab Tests'**
+  String get filterLabs;
+
+  /// No description provided for @filterMedicines.
+  ///
+  /// In en, this message translates to:
+  /// **'Medicines'**
+  String get filterMedicines;
+
+  /// No description provided for @viewMoreHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'View More History'**
+  String get viewMoreHistory;
+
+  /// No description provided for @darkTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark theme'**
+  String get darkTheme;
+
+  /// No description provided for @darkThemeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Easier on the eyes at night. Follows your phone unless you pick Light or Dark.'**
+  String get darkThemeSubtitle;
+
+  /// No description provided for @darkThemeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get darkThemeSystem;
+
+  /// No description provided for @darkThemeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get darkThemeLight;
+
+  /// No description provided for @darkThemeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get darkThemeDark;
+
+  /// No description provided for @languageScreenHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your preferred language for the app.'**
+  String get languageScreenHint;
+
+  /// No description provided for @languageHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'You can change the language at any time from My Account.'**
+  String get languageHelper;
+
+  /// No description provided for @languagePreviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Date and number format preview'**
+  String get languagePreviewTitle;
+
+  /// No description provided for @languageGoodToKnow.
+  ///
+  /// In en, this message translates to:
+  /// **'Changing the language will update the entire app experience, including notifications and messages.'**
+  String get languageGoodToKnow;
+
+  /// No description provided for @selectedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected'**
+  String get selectedBadge;
+
+  /// No description provided for @searchByName.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name'**
+  String get searchByName;
+
+  /// No description provided for @memberSince.
+  ///
+  /// In en, this message translates to:
+  /// **'Member since'**
+  String get memberSince;
+
+  /// No description provided for @safeHandsFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Your loved ones are in safe hands. You can manage their care, appointments, medicines and more in one place.'**
+  String get safeHandsFooter;
+
+  /// No description provided for @paymentHistoryTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment History'**
+  String get paymentHistoryTab;
+
+  /// No description provided for @peopleTab.
+  ///
+  /// In en, this message translates to:
+  /// **'People'**
+  String get peopleTab;
+
+  /// No description provided for @currentPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Plan'**
+  String get currentPlan;
+
+  /// No description provided for @whatsIncluded.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s Included'**
+  String get whatsIncluded;
+
+  /// No description provided for @viewPlanDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'View Plan Details'**
+  String get viewPlanDetails;
+
+  /// No description provided for @upcomingPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming Payment'**
+  String get upcomingPayment;
+
+  /// No description provided for @contactSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Support'**
+  String get contactSupport;
+
+  /// No description provided for @myAccountRow.
+  ///
+  /// In en, this message translates to:
+  /// **'My Account'**
+  String get myAccountRow;
+
+  /// No description provided for @myAccountRowHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal information and account details.'**
+  String get myAccountRowHint;
+
+  /// No description provided for @seeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See All'**
+  String get seeAll;
+
+  /// No description provided for @noIssues.
+  ///
+  /// In en, this message translates to:
+  /// **'No issues'**
+  String get noIssues;
+
+  /// No description provided for @goodStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Good'**
+  String get goodStatus;
+
+  /// No description provided for @dueInDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Due in {days} days'**
+  String dueInDays(int days);
+
+  /// No description provided for @changePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Plan'**
+  String get changePlan;
+
+  /// No description provided for @bookDoctorCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Book Doctor'**
+  String get bookDoctorCard;
+
+  /// No description provided for @requestMedicineCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Medicine'**
+  String get requestMedicineCard;
+
+  /// No description provided for @requestLabCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Lab Test'**
+  String get requestLabCard;
+
+  /// No description provided for @healthRecordsCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Health Records'**
+  String get healthRecordsCard;
+
+  /// No description provided for @careTeamCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Care Team'**
+  String get careTeamCard;
+
+  /// No description provided for @continueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get continueLabel;
+
+  /// No description provided for @selectClinicButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Select clinic'**
+  String get selectClinicButton;
+
+  /// No description provided for @age.
+  ///
+  /// In en, this message translates to:
+  /// **'Age'**
+  String get age;
+
+  /// No description provided for @ageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter age in years'**
+  String get ageHint;
+
+  /// No description provided for @ageInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an age from 1–120'**
+  String get ageInvalid;
+
+  /// No description provided for @welcomeHello.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome!'**
+  String get welcomeHello;
+
+  /// No description provided for @welcomeContinueHint.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll help you get the care you need.'**
+  String get welcomeContinueHint;
+
+  /// No description provided for @caregiverSignInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Caregiver sign in'**
+  String get caregiverSignInTitle;
+
+  /// No description provided for @enterMobileCaregiver.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the mobile number you registered as a caregiver.'**
+  String get enterMobileCaregiver;
+
+  /// No description provided for @seeADoctor.
+  ///
+  /// In en, this message translates to:
+  /// **'See a Doctor'**
+  String get seeADoctor;
+
+  /// No description provided for @seeADoctorHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Video call or clinic'**
+  String get seeADoctorHint;
+
+  /// No description provided for @getMedicine.
+  ///
+  /// In en, this message translates to:
+  /// **'Get Medicine'**
+  String get getMedicine;
+
+  /// No description provided for @getMedicineHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Send your doctor\'s paper, we deliver'**
+  String get getMedicineHint;
+
+  /// No description provided for @bloodTest.
+  ///
+  /// In en, this message translates to:
+  /// **'Blood Test'**
+  String get bloodTest;
+
+  /// No description provided for @bloodTestHint.
+  ///
+  /// In en, this message translates to:
+  /// **'At home or at the clinic'**
+  String get bloodTestHint;
+
+  /// No description provided for @talkToCareTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Talk to my care team'**
+  String get talkToCareTeam;
+
+  /// No description provided for @talkToCareTeamHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Hiraal Care Team · 8 AM – 8 PM'**
+  String get talkToCareTeamHint;
+
+  /// No description provided for @howDoYouFeelToday.
+  ///
+  /// In en, this message translates to:
+  /// **'How do you feel today?'**
+  String get howDoYouFeelToday;
+
+  /// No description provided for @sendReadings.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Readings'**
+  String get sendReadings;
+
+  /// No description provided for @emergencyCallShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency? Call {number}'**
+  String emergencyCallShort(String number);
+
+  /// No description provided for @chooseDoctorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a Doctor'**
+  String get chooseDoctorTitle;
+
+  /// No description provided for @onlineDoctorsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Talk to a doctor from the comfort of your home.'**
+  String get onlineDoctorsHint;
+
+  /// No description provided for @reasonOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Anything we should know? (optional)'**
+  String get reasonOptional;
+
+  /// No description provided for @bookingOnBehalf.
+  ///
+  /// In en, this message translates to:
+  /// **'For {name} · you are doing this on their behalf'**
+  String bookingOnBehalf(String name);
+
+  /// No description provided for @createYourAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your account'**
+  String get createYourAccount;
+
+  /// No description provided for @fourQuickDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Four quick details. You can choose a plan after.'**
+  String get fourQuickDetails;
+
+  /// No description provided for @areYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you…'**
+  String get areYou;
+
+  /// No description provided for @maleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Male'**
+  String get maleLabel;
+
+  /// No description provided for @femaleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Female'**
+  String get femaleLabel;
+
+  /// No description provided for @fullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name'**
+  String get fullName;
+
+  /// No description provided for @fullNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your full name'**
+  String get fullNameHint;
+
+  /// No description provided for @genderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Gender'**
+  String get genderLabel;
+
+  /// No description provided for @emailOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Email (optional)'**
+  String get emailOptional;
+
+  /// No description provided for @createAccountCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Account'**
+  String get createAccountCta;
+
+  /// No description provided for @alreadyHaveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account?'**
+  String get alreadyHaveAccount;
+
+  /// No description provided for @signInLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get signInLink;
+
+  /// No description provided for @selectADate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a Date'**
+  String get selectADate;
+
+  /// No description provided for @selectATime.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a Time'**
+  String get selectATime;
+
+  /// No description provided for @todayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get todayLabel;
+
+  /// No description provided for @upcomingShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get upcomingShort;
+
+  /// No description provided for @relationshipParent.
+  ///
+  /// In en, this message translates to:
+  /// **'Parent'**
+  String get relationshipParent;
+
+  /// No description provided for @relationshipSibling.
+  ///
+  /// In en, this message translates to:
+  /// **'Sibling'**
+  String get relationshipSibling;
+
+  /// No description provided for @filterActiveStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get filterActiveStatus;
+
+  /// No description provided for @filterInactiveStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get filterInactiveStatus;
+
+  /// No description provided for @yearsOld.
+  ///
+  /// In en, this message translates to:
+  /// **'{age} years'**
+  String yearsOld(int age);
+
+  /// No description provided for @totalReadings.
+  ///
+  /// In en, this message translates to:
+  /// **'Total readings'**
+  String get totalReadings;
+
+  /// No description provided for @avgBp.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg. BP'**
+  String get avgBp;
+
+  /// No description provided for @avgSugar.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg. Sugar'**
+  String get avgSugar;
+
+  /// No description provided for @viewResults.
+  ///
+  /// In en, this message translates to:
+  /// **'View Results'**
+  String get viewResults;
+
+  /// No description provided for @resultsNotReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Results are not ready yet.'**
+  String get resultsNotReady;
+
+  /// No description provided for @includedConsultations.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited doctor consultations'**
+  String get includedConsultations;
+
+  /// No description provided for @includedLabs.
+  ///
+  /// In en, this message translates to:
+  /// **'Lab tests and diagnostics'**
+  String get includedLabs;
+
+  /// No description provided for @includedMedicine.
+  ///
+  /// In en, this message translates to:
+  /// **'Medicine delivery'**
+  String get includedMedicine;
+
+  /// No description provided for @includedPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority support'**
+  String get includedPriority;
+
+  /// No description provided for @outOfPlanPaymentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Payment'**
+  String get outOfPlanPaymentTitle;
 }
 
 class _AppLocalizationsDelegate

@@ -55,4 +55,29 @@ abstract class CaregiverService {
     required String patient,
     required String dataType,
   });
+
+  Future<Result<Map<String, dynamic>>> addFamilyMember({
+    required String fullName,
+    required String relationship,
+    required String phone,
+    String countryCode = '+252',
+    String? sex,
+    String? dob,
+    String? email,
+  });
+
+  Future<Result<CaregiverInvitation>> grantFamilyAccess({
+    required String patient,
+    required String countryCode,
+    required String whatsappNumber,
+    required String relationship,
+    String? familyMemberName,
+    Map<String, bool>? permissions,
+  });
+
+  Future<Result<Map<String, dynamic>>> caregiverHome(String patient);
+
+  Future<Result<List<SponsorshipSummary>>> peopleICareFor({String? query});
+
+  Future<Result<Map<String, dynamic>>> plansAndPayments();
 }
