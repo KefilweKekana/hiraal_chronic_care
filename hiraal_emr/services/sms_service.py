@@ -6,6 +6,24 @@ def _get_settings():
     return frappe.get_doc("Chronic Care Settings", "Chronic Care Settings")
 
 
+def _normalize_msisdn(to: str) -> str:
+    """Digits-only MSISDN. Somali 9-digit 6… numbers become 252… (no plus).
+
+    Telesom rejects ``+252…`` even when Frappe ``request_otp`` reports success.
+    """
+    mobile = str(to or "").strip().replace(" ", "").replace("-", "").replace("+", "")
+    if mobile.startswith("00"):
+        mobile = mobile[2:]
+    if mobile.startswith("252"):
+        nsn = mobile[3:].lstrip("0")
+        return f"252{nsn}" if nsn else mobile
+    if mobile.startswith("0"):
+        mobile = mobile.lstrip("0")
+    if len(mobile) == 9 and mobile.startswith("6"):
+        return f"252{mobile}"
+    return mobile
+
+
 def send_sms(to: str, message: str) -> dict:
     """Send SMS.
 
@@ -17,6 +35,8 @@ def send_sms(to: str, message: str) -> dict:
     Falls back to the provider configured in Chronic Care Settings only when the
     ``telesom_sms`` app is not available.
     """
+    to = _normalize_msisdn(to)
+
     # 1) Direct integration with the dedicated telesom_sms app.
     try:
         from telesom_sms.services.telesom_api import send_single_sms

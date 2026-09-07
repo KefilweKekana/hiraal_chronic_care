@@ -14,6 +14,22 @@
     "currency",
     "allows_trial",
     "is_featured",
+    "section_coverage",
+    "include_consultations",
+    "consultation_quota_monthly",
+    "consultation_fee",
+    "include_video_consultations",
+    "video_quota_monthly",
+    "video_consultation_fee",
+    "include_lab_tests",
+    "lab_quota_monthly",
+    "lab_default_fee",
+    "include_medicines",
+    "medicine_quota_monthly",
+    "medicine_default_fee",
+    "include_home_sample",
+    "home_sample_quota_monthly",
+    "home_sample_fee",
     "section_copy",
     "description",
     "features"
@@ -82,6 +98,101 @@
       "fieldtype": "Check",
       "label": "Featured / Popular",
       "default": 0
+    },
+    {
+      "fieldname": "section_coverage",
+      "fieldtype": "Section Break",
+      "label": "What the plan covers"
+    },
+    {
+      "fieldname": "include_consultations",
+      "fieldtype": "Check",
+      "label": "Include Clinic Consultations",
+      "default": 1
+    },
+    {
+      "fieldname": "consultation_quota_monthly",
+      "fieldtype": "Int",
+      "label": "Clinic Consultations / Month (0 = unlimited)",
+      "default": 0
+    },
+    {
+      "fieldname": "consultation_fee",
+      "fieldtype": "Currency",
+      "label": "Out-of-plan Clinic Fee",
+      "default": 10
+    },
+    {
+      "fieldname": "include_video_consultations",
+      "fieldtype": "Check",
+      "label": "Include Video Consultations",
+      "default": 1
+    },
+    {
+      "fieldname": "video_quota_monthly",
+      "fieldtype": "Int",
+      "label": "Video Consultations / Month (0 = unlimited)",
+      "default": 0
+    },
+    {
+      "fieldname": "video_consultation_fee",
+      "fieldtype": "Currency",
+      "label": "Out-of-plan Video Fee",
+      "default": 10
+    },
+    {
+      "fieldname": "include_lab_tests",
+      "fieldtype": "Check",
+      "label": "Include Lab Tests",
+      "default": 1
+    },
+    {
+      "fieldname": "lab_quota_monthly",
+      "fieldtype": "Int",
+      "label": "Lab Tests / Month (0 = unlimited)",
+      "default": 0
+    },
+    {
+      "fieldname": "lab_default_fee",
+      "fieldtype": "Currency",
+      "label": "Out-of-plan Lab Fee",
+      "default": 15
+    },
+    {
+      "fieldname": "include_medicines",
+      "fieldtype": "Check",
+      "label": "Include Medicine Refills",
+      "default": 1
+    },
+    {
+      "fieldname": "medicine_quota_monthly",
+      "fieldtype": "Int",
+      "label": "Medicine Orders / Month (0 = unlimited)",
+      "default": 0
+    },
+    {
+      "fieldname": "medicine_default_fee",
+      "fieldtype": "Currency",
+      "label": "Out-of-plan Medicine Fee",
+      "default": 0
+    },
+    {
+      "fieldname": "include_home_sample",
+      "fieldtype": "Check",
+      "label": "Include Home Sample Collection",
+      "default": 1
+    },
+    {
+      "fieldname": "home_sample_quota_monthly",
+      "fieldtype": "Int",
+      "label": "Home Collections / Month (0 = unlimited)",
+      "default": 0
+    },
+    {
+      "fieldname": "home_sample_fee",
+      "fieldtype": "Currency",
+      "label": "Out-of-plan Home Collection Fee",
+      "default": 8
     },
     {
       "fieldname": "section_copy",

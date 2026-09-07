@@ -593,3 +593,298 @@ def activate_sponsored_care(link_name: str):
     doc.activated_on = now_datetime()
     doc.is_sponsor = 1
     doc.save(ignore_permissions=True)
+
+
+def _caregiver_link_for(patient: str, user: str | None = None):
+    user = user or frappe.session.user
+    if not user or user == "Guest":
+        return None
+    return frappe.db.get_value(
+        "Family Member",
+        {
+            "patient": patient,
+            "caregiver_user": user,
+            "link_status": ["in", ["Accepted", "Active"]],
+        },
+        LINK_FIELDS,
+        as_dict=True,
+    )
+
+
+def add_family_member(
+    full_name: str,
+    relationship: str,
+    country_code: str,
+    phone: str,
+    sex: str | None = None,
+    dob: str | None = None,
+    email: str | None = None,
+    as_sponsor: int = 1,
+):
+    """Caregiver creates or links a patient they will care for / sponsor."""
+    user = frappe.session.user
+    if not user or user == "Guest":
+        frappe.throw(_("Not authenticated"), frappe.AuthenticationError)
+    rate_limit(client_rate_key("add_family", user), limit=20, window_sec=3600)
+
+    full_name = (full_name or "").strip()
+    if len(full_name) < 2:
+        frappe.throw(_("Enter the family member's full name"))
+    phone_norm = normalize_phone(country_code or "+252", phone)
+    existing = _patient_by_phone(phone_norm)
+
+    if existing:
+        already = frappe.db.get_value(
+            "Family Member",
+            {
+                "patient": existing.name,
+                "caregiver_user": user,
+                "link_status": ["in", ["Pending", "Accepted", "Active"]],
+            },
+            "name",
+        )
+        if already:
+            doc = frappe.get_doc("Family Member", already)
+            return doc, "linked"
+
+        doc = frappe.new_doc("Family Member")
+        doc.patient = existing.name
+        doc.family_member_name = frappe.db.get_value("User", user, "full_name") or user
+        doc.relationship = relationship or "Other"
+        doc.country_code = country_code or "+252"
+        doc.whatsapp_number = phone
+        doc.phone = phone_norm
+        doc.email = email
+        doc.invite_direction = "Sponsor Requested"
+        doc.link_status = "Pending"
+        doc.invite_token = _invite_token()
+        doc.invite_code = _invite_code()
+        doc.is_active = 1
+        doc.is_sponsor = 1 if as_sponsor else 0
+        doc.can_pay_for_care = 1 if as_sponsor else 0
+        doc.can_view_vitals = 1
+        doc.can_view_appointments = 1
+        doc.can_view_medications = 1
+        doc.can_receive_alerts = 1
+        doc.requested_on = now_datetime()
+        doc.caregiver_user = user
+        doc.insert(ignore_permissions=True)
+        return doc, "pending_consent"
+
+    patient = frappe.new_doc("Patient")
+    patient.patient_name = full_name
+    patient.sex = sex or "Other"
+    if dob:
+        patient.dob = dob
+    patient.mobile = phone_norm
+    if email:
+        patient.email = email
+    if hasattr(patient, "status"):
+        patient.status = "Active"
+    patient.insert(ignore_permissions=True)
+
+    doc = frappe.new_doc("Family Member")
+    doc.patient = patient.name
+    doc.family_member_name = frappe.db.get_value("User", user, "full_name") or user
+    doc.relationship = relationship or "Other"
+    doc.country_code = country_code or "+252"
+    doc.whatsapp_number = phone
+    doc.phone = phone_norm
+    doc.email = email
+    doc.invite_direction = "Desk Created"
+    doc.link_status = "Active"
+    doc.invite_token = _invite_token()
+    doc.invite_code = _invite_code()
+    doc.is_active = 1
+    doc.is_sponsor = 1 if as_sponsor else 0
+    doc.can_pay_for_care = 1 if as_sponsor else 0
+    doc.can_view_vitals = 1
+    doc.can_view_appointments = 1
+    doc.can_view_medications = 1
+    doc.can_receive_alerts = 1
+    doc.requested_on = now_datetime()
+    doc.activated_on = now_datetime()
+    doc.caregiver_user = user
+    doc.insert(ignore_permissions=True)
+    return doc, "created"
+
+
+def grant_family_access(
+    patient: str,
+    country_code: str,
+    whatsapp_number: str,
+    relationship: str,
+    family_member_name: str | None = None,
+    permissions=None,
+):
+    """A caregiver invites another family member to help with a patient they manage."""
+    user = frappe.session.user
+    link = _caregiver_link_for(patient, user)
+    if not link:
+        frappe.throw(_("You can only grant access for people you care for"), frappe.PermissionError)
+    return invite_caregiver(
+        patient,
+        country_code,
+        whatsapp_number,
+        relationship,
+        family_member_name,
+        permissions,
+    )
+
+
+def caregiver_home_bundle(patient: str, user: str | None = None):
+    """One-glance data for Caregiver Home: readings, next appt/lab, refill."""
+    user = user or frappe.session.user
+    link = _caregiver_link_for(patient, user)
+    if not link:
+        frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+    latest = {}
+    if link.get("can_view_vitals"):
+        reading = frappe.get_all(
+            "Daily Reading",
+            filters={"patient": patient},
+            fields=[
+                "reading_date", "reading_time", "bp_systolic", "bp_diastolic",
+                "blood_sugar", "medicine_taken", "risk_level",
+            ],
+            order_by="reading_date desc, reading_time desc",
+            limit=1,
+            ignore_permissions=True,
+        )
+        latest = reading[0] if reading else {}
+
+    next_appt = None
+    if link.get("can_view_appointments"):
+        appts = frappe.get_all(
+            "Patient Appointment",
+            filters={
+                "patient": patient,
+                "appointment_date": [">=", frappe.utils.today()],
+                "status": ["not in", ("Closed", "Cancelled")],
+            },
+            fields=["name", "practitioner_name", "appointment_date", "appointment_time", "status"],
+            order_by="appointment_date asc, appointment_time asc",
+            limit=1,
+            ignore_permissions=True,
+        )
+        next_appt = appts[0] if appts else None
+
+    next_lab = None
+    if link.get("can_view_appointments"):
+        labs = frappe.get_all(
+            "Lab Test",
+            filters={"patient": patient, "status": ["not in", ("Completed", "Cancelled")]},
+            fields=["name", "template", "status", "creation"],
+            order_by="creation desc",
+            limit=1,
+            ignore_permissions=True,
+        )
+        next_lab = labs[0] if labs else None
+
+    refill = None
+    if link.get("can_view_medications"):
+        orders = frappe.get_all(
+            "Medicine Request",
+            filters={"patient": patient, "status": ["not in", ("Cancelled", "Delivered")]},
+            fields=["name", "status", "modified"],
+            order_by="modified desc",
+            limit=1,
+            ignore_permissions=True,
+        )
+        refill = orders[0] if orders else None
+
+    sub = frappe.db.get_value(
+        "Care Subscription",
+        {"patient": patient, "status": ["in", ["Active", "Overdue", "Past Due", "Expiring Soon"]]},
+        ["name", "plan", "monthly_fee", "status", "next_billing_date"],
+        as_dict=True,
+    )
+    patient_row = frappe.db.get_value(
+        "Patient",
+        patient,
+        ["patient_name", "sex", "dob", "mobile", "status"],
+        as_dict=True,
+    ) or {}
+
+    return {
+        "success": True,
+        "link": _serialize_link(link),
+        "patient": {
+            "name": patient,
+            "patient_name": patient_row.get("patient_name"),
+            "sex": patient_row.get("sex"),
+            "dob": patient_row.get("dob"),
+            "mobile": patient_row.get("mobile"),
+            "status": patient_row.get("status"),
+            "relationship": link.get("relationship"),
+        },
+        "plan": {
+            "plan": sub.plan if sub else None,
+            "monthly_fee": flt(sub.monthly_fee) if sub else 0,
+            "status": sub.status if sub else None,
+            "next_billing_date": sub.next_billing_date if sub else None,
+        },
+        "latest_reading": latest,
+        "next_appointment": next_appt,
+        "next_lab": next_lab,
+        "refill": refill,
+    }
+
+
+def list_people_i_care_for(user: str | None = None, query: str | None = None):
+    """People I Care For list with plan + member-since for the caregiver app."""
+    items = list_sponsorships_for_user(user or frappe.session.user)
+    needle = (query or "").strip().lower()
+    out = []
+    for item in items:
+        name = (item.get("patient_name") or "").lower()
+        if needle and needle not in name and needle not in (item.get("patient") or "").lower():
+            continue
+        dob = frappe.db.get_value("Patient", item.get("patient"), "dob")
+        age = None
+        if dob:
+            try:
+                from frappe.utils import date_diff, getdate, today
+                age = int(date_diff(today(), getdate(dob)) / 365.25)
+            except Exception:
+                age = None
+        item["age"] = age
+        item["member_since"] = item.get("creation") or item.get("activated_on") or item.get("accepted_on")
+        item["status"] = item.get("link_status") or item.get("status")
+        out.append(item)
+    return out
+
+
+def plans_and_payments(user: str | None = None):
+    """Plans, next payment, and receipts for every sponsored patient."""
+    user = user or frappe.session.user
+    people = list_sponsorships_for_user(user)
+    receipts = []
+    if frappe.db.exists("DocType", "Subscription Payment"):
+        patient_ids = [p.get("patient") for p in people if p.get("patient")]
+        if patient_ids:
+            receipts = frappe.get_all(
+                "Subscription Payment",
+                filters={"patient": ["in", patient_ids], "paid_by_user": user},
+                fields=[
+                    "name", "patient", "patient_name", "amount", "payment_date",
+                    "payment_method", "status", "transaction_id",
+                ],
+                order_by="payment_date desc",
+                limit=40,
+                ignore_permissions=True,
+            )
+            if not receipts:
+                receipts = frappe.get_all(
+                    "Subscription Payment",
+                    filters={"patient": ["in", patient_ids]},
+                    fields=[
+                        "name", "patient", "patient_name", "amount", "payment_date",
+                        "payment_method", "status", "transaction_id",
+                    ],
+                    order_by="payment_date desc",
+                    limit=40,
+                    ignore_permissions=True,
+                )
+    return {"people": people, "receipts": receipts}

@@ -676,10 +676,12 @@ def request_otp(mobile=None, channel="sms", email=None):
     # ── SMS path ──
     if not mobile or len(str(mobile).strip()) < 6:
         frappe.throw(_("Valid mobile number is required"))
-    mobile = str(mobile).strip()
+    mobile = _normalize_otp_mobile(mobile)
+    if not mobile or len(mobile) < 6:
+        frappe.throw(_("Valid mobile number is required"))
     if not request_allowed(mobile):
         frappe.logger("hiraal_otp").warning("OTP rate limit exceeded for %s", mobile)
-        return {"success": True, "message": "OTP sent", "channel": "sms", "sent_to": None}
+        frappe.throw(_("Please wait before requesting another code"))
     otp = generate_otp(mobile)
     used = "sms"
     sent_to = None
@@ -690,6 +692,10 @@ def request_otp(mobile=None, channel="sms", email=None):
         if on_file and send_otp_email(on_file, otp):
             used = "email"
             sent_to = _mask_email(on_file)
+        else:
+            reason = (sms_result or {}).get("reason") or "SMS could not be sent"
+            frappe.logger("hiraal_otp").error("OTP SMS failed for %s: %s", mobile, reason)
+            frappe.throw(_("Could not send the verification SMS. Please try again in a few minutes."))
     frappe.logger("hiraal_otp").info(f"OTP request {mobile}: delivered={used}")
     return {"success": True, "message": "OTP sent", "channel": used, "sent_to": sent_to}
 
@@ -754,6 +760,21 @@ def _otp_step_log(step, detail=""):
         frappe.logger("hiraal_otp").exception("failed to write OTP step log")
 
 
+def _normalize_otp_mobile(mobile):
+    """Canonical OTP/SMS MSISDN: digits only, Somali 9-digit 6… → 252… (no plus)."""
+    digits = "".join(c for c in str(mobile or "") if c.isdigit())
+    if digits.startswith("00"):
+        digits = digits[2:]
+    if digits.startswith("252"):
+        nsn = digits[3:].lstrip("0")
+        return f"252{nsn}" if nsn else digits
+    if digits.startswith("0"):
+        digits = digits.lstrip("0")
+    if len(digits) == 9 and digits.startswith("6"):
+        return f"252{digits}"
+    return digits
+
+
 def _mobile_candidates(mobile):
     """Common stored formats for a phone number, so patient lookup matches
     whether it was saved as +252…, 252…, 0…, or the bare national number."""
@@ -761,7 +782,7 @@ def _mobile_candidates(mobile):
     digits = "".join(c for c in raw if c.isdigit())
     nsn = digits[3:] if digits.startswith("252") else digits
     nsn = nsn.lstrip("0")
-    cands = {raw, digits}
+    cands = {raw, digits, _normalize_otp_mobile(raw)}
     if nsn:
         cands.update({nsn, "0" + nsn, "252" + nsn, "+252" + nsn})
     return [c for c in cands if c]
@@ -981,12 +1002,20 @@ def get_my_patient():
     return data
 
 
+def _own_patient_name_or_none():
+    """Patient linked to the session user, or None for caregiver-only accounts."""
+    user = frappe.session.user
+    if not user or user == "Guest":
+        return None
+    return frappe.db.get_value("Patient", {"user_id": user}, "name")
+
+
 def _my_patient_name():
     """Resolve the Patient linked to the currently authenticated user."""
     user = frappe.session.user
     if not user or user == "Guest":
         frappe.throw(_("Not authenticated"), frappe.AuthenticationError)
-    name = frappe.db.get_value("Patient", {"user_id": user}, "name")
+    name = _own_patient_name_or_none()
     if not name:
         frappe.throw(_("No patient linked to this account"), frappe.AuthenticationError)
     return name
@@ -1419,23 +1448,49 @@ def _telemed_room_url(appointment_name):
     return f"https://meet.jit.si/HiraalCare-{safe}-{token}"
 
 
+@frappe.whitelist()
+def get_available_slots(practitioner, days=14, visit_type=None):
+    """Available appointment slots from Practitioner Schedule for the app picker."""
+    from hiraal_emr.services.availability import get_available_slots as _slots
+
+    return _slots(practitioner, days=days, visit_type=visit_type)
+
+
+@frappe.whitelist()
+def check_service_coverage(patient, service_type, template=None, appointment_type=None):
+    """Whether a service is included in the patient's plan (server-side)."""
+    from hiraal_emr.services.plan_coverage import check_coverage
+
+    _require_patient_access(patient)
+    extra = {}
+    if template:
+        extra["template"] = template
+    if appointment_type:
+        extra["appointment_type"] = appointment_type
+    return check_coverage(patient, service_type, extra)
+
+
 @frappe.whitelist(allow_guest=False)
 def book_appointment(patient, practitioner, appointment_date,
                      appointment_time=None, appointment_type="Chronic Care Follow Up",
                      notes=None, is_video=0, care_station=None):
     """Book a patient appointment from the mobile app.
 
-    ``notes`` carries the patient's reason for the visit so the clinician sees
-    why the appointment was requested (previously collected in the app but
-    dropped on the way to the server). When ``is_video`` is set, a Telemedicine
-    Session with a Jitsi meeting link is created and the link is returned so the
-    app can offer a "Join Video Call" button.
-
-    ``care_station`` is the Care Station name for in-person visits (nearest
-    clinic location). Stored on the appointment when a custom link field exists,
-    and always appended into notes for desk visibility.
+    Slots must come from Practitioner Schedule. Coverage is decided server-side:
+    included services are not invoiced; over-quota / out-of-plan return
+    payment_required plus an amount for the app to collect.
     """
-    _require_patient_access(patient)
+    from hiraal_emr.services.availability import slot_is_bookable
+    from hiraal_emr.services.plan_coverage import apply_coverage_to_appointment, check_coverage
+
+    _require_patient_access(patient, permission="can_view_appointments")
+
+    if not practitioner:
+        frappe.throw(_("Please choose a doctor"))
+    if not appointment_date or not appointment_time:
+        frappe.throw(_("Please choose an available time slot"))
+    if not slot_is_bookable(practitioner, appointment_date, appointment_time):
+        frappe.throw(_("That time is no longer available. Please pick another slot."))
 
     station_label = None
     if care_station and not int(is_video or 0):
@@ -1453,12 +1508,15 @@ def book_appointment(patient, practitioner, appointment_date,
         if station.address:
             station_label = f"{station_label} ({station.address})"
 
+    service = "video_consultation" if int(is_video or 0) else "consultation"
+    coverage = check_coverage(
+        patient, service, extra={"appointment_type": appointment_type}
+    )
+
     appt = frappe.new_doc("Patient Appointment")
     meta = frappe.get_meta("Patient Appointment")
     appt.patient = patient
     appt.practitioner = practitioner
-    # Frappe Healthcare requires "Appointment For" (Visit Details) — we always
-    # book against a practitioner.
     if meta.has_field("appointment_for"):
         appt.appointment_for = "Practitioner"
     appt.appointment_date = appointment_date
@@ -1478,11 +1536,11 @@ def book_appointment(patient, practitioner, appointment_date,
             appt.notes = combined_notes
         elif meta.has_field("custom_reason"):
             appt.custom_reason = combined_notes
+    apply_coverage_to_appointment(appt, coverage)
     appt.insert(ignore_permissions=True)
 
     meeting_url = None
     if int(is_video or 0):
-        # Video visit — provision a telemedicine session with a join link.
         meeting_url = _telemed_room_url(appt.name)
         try:
             session = frappe.new_doc("Telemedicine Session")
@@ -1502,6 +1560,7 @@ def book_appointment(patient, practitioner, appointment_date,
         "status": appt.status,
         "meeting_url": meeting_url,
         "care_station": care_station,
+        **coverage,
     }
 
 
@@ -1912,11 +1971,23 @@ def _require_clinical():
         frappe.throw(_("Not permitted"), frappe.PermissionError)
 
 
-def _require_patient_access(patient):
-    """Clinic staff may act on any patient; a patient user only on themselves."""
+def _caregiver_link_row(patient):
+    from hiraal_emr.services.caregiver_service import _caregiver_link_for
+
+    return _caregiver_link_for(patient)
+
+
+def _require_patient_access(patient, permission=None):
+    """Clinic staff, the patient themselves, or an active caregiver may proceed."""
     if _is_clinical_user():
         return
-    if not patient or patient != _my_patient_name():
+    own = _own_patient_name_or_none()
+    if own and patient == own:
+        return
+    link = _caregiver_link_row(patient)
+    if not link:
+        frappe.throw(_("Not permitted"), frappe.PermissionError)
+    if permission and not link.get(permission):
         frappe.throw(_("Not permitted"), frappe.PermissionError)
 
 
@@ -1953,27 +2024,32 @@ def get_waiting_telemedicine_sessions():
 
 
 @frappe.whitelist(allow_guest=False)
-def request_lab_test(patient, template, practitioner=None, note=None):
-    """Request a lab test from the mobile app."""
-    _require_patient_access(patient)
+def request_lab_test(patient, template, practitioner=None, note=None, collection=None):
+    """Request a lab test from the mobile app. Coverage is decided server-side."""
+    from hiraal_emr.services.plan_coverage import check_coverage
+
+    _require_patient_access(patient, permission="can_view_appointments")
+    home = (collection or "").lower() in ("home", "home_sample", "home sample collection")
+    service = "home_sample" if home else "lab_test"
+    coverage = check_coverage(patient, service, extra={"template": template})
+
     lab = frappe.new_doc("Lab Test")
     lab.patient = patient
     lab.template = template
-    # patient_sex is mandatory on Lab Test; populate it from the Patient record
-    # (app-created patients may predate sex collection, so fall back safely).
     lab.patient_sex = frappe.db.get_value("Patient", patient, "sex") or "Other"
     if practitioner:
         lab.practitioner = practitioner
     if note:
-        # custom_note may be a custom field; set it only if defined on the doctype
         meta = frappe.get_meta("Lab Test")
         if meta.has_field("custom_note"):
             lab.custom_note = note
         elif meta.has_field("description"):
             lab.description = note
+    if coverage.get("covered") and frappe.get_meta("Lab Test").has_field("invoiced"):
+        lab.invoiced = 1
     lab.insert(ignore_permissions=True)
 
-    return {"success": True, "lab_test": lab.name}
+    return {"success": True, "lab_test": lab.name, **coverage}
 
 
 @frappe.whitelist(allow_guest=False)
@@ -1990,11 +2066,16 @@ def order_medicine(patient=None, items=None, delivery_address=None,
     own patient so the app never has to pass an ID it might not have.
     """
     import json
-    patient = patient or _my_patient_name()
-    _require_patient_access(patient)
+    patient = patient or _own_patient_name_or_none()
+    if not patient:
+        frappe.throw(_("No patient linked to this account"), frappe.AuthenticationError)
+    _require_patient_access(patient, permission="can_view_medications")
     if isinstance(items, str):
         items = json.loads(items or "[]")
     items = items or []
+
+    from hiraal_emr.services.plan_coverage import check_coverage, cover_medicine_request_if_included
+    coverage = check_coverage(patient, "medicine")
 
     order = frappe.new_doc("Medicine Request")
     order.patient = patient
@@ -2019,21 +2100,20 @@ def order_medicine(patient=None, items=None, delivery_address=None,
         })
         count += 1
     order.total_items = count
+    cover_medicine_request_if_included(order)
 
     order.insert(ignore_permissions=True)
     audit_log("Create", "Medicine Request", order.name, "Patient ordered medicine via app")
-    return {"success": True, "order": order.name, "status": order.status}
+    return {"success": True, "order": order.name, "status": order.status, **coverage}
 
 
 def _my_order_or_throw(order):
-    """Resolve a Medicine Request the logged-in patient owns, or 403."""
-    patient = _my_patient_name()
+    """Resolve a Medicine Request the logged-in patient or caregiver may pay."""
     owner = frappe.db.get_value("Medicine Request", order, "patient")
     if not owner:
         frappe.throw(_("Order not found"), frappe.DoesNotExistError)
-    if owner != patient:
-        frappe.throw(_("Not permitted"), frappe.PermissionError)
-    return patient
+    _require_patient_access(owner, permission="can_view_medications")
+    return owner
 
 
 @frappe.whitelist()
@@ -2164,6 +2244,20 @@ def pay_my_order(order, provider, method, phone):
     (medicines + delivery_fee + tax). Returns a transaction_log to poll with
     check_my_order_payment."""
     _my_order_or_throw(order)
+    from hiraal_emr.services.plan_coverage import check_coverage
+    coverage = check_coverage(
+        frappe.db.get_value("Medicine Request", order, "patient"), "medicine"
+    )
+    if coverage.get("covered"):
+        mark_order_paid(order, "PLAN-COVERED")
+        return {
+            "success": True,
+            "covered": True,
+            "payment_required": False,
+            "amount": 0,
+            "message": coverage.get("message"),
+            "transaction_log": None,
+        }
     info = frappe.db.get_value(
         "Medicine Request", order, ["status", "total"], as_dict=True
     ) or {}
@@ -2366,7 +2460,20 @@ def on_medicine_request_update(doc, method=None):
 
     In-app notification for every meaningful transition; an SMS for the key
     milestones (out-for-delivery / delivered / cancelled). Best-effort — a
-    notification failure must never block the pharmacy's status update."""
+    notification failure must never block the pharmacy's status update.
+
+    Also: if the pharmacy moves the order to Awaiting Payment but the plan
+    covers medicine, settle it as covered so the app never charges.
+    """
+    try:
+        if doc.has_value_changed("status") and doc.status == "Awaiting Payment":
+            from hiraal_emr.services.plan_coverage import check_coverage
+            coverage = check_coverage(doc.patient, "medicine")
+            if coverage.get("covered"):
+                mark_order_paid(doc.name, "PLAN-COVERED")
+                return
+    except Exception:
+        frappe.logger("hiraal_coverage").exception("medicine coverage settle failed")
     try:
         if not doc.has_value_changed("status"):
             return
@@ -3437,6 +3544,141 @@ def list_my_sponsorships():
 
 
 @frappe.whitelist(allow_guest=False)
+def add_family_member(full_name, relationship, country_code="+252", phone=None,
+                      sex=None, dob=None, email=None, as_sponsor=1):
+    """Caregiver creates or links a patient (People I Care For → Add Family Member)."""
+    from hiraal_emr.services.caregiver_service import add_family_member as _add, _serialize_link
+
+    doc, outcome = _add(
+        full_name, relationship, country_code, phone or "", sex, dob, email, int(as_sponsor or 1)
+    )
+    audit_log("Create", "Family Member", doc.name, f"Family member {outcome} from caregiver app")
+    return {
+        "success": True,
+        "outcome": outcome,
+        "link": _serialize_link(doc.as_dict()),
+        "patient": doc.patient,
+        "patient_name": doc.patient_name,
+    }
+
+
+@frappe.whitelist(allow_guest=False)
+def grant_family_access(patient, country_code, whatsapp_number, relationship,
+                        family_member_name=None, permissions=None):
+    """Caregiver grants another family member access to a patient they manage."""
+    from hiraal_emr.services.caregiver_service import grant_family_access as _grant, whatsapp_invite_url, _serialize_link
+
+    if isinstance(permissions, str):
+        import json as _json
+        permissions = _json.loads(permissions)
+    doc = _grant(patient, country_code, whatsapp_number, relationship, family_member_name, permissions)
+    return {
+        "success": True,
+        "link": _serialize_link(doc.as_dict()),
+        "invite_code": doc.invite_code,
+        "whatsapp_url": whatsapp_invite_url(doc.name),
+    }
+
+
+@frappe.whitelist(allow_guest=False)
+def caregiver_home(patient):
+    """Caregiver Home bundle for the selected patient."""
+    from hiraal_emr.services.caregiver_service import caregiver_home_bundle
+
+    return caregiver_home_bundle(patient)
+
+
+@frappe.whitelist(allow_guest=False)
+def people_i_care_for(query=None):
+    """People I Care For list."""
+    from hiraal_emr.services.caregiver_service import list_people_i_care_for
+
+    return {"success": True, "people": list_people_i_care_for(query=query)}
+
+
+@frappe.whitelist(allow_guest=False)
+def plans_and_payments():
+    """Plans, next payment, and receipts for sponsored patients."""
+    from hiraal_emr.services.caregiver_service import plans_and_payments as _plans
+
+    return {"success": True, **_plans()}
+
+
+@frappe.whitelist(allow_guest=False)
+def pay_out_of_plan_service(patient, service_type, provider, method, phone,
+                            reference_doctype=None, reference_name=None, amount=None):
+    """Charge the sponsor (or patient) for an out-of-plan / over-quota service."""
+    from hiraal_emr.services.plan_coverage import check_coverage
+
+    _require_patient_access(patient)
+    coverage = check_coverage(patient, service_type)
+    if coverage.get("covered"):
+        return {
+            "success": True,
+            "covered": True,
+            "payment_required": False,
+            "amount": 0,
+            "message": coverage.get("message"),
+        }
+    charge = flt(amount) if amount not in (None, "") else flt(coverage.get("amount"))
+    if charge <= 0:
+        frappe.throw(_("This service has no amount to pay"))
+    pos = _mobile_payments_pos()
+    if not pos:
+        frappe.throw(_("Payment gateway is not available"))
+    result = _as_admin(
+        pos.initiate_pos_payment,
+        provider=provider, method=method, phone=phone, amount=charge, currency="USD",
+    ) or {}
+    if not result.get("success"):
+        frappe.throw(result.get("message") or _("Could not start the payment"))
+    txn = result.get("transaction_log")
+    if not txn:
+        frappe.throw(_("Payment started but no transaction id was returned. Please try again."))
+    owner_payload = json.dumps({
+        "patient": patient,
+        "sponsor": frappe.session.user,
+        "service_type": service_type,
+        "reference_doctype": reference_doctype,
+        "reference_name": reference_name,
+        "kind": "out_of_plan",
+    })
+    frappe.cache().set_value(f"hiraal_txn_owner:{txn}", owner_payload, expires_in_sec=86400)
+    return {
+        "success": True,
+        "covered": False,
+        "payment_required": True,
+        "transaction_log": txn,
+        "amount": charge,
+        **coverage,
+    }
+
+
+@frappe.whitelist(allow_guest=False)
+def check_out_of_plan_payment(transaction_log):
+    """Poll an out-of-plan / over-quota charge. Does not mark the care plan paid."""
+    owner = _parse_txn_owner(frappe.cache().get_value(f"hiraal_txn_owner:{transaction_log}"))
+    if not owner or owner.get("kind") != "out_of_plan":
+        frappe.throw(_("Unknown payment"))
+    sponsor = owner.get("sponsor")
+    patient = owner.get("patient")
+    if sponsor and sponsor != frappe.session.user:
+        if patient:
+            _require_patient_access(patient)
+        else:
+            frappe.throw(_("Not permitted"), frappe.PermissionError)
+    pos = _mobile_payments_pos()
+    if not pos:
+        frappe.throw(_("Payment gateway is not available"))
+    result = _as_admin(pos.check_pos_payment_status, transaction_log) or {}
+    raw = (result.get("status") or "").strip()
+    status = {
+        "completed": "Completed", "failed": "Failed", "pending": "Pending",
+    }.get(raw.lower(), "Pending")
+    return {"success": True, "status": status}
+
+
+@frappe.whitelist(allow_guest=False)
 def get_sponsorship_dashboard(name):
     """Sponsor dashboard for one linked patient."""
     from hiraal_emr.services.caregiver_service import sponsorship_dashboard
@@ -3692,6 +3934,51 @@ def get_sponsored_patient_data(patient, data_type="readings"):
             limit_page_length=20,
         )
         return {"success": True, "orders": rows}
+    if data_type == "labs" and link.can_view_appointments:
+        rows = _safe_get_all(
+            "Lab Test",
+            filters={"patient": patient},
+            fields=["name", "template", "status", "creation", "result_date"],
+            order_by="creation desc",
+            limit_page_length=30,
+        )
+        return {"success": True, "labs": rows}
+    if data_type == "history":
+        bundle = {"readings": [], "appointments": [], "labs": [], "orders": []}
+        if link.can_view_vitals:
+            bundle["readings"] = _safe_get_all(
+                "Daily Reading",
+                filters={"patient": patient},
+                fields=["reading_date", "reading_time", "bp_systolic", "bp_diastolic",
+                        "blood_sugar", "medicine_taken", "risk_level"],
+                order_by="reading_date desc",
+                limit_page_length=40,
+            )
+        if link.can_view_appointments:
+            bundle["appointments"] = _safe_get_all(
+                "Patient Appointment",
+                filters={"patient": patient},
+                fields=["name", "appointment_date", "appointment_time",
+                        "practitioner_name", "status"],
+                order_by="appointment_date desc",
+                limit_page_length=20,
+            )
+            bundle["labs"] = _safe_get_all(
+                "Lab Test",
+                filters={"patient": patient},
+                fields=["name", "template", "status", "creation", "result_date"],
+                order_by="creation desc",
+                limit_page_length=20,
+            )
+        if link.can_view_medications:
+            bundle["orders"] = _safe_get_all(
+                "Medicine Request",
+                filters={"patient": patient},
+                fields=["name", "status", "modified"],
+                order_by="modified desc",
+                limit_page_length=20,
+            )
+        return {"success": True, **bundle}
     frappe.throw(_("Not permitted"), frappe.PermissionError)
 
 

@@ -32,9 +32,11 @@ doc_events = {
         "after_insert": "hiraal_emr.api.on_vital_signs_insert",
     },
     "Patient Appointment": {
+        "after_insert": "hiraal_emr.services.plan_coverage.after_appointment_insert",
         "on_update": "hiraal_emr.api.on_appointment_update",
     },
     "Lab Test": {
+        "after_insert": "hiraal_emr.services.plan_coverage.after_lab_test_insert",
         "on_update": "hiraal_emr.api.on_lab_test_update",
     },
     "Daily Reading": {
