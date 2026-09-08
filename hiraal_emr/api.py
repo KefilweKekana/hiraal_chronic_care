@@ -8,7 +8,12 @@ from frappe import _
 from frappe.utils import add_days, add_months, add_to_date, flt, get_datetime, getdate, now_datetime, today
 import json
 
-from hiraal_emr.services.otp_service import generate_otp, verify_otp as otp_verify, request_allowed
+from hiraal_emr.services.otp_service import (
+    generate_otp,
+    verify_otp as otp_verify,
+    check_otp_send_allowed,
+    otp_wait_message,
+)
 from hiraal_emr.services.sms_service import send_otp_sms, send_alert_sms, send_sms
 try:
     from hiraal_emr.doctype.audit_log.audit_log import log_action as audit_log
@@ -663,8 +668,11 @@ def request_otp(mobile=None, channel="sms", email=None):
         email = (email or "").strip().lower()
         if "@" not in email or "." not in email.rsplit("@", 1)[-1]:
             frappe.throw(_("A valid email is required"))
-        if not request_allowed(email):
-            frappe.logger("hiraal_otp").warning("OTP rate limit exceeded for %s", email)
+        gate = check_otp_send_allowed(email)
+        if not gate.allowed:
+            frappe.logger("hiraal_otp").warning(
+                "OTP rate limit exceeded for %s retry_after=%s", email, gate.retry_after
+            )
             return {"success": True, "message": "OTP sent", "channel": "email", "sent_to": _mask_email(email)}
         otp = generate_otp(email)
         # Only actually deliver to a registered patient's email address.
@@ -679,9 +687,12 @@ def request_otp(mobile=None, channel="sms", email=None):
     mobile = _normalize_otp_mobile(mobile)
     if not mobile or len(mobile) < 6:
         frappe.throw(_("Valid mobile number is required"))
-    if not request_allowed(mobile):
-        frappe.logger("hiraal_otp").warning("OTP rate limit exceeded for %s", mobile)
-        frappe.throw(_("Please wait before requesting another code"))
+    gate = check_otp_send_allowed(mobile)
+    if not gate.allowed:
+        frappe.logger("hiraal_otp").warning(
+            "OTP rate limit exceeded for %s retry_after=%s", mobile, gate.retry_after
+        )
+        frappe.throw(otp_wait_message(gate.retry_after))
     otp = generate_otp(mobile)
     used = "sms"
     sent_to = None
@@ -926,9 +937,7 @@ def self_register(full_name=None, mobile=None, otp=None, email=None,
     if not dob:
         frappe.throw(_("Your date of birth is required"))
 
-    # ── verify phone ownership ──
-    if not request_allowed(mobile):
-        frappe.throw(_("Too many attempts. Please try again later."), frappe.ValidationError)
+    # ── verify phone ownership (do not share the OTP *send* quota) ──
     if not otp_verify(mobile, otp):
         frappe.throw(_("Invalid or expired code"), frappe.AuthenticationError)
 
@@ -999,7 +1008,46 @@ def get_my_patient():
     data = frappe.get_doc("Patient", name).as_dict()
     # Feature gate for the app: whether this patient may use paid features.
     data["subscription_active"] = _has_active_subscription(name)
+    from hiraal_emr.services.health_pin_service import patient_has_pin, strip_pin_fields
+
+    data["has_health_pin"] = patient_has_pin(name)
+    strip_pin_fields(data)
     return data
+
+
+@frappe.whitelist()
+def has_health_pin(patient=None):
+    """Whether this patient (self, or a linked loved one) has a health PIN.
+
+    Returns a boolean only. Never returns a hash, salt, or PIN.
+    """
+    from hiraal_emr.services.health_pin_service import has_health_pin as _impl
+
+    return _impl(patient)
+
+
+@frappe.whitelist()
+def set_health_pin(pin=None, current_pin=None):
+    """Create or change the logged-in patient's 4-digit health PIN."""
+    from hiraal_emr.services.health_pin_service import set_health_pin as _impl
+
+    return _impl(pin, current_pin)
+
+
+@frappe.whitelist()
+def verify_health_pin(pin=None, patient=None):
+    """Verify a health PIN. Returns a short-lived token or a structured failure."""
+    from hiraal_emr.services.health_pin_service import verify_health_pin as _impl
+
+    return _impl(pin, patient)
+
+
+@frappe.whitelist(allow_guest=True)
+def reset_health_pin(otp=None, new_pin=None, mobile=None):
+    """Replace a health PIN after OTP to the patient's own phone."""
+    from hiraal_emr.services.health_pin_service import reset_health_pin as _impl
+
+    return _impl(otp, new_pin, mobile)
 
 
 def _own_patient_name_or_none():
