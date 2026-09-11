@@ -230,7 +230,7 @@ class _SplashScreenState extends State<SplashScreen>
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       key: const ValueKey('unlock'),
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.of(context).scaffold,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -252,17 +252,17 @@ class _SplashScreenState extends State<SplashScreen>
               const SizedBox(height: 24),
               Text(
                 l10n.welcomeBack,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: AppColors.of(context).text,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 l10n.unlockWithBio(_bioLabel),
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 14, color: AppColors.of(context).textMuted),
               ),
               const SizedBox(height: 40),
               SizedBox(
@@ -366,7 +366,7 @@ class _SplashScreenState extends State<SplashScreen>
                 opacity: _textFade,
                 child: Text(
                   l10n.appNameFull,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
@@ -416,7 +416,7 @@ class _SplashScreenState extends State<SplashScreen>
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       key: const ValueKey('welcome'),
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.of(context).scaffold,
       body: SafeArea(
         child: FadeTransition(
           opacity: _welcomeFade,
@@ -436,10 +436,10 @@ class _SplashScreenState extends State<SplashScreen>
                   Text(
                     l10n.welcomeHello,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
+                      color: AppColors.of(context).text,
                       height: 1.2,
                     ),
                   ),
@@ -447,19 +447,19 @@ class _SplashScreenState extends State<SplashScreen>
                   Text(
                     l10n.roleChooserTitle,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: AppColors.of(context).text,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     l10n.welcomeContinueHint,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
-                      color: AppColors.textSecondary,
+                      color: AppColors.of(context).textMuted,
                       height: 1.45,
                     ),
                   ),
@@ -519,9 +519,9 @@ class _SplashScreenState extends State<SplashScreen>
                     },
                     child: Text(
                       l10n.needHelpContactSupport,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
-                        color: AppColors.textTertiary,
+                        color: AppColors.of(context).textFaint,
                       ),
                     ),
                   ),
@@ -557,7 +557,7 @@ class _WelcomePathCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.white,
+      color: AppColors.of(context).card,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -567,7 +567,7 @@ class _WelcomePathCard extends StatelessWidget {
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.cardBorder),
+            border: Border.all(color: AppColors.of(context).border),
           ),
           child: Row(
             children: [
@@ -587,19 +587,19 @@ class _WelcomePathCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 19,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                        color: AppColors.of(context).text,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       subtitle,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         height: 1.35,
-                        color: AppColors.textSecondary,
+                        color: AppColors.of(context).textMuted,
                       ),
                     ),
                   ],

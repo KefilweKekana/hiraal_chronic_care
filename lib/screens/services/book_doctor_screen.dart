@@ -277,7 +277,7 @@ class _BookDoctorScreenState extends State<BookDoctorScreen> {
       appBar: AppBar(
         title: Text(_pickingSlot ? l10n.chooseDateTime : l10n.chooseDoctorTitle),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back),
           onPressed: () {
             if (_pickingSlot) {
               setState(() => _pickingSlot = false);
@@ -292,9 +292,9 @@ class _BookDoctorScreenState extends State<BookDoctorScreen> {
               final count = context.watch<AppProvider>().unreadNotificationCount;
               return IconButton(
                 icon: Stack(children: [
-                  const Icon(Icons.notifications_outlined),
+                  Icon(Icons.notifications_outlined),
                   if (count > 0)
-                    Positioned(right: 0, top: 0, child: Container(width: 12, height: 12, decoration: const BoxDecoration(color: AppColors.error, shape: BoxShape.circle))),
+                    Positioned(right: 0, top: 0, child: Container(width: 12, height: 12, decoration: BoxDecoration(color: AppColors.error, shape: BoxShape.circle))),
                 ]),
                 onPressed: () => Navigator.pushNamed(context, '/notifications'),
               );
@@ -320,17 +320,17 @@ class _BookDoctorScreenState extends State<BookDoctorScreen> {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: AppColors.primarySurface,
+          color: AppColors.of(context).primaryMuted,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           children: [
-            const Icon(Icons.groups_outlined, color: AppColors.primary, size: 18),
+            Icon(Icons.groups_outlined, color: AppColors.primary, size: 18),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
                 l10n.bookingOnBehalf(name),
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.primary),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.primary),
               ),
             ),
           ],
@@ -348,18 +348,18 @@ class _BookDoctorScreenState extends State<BookDoctorScreen> {
           Align(
             alignment: Alignment.centerLeft,
             child: InputChip(
-              avatar: const Icon(Icons.filter_list, size: 16),
+              avatar: Icon(Icons.filter_list, size: 16),
               label: Text(widget.specialtyLabel!),
               onDeleted: _clearSpecialtyFilter,
-              deleteIcon: const Icon(Icons.close, size: 16),
+              deleteIcon: Icon(Icons.close, size: 16),
             ),
           ),
           const SizedBox(height: 10),
         ],
-        Text(l10n.onlineDoctorsHint, style: const TextStyle(fontSize: 16, color: AppColors.textSecondary, height: 1.4)),
+        Text(l10n.onlineDoctorsHint, style: TextStyle(fontSize: 16, color: AppColors.of(context).textMuted, height: 1.4)),
         if (_filterFallback && widget.specialtyLabel != null) ...[
           const SizedBox(height: 4),
-          Text(l10n.noSpecialistsShowingAll(widget.specialtyLabel!), style: const TextStyle(fontSize: 12, color: AppColors.textTertiary)),
+          Text(l10n.noSpecialistsShowingAll(widget.specialtyLabel!), style: TextStyle(fontSize: 12, color: AppColors.of(context).textFaint)),
         ],
         const SizedBox(height: 16),
         if (_isLoadingDoctors)
@@ -372,9 +372,9 @@ class _BookDoctorScreenState extends State<BookDoctorScreen> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(children: [
-              const Icon(Icons.error_outline, color: AppColors.error, size: 18),
+              Icon(Icons.error_outline, color: AppColors.error, size: 18),
               const SizedBox(width: 8),
-              Expanded(child: Text(_doctorError!, style: const TextStyle(color: AppColors.error, fontSize: 13))),
+              Expanded(child: Text(_doctorError!, style: TextStyle(color: AppColors.error, fontSize: 13))),
               TextButton(onPressed: _fetchDoctors, child: Text(l10n.retry)),
             ]),
           )
@@ -382,14 +382,14 @@ class _BookDoctorScreenState extends State<BookDoctorScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.inputBackground,
+              color: AppColors.of(context).inputFill,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.inputBorder),
+              border: Border.all(color: AppColors.of(context).inputBorder),
             ),
             child: Row(children: [
-              const Icon(Icons.info_outline, color: AppColors.textSecondary, size: 18),
+              Icon(Icons.info_outline, color: AppColors.of(context).textMuted, size: 18),
               const SizedBox(width: 8),
-              Expanded(child: Text(l10n.noDoctorsAvailable, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13))),
+              Expanded(child: Text(l10n.noDoctorsAvailable, style: TextStyle(color: AppColors.of(context).textMuted, fontSize: 13))),
               TextButton(onPressed: _fetchDoctors, child: Text(l10n.refresh)),
             ]),
           )
@@ -424,16 +424,16 @@ class _BookDoctorScreenState extends State<BookDoctorScreen> {
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.cardBorder),
+                      border: Border.all(color: AppColors.of(context).border),
                     ),
                     child: Row(
                       children: [
                         CircleAvatar(
                           radius: 32,
-                          backgroundColor: AppColors.infoLight,
+                          backgroundColor: AppColors.of(context).infoSoft,
                           child: Text(
                             initials.isEmpty ? 'DR' : initials,
-                            style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.info, fontSize: 16),
+                            style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.info, fontSize: 16),
                           ),
                         ),
                         const SizedBox(width: 14),
@@ -441,13 +441,13 @@ class _BookDoctorScreenState extends State<BookDoctorScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(name, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
+                              Text(name, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
                               const SizedBox(height: 2),
-                              Text(dept, style: const TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+                              Text(dept, style: TextStyle(fontSize: 14, color: AppColors.of(context).textMuted)),
                             ],
                           ),
                         ),
-                        const Icon(Icons.chevron_right, color: AppColors.success, size: 26),
+                        Icon(Icons.chevron_right, color: AppColors.success, size: 26),
                       ],
                     ),
                   ),
@@ -458,7 +458,7 @@ class _BookDoctorScreenState extends State<BookDoctorScreen> {
         const SizedBox(height: 8),
         TextButton.icon(
           onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AppointmentsScreen())),
-          icon: const Icon(Icons.event_available_outlined),
+          icon: Icon(Icons.event_available_outlined),
           label: Text(l10n.appointments),
         ),
       ],
@@ -480,10 +480,10 @@ class _BookDoctorScreenState extends State<BookDoctorScreen> {
               children: [
                 CircleAvatar(
                   radius: 28,
-                  backgroundColor: AppColors.infoLight,
+                  backgroundColor: AppColors.of(context).infoSoft,
                   child: Text(
                     name.replaceAll(RegExp(r'^Dr\.?\s*', caseSensitive: false), '').split(' ').where((p) => p.isNotEmpty).map((p) => p[0]).take(2).join().toUpperCase(),
-                    style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.info),
+                    style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.info),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -491,15 +491,15 @@ class _BookDoctorScreenState extends State<BookDoctorScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(name, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
-                      Text(dept, style: const TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+                      Text(name, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
+                      Text(dept, style: TextStyle(fontSize: 14, color: AppColors.of(context).textMuted)),
                     ],
                   ),
                 ),
               ],
             ),
           ),
-        Text(l10n.visitType, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+        Text(l10n.visitType, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
         const SizedBox(height: 10),
         Row(
           children: [
@@ -526,17 +526,17 @@ class _BookDoctorScreenState extends State<BookDoctorScreen> {
         ),
         if (_visitType == 'inperson') ...[
           const SizedBox(height: 16),
-          Text(l10n.clinicLocationLabel, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+          Text(l10n.clinicLocationLabel, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
           _buildStationPicker(l10n),
         ],
         const SizedBox(height: 20),
-        Text(l10n.selectADate, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+        Text(l10n.selectADate, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
         const SizedBox(height: 10),
         if (_loadingSlots)
           const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator()))
         else if (_slotError != null)
-          Text(_slotError!, style: const TextStyle(color: AppColors.error))
+          Text(_slotError!, style: TextStyle(color: AppColors.error))
         else if (_slots == null || _slots!.empty)
           Text(l10n.noSlotsYet, style: TextStyle(color: AppColors.textMuted(context), fontSize: 15))
         else ...[
@@ -561,7 +561,7 @@ class _BookDoctorScreenState extends State<BookDoctorScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          Text(l10n.selectATime, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+          Text(l10n.selectATime, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
           const SizedBox(height: 10),
           Wrap(
             spacing: 8,
@@ -581,7 +581,7 @@ class _BookDoctorScreenState extends State<BookDoctorScreen> {
           ),
         ],
         const SizedBox(height: 20),
-        Text(l10n.reasonOptional, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+        Text(l10n.reasonOptional, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
         const SizedBox(height: 8),
         TextField(
           controller: _reasonController,
@@ -597,7 +597,7 @@ class _BookDoctorScreenState extends State<BookDoctorScreen> {
             onPressed: (_isLoading || _selectedDoctorId == null || _selectedSlot == null) ? null : _bookAppointment,
             child: _isLoading
                 ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.white))
-                : Text(l10n.continueLabel, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+                : Text(l10n.continueLabel, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
           ),
         ),
         const SizedBox(height: 24),
@@ -622,7 +622,7 @@ class _BookDoctorScreenState extends State<BookDoctorScreen> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(_stationError!, style: const TextStyle(fontSize: 13, color: AppColors.error)),
+          Text(_stationError!, style: TextStyle(fontSize: 13, color: AppColors.error)),
           TextButton(
             onPressed: _fetchStations,
             child: Text(l10n.retry),
@@ -633,7 +633,7 @@ class _BookDoctorScreenState extends State<BookDoctorScreen> {
     if (_stations.isEmpty) {
       return Text(
         l10n.noStationsAvailable,
-        style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+        style: TextStyle(fontSize: 13, color: AppColors.of(context).textMuted),
       );
     }
 
@@ -667,11 +667,11 @@ class _BookDoctorScreenState extends State<BookDoctorScreen> {
             children: [
               Container(
                 width: 72, height: 72,
-                decoration: const BoxDecoration(color: AppColors.success, shape: BoxShape.circle),
-                child: const Icon(Icons.check, color: AppColors.white, size: 40),
+                decoration: BoxDecoration(color: AppColors.success, shape: BoxShape.circle),
+                child: Icon(Icons.check, color: AppColors.white, size: 40),
               ),
               const SizedBox(height: 20),
-              Text(l10n.appointmentBooked, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+              Text(l10n.appointmentBooked, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
               const SizedBox(height: 8),
               Text(
                 l10n.appointmentConfirmedFor(
@@ -679,14 +679,14 @@ class _BookDoctorScreenState extends State<BookDoctorScreen> {
                   _selectedSlot?.label ?? '',
                 ),
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: AppColors.textSecondary),
+                style: TextStyle(color: AppColors.of(context).textMuted),
               ),
               const SizedBox(height: 32),
               if (_visitType == 'video') ...[
                 Text(
                   l10n.videoVisitJoinReady,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 13, color: AppColors.primary),
+                  style: TextStyle(fontSize: 13, color: AppColors.primary),
                 ),
                 const SizedBox(height: 12),
                 SizedBox(
@@ -696,7 +696,7 @@ class _BookDoctorScreenState extends State<BookDoctorScreen> {
                       context,
                       MaterialPageRoute(builder: (_) => const VideoVisitsScreen()),
                     ),
-                    icon: const Icon(Icons.video_call),
+                    icon: Icon(Icons.video_call),
                     label: Text(l10n.goToVideoVisit),
                   ),
                 ),
@@ -735,11 +735,11 @@ class _VisitTypeCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isSelected
-              ? (AppColors.isDark(context) ? AppColors.darkPrimaryLight : AppColors.primaryLight)
+              ? AppColors.of(context).primarySoft
               : AppColors.card(context),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border(context),
+            color: isSelected ? Theme.of(context).colorScheme.primary : AppColors.border(context),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -748,18 +748,18 @@ class _VisitTypeCard extends StatelessWidget {
             Stack(
               alignment: Alignment.topRight,
               children: [
-                Icon(icon, size: 32, color: isSelected ? AppColors.primary : AppColors.textTertiary),
+                Icon(icon, size: 32, color: isSelected ? Theme.of(context).colorScheme.primary : AppColors.of(context).textFaint),
                 if (isSelected)
                   Container(
                     width: 18, height: 18,
-                    decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
-                    child: const Icon(Icons.check, color: AppColors.white, size: 12),
+                    decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary, shape: BoxShape.circle),
+                    child: Icon(Icons.check, color: AppColors.white, size: 12),
                   ),
               ],
             ),
             const SizedBox(height: 8),
-            Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: isSelected ? AppColors.primary : AppColors.textPrimary)),
-            Text(subtitle, style: TextStyle(fontSize: 11, color: isSelected ? AppColors.primary : AppColors.textTertiary)),
+            Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: isSelected ? Theme.of(context).colorScheme.primary : AppColors.of(context).text)),
+            Text(subtitle, style: TextStyle(fontSize: 11, color: isSelected ? Theme.of(context).colorScheme.primary : AppColors.of(context).textFaint)),
           ],
         ),
       ),

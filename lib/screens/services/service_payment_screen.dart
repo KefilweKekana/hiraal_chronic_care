@@ -270,15 +270,15 @@ class _ServicePaymentScreenState extends State<ServicePaymentScreen>
             children: [
               Text(
                 '${widget.currency} ${widget.amount.toStringAsFixed(2)}',
-                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.primary),
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.primary),
               ),
               const SizedBox(height: 16),
-              Text(l10n.payWith, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+              Text(l10n.payWith, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
               const SizedBox(height: 8),
               if (_loadingMethods)
                 const Center(child: CircularProgressIndicator())
               else if (_methodsError != null)
-                Text(_methodsError!, style: const TextStyle(color: AppColors.error))
+                Text(_methodsError!, style: TextStyle(color: AppColors.error))
               else
                 Wrap(
                   spacing: 8,
@@ -294,7 +294,7 @@ class _ServicePaymentScreenState extends State<ServicePaymentScreen>
                   ],
                 ),
               const SizedBox(height: 16),
-              Text(l10n.mobileMoneyNumber, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+              Text(l10n.mobileMoneyNumber, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
               const SizedBox(height: 8),
               TextField(
                 controller: _phoneCtrl,
@@ -306,7 +306,7 @@ class _ServicePaymentScreenState extends State<ServicePaymentScreen>
                 decoration: InputDecoration(
                   hintText: 'e.g. 252636197117',
                   prefixText: '',
-                  prefixIcon: const Icon(Icons.phone_iphone),
+                  prefixIcon: Icon(Icons.phone_iphone),
                 ),
               ),
               const SizedBox(height: 24),

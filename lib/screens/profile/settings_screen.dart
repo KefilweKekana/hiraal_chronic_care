@@ -9,6 +9,8 @@ import '../../l10n/app_localizations.dart';
 import '../../providers/app_provider.dart';
 import '../../services/local_reminder_service.dart';
 import 'language_screen.dart';
+import 'addresses_screen.dart';
+import 'privacy_security_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -87,10 +89,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    const sectionStyle = TextStyle(
+    final sectionStyle = TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w600,
-        color: AppColors.textSecondary);
+        color: AppColors.of(context).textMuted);
     final provider = context.watch<AppProvider>();
 
     return Scaffold(
@@ -112,6 +114,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const LanguageScreen()),
+              );
+            },
+          ),
+          const SizedBox(height: 16),
+          Text(l10n.otherSettings, style: sectionStyle),
+          const SizedBox(height: 8),
+          _NavRow(
+            title: l10n.addresses,
+            subtitle: l10n.addressesDeliveryHint,
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const AddressesScreen()),
+              );
+            },
+          ),
+          _NavRow(
+            title: l10n.privacyAndSecurity,
+            subtitle: l10n.privacyWhoCanSee,
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const PrivacySecurityScreen()),
               );
             },
           ),
@@ -200,9 +223,9 @@ class _NavRow extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: InkWell(
         onTap: onTap,
@@ -216,17 +239,17 @@ class _NavRow extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(title,
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontSize: 14, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 2),
                     Text(subtitle,
-                        style: const TextStyle(
-                            fontSize: 13, color: AppColors.textTertiary)),
+                        style: TextStyle(
+                            fontSize: 13, color: AppColors.of(context).textFaint)),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right,
-                  color: AppColors.textTertiary, size: 20),
+              Icon(Icons.chevron_right,
+                  color: AppColors.of(context).textFaint, size: 20),
             ],
           ),
         ),
@@ -255,9 +278,9 @@ class _SwitchTile extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: InkWell(
         onTap: onTap,
@@ -271,12 +294,12 @@ class _SwitchTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(title,
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontSize: 14, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 2),
                     Text(subtitle,
-                        style: const TextStyle(
-                            fontSize: 13, color: AppColors.textTertiary)),
+                        style: TextStyle(
+                            fontSize: 13, color: AppColors.of(context).textFaint)),
                   ],
                 ),
               ),
@@ -300,15 +323,15 @@ class _InfoRow extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: Row(
         children: [
-          Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+          Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
           const Spacer(),
-          Text(value, style: const TextStyle(fontSize: 13, color: AppColors.textTertiary)),
+          Text(value, style: TextStyle(fontSize: 13, color: AppColors.of(context).textFaint)),
         ],
       ),
     );
@@ -328,11 +351,11 @@ class _ThemeBtn extends StatelessWidget {
       child: OutlinedButton(
         onPressed: onTap,
         style: OutlinedButton.styleFrom(
-          backgroundColor: selected ? AppColors.primaryLight : AppColors.white,
-          side: BorderSide(color: selected ? AppColors.primary : AppColors.cardBorder, width: selected ? 2 : 1),
-          foregroundColor: selected ? AppColors.primary : AppColors.textPrimary,
+          backgroundColor: selected ? AppColors.of(context).primarySoft : AppColors.of(context).card,
+          side: BorderSide(color: selected ? Theme.of(context).colorScheme.primary : AppColors.of(context).border, width: selected ? 2 : 1),
+          foregroundColor: selected ? Theme.of(context).colorScheme.primary : AppColors.of(context).text,
         ),
-        child: Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
+        child: Text(label, style: TextStyle(fontWeight: FontWeight.w700)),
       ),
     );
   }

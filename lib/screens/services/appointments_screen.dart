@@ -51,11 +51,9 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).scaffold,
       appBar: AppBar(
         title: Text(l10n.myAppointments),
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: _loading
@@ -78,7 +76,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
           context,
           MaterialPageRoute(builder: (_) => const BookDoctorScreen()),
         ).then((_) => _load()),
-        icon: const Icon(Icons.add),
+        icon: Icon(Icons.add),
         label: Text(l10n.bookDoctor),
       ),
     );
@@ -91,9 +89,9 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
       margin: const EdgeInsets.symmetric(vertical: 5),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: Row(
         children: [
@@ -101,10 +99,10 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: AppColors.primaryLight,
+              color: AppColors.of(context).primarySoft,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.calendar_today, size: 20, color: AppColors.primary),
+            child: Icon(Icons.calendar_today, size: 20, color: AppColors.primary),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -112,15 +110,15 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(a.practitionerName,
-                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 3),
                 Text(
                   '$dateLabel${timeLabel.isNotEmpty ? ' · $timeLabel' : ''}',
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted),
                 ),
                 if (a.type.isNotEmpty)
                   Text(a.type,
-                      style: const TextStyle(fontSize: 11, color: AppColors.textTertiary)),
+                      style: TextStyle(fontSize: 11, color: AppColors.of(context).textFaint)),
               ],
             ),
           ),
@@ -128,12 +126,12 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: AppColors.successLight,
+                color: AppColors.of(context).successSoft,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 a.status,
-                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.success),
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.success),
               ),
             ),
         ],
@@ -147,10 +145,10 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline, size: 40, color: AppColors.error),
+              Icon(Icons.error_outline, size: 40, color: AppColors.error),
               const SizedBox(height: 12),
               Text(_error!, textAlign: TextAlign.center,
-                  style: const TextStyle(color: AppColors.textSecondary)),
+                  style: TextStyle(color: AppColors.of(context).textMuted)),
               const SizedBox(height: 12),
               TextButton(onPressed: _load, child: Text(l10n.retry)),
             ],
@@ -164,17 +162,17 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
           physics: const AlwaysScrollableScrollPhysics(),
           children: [
             const SizedBox(height: 120),
-            const Icon(Icons.event_available, size: 56, color: AppColors.textTertiary),
+            Icon(Icons.event_available, size: 56, color: AppColors.of(context).textFaint),
             const SizedBox(height: 12),
             Center(
               child: Text(l10n.noUpcomingAppointments,
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.of(context).textMuted)),
             ),
             const SizedBox(height: 4),
             Center(
               child: Text(l10n.bookDoctorEmptyHint,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 12, color: AppColors.textTertiary, height: 1.5)),
+                  style: TextStyle(fontSize: 12, color: AppColors.of(context).textFaint, height: 1.5)),
             ),
           ],
         ),

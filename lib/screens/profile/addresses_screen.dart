@@ -86,11 +86,11 @@ class _AddressesScreenState extends State<AddressesScreen> {
                           },
                     icon: locating
                         ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                        : const Icon(Icons.my_location, size: 18),
+                        : Icon(Icons.my_location, size: 18),
                     label: Text(locating ? 'Getting location…' : 'Use my current location'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.primary,
-                      side: const BorderSide(color: AppColors.primary),
+                      side: BorderSide(color: AppColors.primary),
                     ),
                   ),
                 ),
@@ -133,11 +133,9 @@ class _AddressesScreenState extends State<AddressesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).scaffold,
       appBar: AppBar(
         title: const Text('Addresses'),
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: _loading
@@ -146,7 +144,7 @@ class _AddressesScreenState extends State<AddressesScreen> {
               ? Center(child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(_error!, style: const TextStyle(color: AppColors.error)),
+                    Text(_error!, style: TextStyle(color: AppColors.error)),
                     const SizedBox(height: 8),
                     TextButton(onPressed: _load, child: const Text('Retry')),
                   ],
@@ -169,11 +167,11 @@ class _AddressesScreenState extends State<AddressesScreen> {
                       const SizedBox(height: 16),
                       OutlinedButton.icon(
                         onPressed: _showAddDialog,
-                        icon: const Icon(Icons.add),
+                        icon: Icon(Icons.add),
                         label: const Text('Add New Address'),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.primary,
-                          side: const BorderSide(color: AppColors.primary),
+                          side: BorderSide(color: AppColors.primary),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
@@ -206,9 +204,9 @@ class _AddressCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isDefault ? AppColors.primary.withValues(alpha: 0.3) : AppColors.cardBorder),
+        border: Border.all(color: isDefault ? AppColors.primary.withValues(alpha: 0.3) : AppColors.of(context).border),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -229,13 +227,13 @@ class _AddressCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                    Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                     if (isDefault) ...[
                       const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
-                          color: AppColors.primarySurface,
+                          color: AppColors.of(context).primaryMuted,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: const Text('Default', style: TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.w600)),
@@ -244,14 +242,14 @@ class _AddressCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text(address, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                Text(address, style: TextStyle(fontSize: 13, color: AppColors.of(context).textMuted)),
               ],
             ),
           ),
           if (!isDefault)
             GestureDetector(
               onTap: onDelete,
-              child: const Icon(Icons.delete_outline, size: 18, color: AppColors.textTertiary),
+              child: Icon(Icons.delete_outline, size: 18, color: AppColors.of(context).textFaint),
             ),
         ],
       ),

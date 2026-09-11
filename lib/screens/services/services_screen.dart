@@ -52,7 +52,7 @@ class _ServicesScreenState extends State<ServicesScreen> {
             ? l10n.greetingAfternoon
             : l10n.greetingEvening;
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).scaffold,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -65,15 +65,15 @@ class _ServicesScreenState extends State<ServicesScreen> {
                 children: [
                   CircleAvatar(
                     radius: 20,
-                    backgroundColor: AppColors.primaryLight,
-                    child: Text(patient?.name.split(' ').where((n) => n.isNotEmpty).map((n) => n[0]).take(2).join() ?? 'AA', style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.primary, fontSize: 12)),
+                    backgroundColor: AppColors.of(context).primarySoft,
+                    child: Text(patient?.name.split(' ').where((n) => n.isNotEmpty).map((n) => n[0]).take(2).join() ?? 'AA', style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.primary, fontSize: 12)),
                   ),
                   const SizedBox(width: 10),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(greeting, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                      Text(patient?.name ?? l10n.patientFallback, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                      Text(greeting, style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted)),
+                      Text(patient?.name ?? l10n.patientFallback, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                     ],
                   ),
                   const Spacer(),
@@ -81,14 +81,14 @@ class _ServicesScreenState extends State<ServicesScreen> {
                     onTap: () => Navigator.pushNamed(context, '/notifications'),
                     child: Stack(
                       children: [
-                        const Icon(Icons.notifications_outlined),
+                        Icon(Icons.notifications_outlined),
                         if (provider.unreadNotificationCount > 0)
                           Positioned(
                             right: 0, top: 0,
                             child: Container(
                               width: 14, height: 14,
-                              decoration: const BoxDecoration(color: AppColors.error, shape: BoxShape.circle),
-                              child: Center(child: Text('${provider.unreadNotificationCount}', style: const TextStyle(color: AppColors.white, fontSize: 8, fontWeight: FontWeight.w700))),
+                              decoration: BoxDecoration(color: AppColors.error, shape: BoxShape.circle),
+                              child: Center(child: Text('${provider.unreadNotificationCount}', style: TextStyle(color: AppColors.white, fontSize: 8, fontWeight: FontWeight.w700))),
                             ),
                           ),
                       ],
@@ -99,7 +99,7 @@ class _ServicesScreenState extends State<ServicesScreen> {
               const SizedBox(height: 24),
               Text(
                 l10n.servicesTitle,
-                style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.of(context).text),
               ),
               const SizedBox(height: 14),
               _ServiceRow(
@@ -139,7 +139,7 @@ class _ServicesScreenState extends State<ServicesScreen> {
                 onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SponsorCareScreen())),
               ),
               const SizedBox(height: 20),
-              Text(l10n.upcomingShort, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+              Text(l10n.upcomingShort, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
               const SizedBox(height: 8),
               const SizedBox(height: 12),
               if (_loadingDoctors)
@@ -201,7 +201,7 @@ class _ServiceRow extends StatelessWidget {
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(
-                    color: AppColors.white,
+                    color: AppColors.of(context).card,
                     shape: BoxShape.circle,
                   ),
                   child: Icon(icon, color: color, size: 28),
@@ -213,16 +213,16 @@ class _ServiceRow extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimary,
+                          color: AppColors.of(context).text,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         subtitle,
-                        style: const TextStyle(fontSize: 14, color: AppColors.textSecondary, height: 1.3),
+                        style: TextStyle(fontSize: 14, color: AppColors.of(context).textMuted, height: 1.3),
                       ),
                     ],
                   ),
@@ -260,9 +260,9 @@ class _RecommendedCard extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 4),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: AppColors.of(context).card,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.cardBorder),
+          border: Border.all(color: AppColors.of(context).border),
         ),
         child: Row(
           children: [
@@ -280,12 +280,12 @@ class _RecommendedCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                  Text(subtitle, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                  Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                  Text(subtitle, style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted)),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: AppColors.textTertiary),
+            Icon(Icons.chevron_right, color: AppColors.of(context).textFaint),
           ],
         ),
       ),

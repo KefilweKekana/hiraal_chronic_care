@@ -35,6 +35,8 @@
   "channelEmail": "Iimayl",
   "channelEmailSublabel": "Iimaylka ku qoran diiwaankaaga",
   "sendCode": "Soo dir koodhka",
+  "waitCountdown": "Sug {countdown}",
+  "pleaseWaitBeforeAnotherCode": "Fadlan sug {countdown} ka hor intaadan koodh kale weydiisan",
   "infoSafeWithUs": "Macluumaadkaagu waa ammaan, si fiicanna waannu u ilaalinaa.",
   "newToHiraal": "Hiraal ma ku cusub tahay?",
   "createAnAccount": "Samayso akoon",
@@ -56,7 +58,7 @@
   "navHome": "Hore",
   "navServices": "Adeegyo",
   "navHistory": "Diiwaan",
-  "navProfile": "Akoon",
+  "navProfile": "Xisaabtayda",
   "offlineBanner": "Ma ku xirnidin – cabbirrada waxa lagu kaydinayaa taleefankan",
   "backOnlineSyncing": "Dib ayaad u xirmay – waa la isku-dubbaridayaa…",
   "greetingMorning": "Subax wanaagsan,",
@@ -199,7 +201,7 @@
   "noAlerts": "Digniin ma jirto",
   "statusPending": "Sugaya",
   "statusSent": "La diray",
-  "profileTitle": "Akoonkayga",
+  "profileTitle": "Xisaabtayda",
   "memberId": "Lambarka xubinimada: {id}",
   "yourProgram": "Xidhmadaada",
   "programHypertensionCare": "Xidhmada Daryeelka Dhiig-karka",
@@ -488,7 +490,7 @@
   "measureAction": "Cabbir",
   "unknownDevice": "Qalab aan la aqoon",
 
-  "caregiversTitle": "Daryeelayaasha",
+  "caregiversTitle": "Daryeele & Qoys",
   "addCaregiver": "Ku dar daryeele",
   "caregiversInfoBanner": "Ku casuum xubnaha qoyska si ay u arkaan macluumaadka caafimaad ee aad doorato oo ay ku taageeraan daryeelkaaga.",
   "myCaregivers": "Daryeelayaashayda",
@@ -593,7 +595,7 @@
   "supportLovedOneSubtitle": "Samee akoon daryeele ama maalgeliye oo bilaash ah",
   "caregiverPortalHome": "Daryeelkayga",
   "caregiverPortalConnect": "Ku xidh",
-  "caregiverPortalAccount": "Akoon",
+  "caregiverPortalAccount": "Xisaabtayda",
   "caregiverPortalWelcome": "Qoyskayga",
   "caregiverPortalWelcomeHint": "Eeg wararka oo taage dadyowga aad daryeesho.",
   "caregiverPortalAccountTitle": "Akoonka taageeraha",
@@ -627,12 +629,12 @@
   "noPeopleYet": "Weli qof ma aadan darin. Taabo Ku dar xubin qoyska si aad u bilowdo.",
   "addFamilyMember": "Ku dar xubin qoyska",
   "addFamilyMemberHint": "Samee ama ku xidh qof aad jeceshahay si aad u maamusho daryeelkiisa.",
-  "plansAndPayments": "Qorshayaasha iyo lacag-bixinta",
-  "plansAndPaymentsHint": "Qorshayaashooda daryeel, lacag-bixinta iyo rasiidhyada.",
+  "plansAndPayments": "Qorshayaasha Daryeelka & Lacag-bixinta",
+  "plansAndPaymentsHint": "Waxay helaan, bixi, rasiidyo.",
   "familyAccess": "Gelitaanka qoyska",
   "familyAccessHint": "Dadka loo oggol yahay inay ka caawiyaan daryeelka.",
   "caregiverAccountTitle": "Akoonka daryeelaha",
-  "caregiverAccountHint": "Maamul kuwa aad jeceshahay, qorshayaasha, lacag-bixinta iyo dejinta.",
+  "caregiverAccountHint": "Dadkaaga aad jeceshahay, qorshayaasha iyo dejinta",
   "caregiverServicesTitle": "Adeegyada",
   "caregiverServicesHint": "Maamul daryeelka iyo adeegyada caafimaad ee qofka aad jeceshahay.",
   "caregiverHistoryTitle": "Taariikhda",
@@ -651,13 +653,13 @@
   "filterLabs": "Baadhitaannada",
   "filterMedicines": "Dawooyinka",
   "viewMoreHistory": "Eeg taariikh dheeraad ah",
-  "darkTheme": "Mowduuca mugdiga",
+  "darkTheme": "Mowduuca",
   "darkThemeSubtitle": "Waa fududahay indhaha habeenkii. Wuxuu raacaa taleefankaaga illaa aad doorato Iftiin ama Mugdi.",
   "darkThemeSystem": "Toos",
   "darkThemeLight": "Iftiin",
   "darkThemeDark": "Mugdi",
   "languageScreenHint": "Dooro luqadda aad doorbidayso ee app-ka.",
-  "languageHelper": "Waxaad luqadda ka beddeli kartaa wakhti kasta Akoonkayga.",
+  "languageHelper": "Waxaad luqadda ka beddeli kartaa wakhti kasta Xisaabtayda.",
   "languagePreviewTitle": "Muujinta qaabka taariikhda iyo lambarrada",
   "languageGoodToKnow": "Beddelidda luqadda waxay cusboonaysiinaysaa dhammaan khibradda app-ka, oo ay ku jiraan ogeysiisyada iyo farriimaha.",
   "selectedBadge": "La doortay",
@@ -725,6 +727,8 @@
   "createAccountCta": "Samee xisaab",
   "alreadyHaveAccount": "Horey xisaab ma u lahayd?",
   "signInLink": "Gal",
+  "mobileAlreadyRegistered": "Lambarkan moobaylka horey ayaa loo diiwaangeliyey. Gal halkii.",
+  "couldNotCreateAccount": "Xisaabtaada lama sameyn karin",
   "selectADate": "Dooro taariikh",
   "selectATime": "Dooro saacad",
   "todayLabel": "Maanta",
@@ -743,5 +747,83 @@
   "includedLabs": "Baadhitaanno iyo ogaansho",
   "includedMedicine": "Gaarsiinta dawada",
   "includedPriority": "Taageero degdeg ah",
-  "outOfPlanPaymentTitle": "Dhammaystir lacag-bixinta"
+  "outOfPlanPaymentTitle": "Dhammaystir lacag-bixinta",
+
+  "healthPinTitle": "PIN-ka caafimaadka",
+  "createHealthPinTitle": "Samee PIN-kaaga caafimaadka",
+  "createHealthPinHint": "Dooro PIN afar lambar ah si aad u ilaaliso natiijooyinka shaybaadhka iyo diiwaanka caafimaadka.",
+  "confirmHealthPinTitle": "Xaqiiji PIN-kaaga caafimaadka",
+  "confirmHealthPinHint": "Mar kale geli isla PIN-ka afar lambar ah.",
+  "enterHealthPinTitle": "Geli PIN-ka caafimaadka",
+  "enterHealthPinHint": "PIN-kan wuxuu ilaaliyaa natiijooyinka shaybaadhka iyo diiwaanka caafimaadka.",
+  "healthPinMismatch": "PIN-yadu isma mid aha. Isku day mar kale.",
+  "healthPinWrong": "PIN khaldan. Isku day mar kale.",
+  "healthPinLocked": "Isku dayo khaldan oo badan. Fadlan sug {countdown}.",
+  "healthPinForgot": "PIN-ka ma hilmaamtay?",
+  "healthPinResetTitle": "Dib u deji PIN-ka caafimaadka",
+  "healthPinResetHint": "Waxaan kood u diri doonaa telefoonkaaga si aad PIN cusub u samaysato.",
+  "healthPinResetSendCode": "Dir koodka dib-u-dejinta",
+  "healthPinAskPatient": "Weydiiso bukaanka PIN-ka caafimaadka",
+  "healthPinAskPatientHint": "Natiijooyinka shaybaadhka iyo diiwaanka qofkan waxaa xiray PIN ay ku sameeyeen abka Hiraal. Weydiiso, ama weydiiso inay mid sameeyaan haddii aysan weli samayn.",
+  "healthPinNoPinYet": "Bukaanku weli ma samayn PIN caafimaad. Weydiiso inuu furo abka Hiraal oo uu mid sameeyo.",
+  "healthPinSave": "Kaydi PIN-ka",
+  "healthPinUnlock": "Fur",
+  "healthPinRequired": "Geli PIN-kaaga caafimaadka si aad u aragto xogtan.",
+  "healthPinChange": "Beddel PIN-ka caafimaadka",
+  "healthPinChangeHint": "Cusbooneysii PIN-ka ilaaliya diiwaankaaga",
+  "healthPinCreated": "PIN-kaaga caafimaadka waa diyaar.",
+  "healthPinResetSuccess": "PIN-kaaga caafimaadka waa la dib u dejiyey.",
+  "healthPinInvalid": "Geli PIN afar lambar ah.",
+  "healthPinProtects": "PIN-kaaga weligiis looma kaydiyo qoraal cad. Daryeelayaashu waxay u baahan doonaan PIN-kan si ay u arkaan shaybaadhkaaga iyo diiwaankaaga.",
+
+  "yourCarePlan": "Qorshahaaga daryeelka",
+  "planPriceAMonth": "{plan} · {price} bishiiba",
+  "@planPriceAMonth": {
+    "placeholders": {
+      "plan": {"type": "String"},
+      "price": {"type": "String"}
+    }
+  },
+  "aMonth": "bishiiba",
+  "paidUntil": "La bixiyay ilaa {date}",
+  "@paidUntil": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "trialUntil": "Tijaabo ilaa {date}",
+  "@trialUntil": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "paymentDueShort": "Lacag baa la sugayaa",
+  "noCarePlanYet": "Weli qorshe daryeel ma jiro",
+  "personalInfoSubtitle": "Magaca, taleefanka, da'da, diiwaanka caafimaadka.",
+  "myCarePlan": "Qorshahayga Daryeelka",
+  "myCarePlanSubtitle": "Waxaad hesho, bixi, rasiidyo.",
+  "caregiverAndFamily": "Daryeele & Qoys",
+  "caregiverFamilySubtitle": "{active} firfircoon · {pending} la sugayo.",
+  "@caregiverFamilySubtitle": {
+    "placeholders": {
+      "active": {"type": "int"},
+      "pending": {"type": "int"}
+    }
+  },
+  "settingsAccountSubtitle": "Luqadda ({language}), cinwaannada, asturnaanta.",
+  "@settingsAccountSubtitle": {
+    "placeholders": {
+      "language": {"type": "String"}
+    }
+  },
+  "memberIdUnchangeable": "Waxaa bixiyay Hiraal. Lama beddeli karo.",
+  "phoneLabel": "Taleefanka",
+  "medicalRecordsHint": "Soo koobidda caafimaadka iyo diiwaannadii hore.",
+  "otherSettings": "Dejin kale",
+  "privacyWhoCanSee": "Cidda arki karta xogtaada",
+  "addressesDeliveryHint": "Waxaa loo isticmaalaa gaarsiinta daawada iyo booqashooyinka shaybaarka guriga.",
+  "myDetails": "Faahfaahintayda",
+  "freePlanLabel": "Bilaash",
+  "assignedNurseLabel": "Kalkaaliyaha laguu xilsaaray",
+  "clinicLabel": "Kiliniko"
 }

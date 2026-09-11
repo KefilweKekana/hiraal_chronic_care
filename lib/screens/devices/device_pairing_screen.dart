@@ -317,11 +317,10 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).scaffold,
       appBar: AppBar(
         title: Text(l10n.connectMeasurementDevice),
         backgroundColor: AppColors.surface,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
         actions: [
           IconButton(
@@ -355,9 +354,9 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> {
                                 'or Disconnect to pair a different monitor.'
                             : 'You’re connected. Take a reading, or Disconnect to '
                                 'pair a different monitor.',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
-                      color: AppColors.textSecondary,
+                      color: AppColors.of(context).textMuted,
                     ),
                   ),
                 ] else ...[
@@ -393,7 +392,7 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isConnected ? AppColors.successLight : AppColors.primaryLight,
+        color: isConnected ? AppColors.of(context).successSoft : AppColors.of(context).primarySoft,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isConnected ? AppColors.success : AppColors.primary,
@@ -414,9 +413,9 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> {
                   isConnected
                       ? l10n.connectedToDevice(deviceName)
                       : l10n.noDeviceConnected,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: AppColors.of(context).text,
                   ),
                 ),
               ),
@@ -432,13 +431,13 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> {
               padding: const EdgeInsets.only(top: 8),
               child: Text(
                 'Protocol detected: ${protocol.name}',
-                style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted),
               ),
             ),
           if (_bleService.lastError != null)
             Text(
               _bleService.lastError!,
-              style: const TextStyle(fontSize: 12, color: AppColors.error),
+              style: TextStyle(fontSize: 12, color: AppColors.error),
             ),
         ],
       ),
@@ -452,7 +451,7 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> {
     }
     final btOff = _bleService.isBluetoothOff;
     final color = btOff ? AppColors.warning : AppColors.error;
-    final bg = btOff ? AppColors.warningLight : AppColors.errorLight;
+    final bg = btOff ? AppColors.of(context).warningSoft : AppColors.of(context).errorSoft;
     final isAndroid = Theme.of(context).platform == TargetPlatform.android;
     return Container(
       margin: const EdgeInsets.only(top: 16),
@@ -471,7 +470,7 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> {
               Icon(btOff ? Icons.bluetooth_disabled : Icons.error_outline, color: color, size: 20),
               const SizedBox(width: 10),
               Expanded(
-                child: Text(err, style: const TextStyle(fontSize: 13, color: AppColors.textPrimary, height: 1.4)),
+                child: Text(err, style: TextStyle(fontSize: 13, color: AppColors.of(context).text, height: 1.4)),
               ),
             ],
           ),
@@ -484,7 +483,7 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> {
                   await _bleService.turnOnBluetooth();
                   if (mounted) _startScan();
                 },
-                icon: const Icon(Icons.bluetooth, size: 18),
+                icon: Icon(Icons.bluetooth, size: 18),
                 label: Text(l10n.turnOnBluetooth),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
@@ -513,7 +512,7 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> {
         ),
         icon: Icon(isGlucose ? Icons.water_drop : Icons.monitor_heart, size: 22),
         label: Text(label,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.white,
@@ -541,16 +540,16 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> {
       children: [
         Text(
           l10n.availableDevices,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: AppColors.of(context).text,
           ),
         ),
         const SizedBox(height: 4),
         Text(
           l10n.availableDevicesHint,
-          style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+          style: TextStyle(color: AppColors.of(context).textMuted, fontSize: 13),
         ),
         const SizedBox(height: 12),
         SizedBox(
@@ -567,10 +566,10 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> {
                       color: Colors.white,
                     ),
                   )
-                : const Icon(Icons.bluetooth_searching, size: 22),
+                : Icon(Icons.bluetooth_searching, size: 22),
             label: Text(
               _bleService.isScanning ? l10n.scanning : l10n.scanForDevices,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
@@ -582,7 +581,7 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> {
         if (!hasAnything && !_bleService.isScanning)
           Text(
             l10n.scanDevicesHint,
-            style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+            style: TextStyle(color: AppColors.of(context).textMuted, fontSize: 13),
           ),
         if (!hasAnything && _bleService.isScanning)
           Padding(
@@ -661,19 +660,19 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Already on this phone',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: AppColors.of(context).text,
           ),
         ),
         const SizedBox(height: 4),
-        const Text(
+        Text(
           'These health devices are paired in Bluetooth settings. Tap Scan '
           '(or Connect below) – Hiraal will take over the link.',
-          style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+          style: TextStyle(color: AppColors.of(context).textMuted, fontSize: 13),
         ),
         const SizedBox(height: 12),
         ...known.map((d) => _buildKnownDeviceTile(l10n, d)),
@@ -698,8 +697,8 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: AppColors.primaryLight,
-          child: const Icon(Icons.bluetooth, color: AppColors.primary),
+          backgroundColor: AppColors.of(context).primarySoft,
+          child: Icon(Icons.bluetooth, color: AppColors.primary),
         ),
         title: Text(name.isNotEmpty ? name : l10n.unknownDevice),
         subtitle: Text(type == 'Unknown'
@@ -772,7 +771,7 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: AppColors.primaryLight,
+          backgroundColor: AppColors.of(context).primarySoft,
           child: Icon(icon, color: AppColors.primary),
         ),
         title: Text(name.isNotEmpty ? name : l10n.unknownDevice),
@@ -785,7 +784,7 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> {
             if (protocol != null)
               Text(
                 'Detected: ${protocol.name}',
-                style: const TextStyle(fontSize: 11, color: AppColors.success),
+                style: TextStyle(fontSize: 11, color: AppColors.success),
               ),
           ],
         ),
@@ -820,10 +819,10 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> {
       children: [
         Text(
           l10n.myDevices,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: AppColors.of(context).text,
           ),
         ),
         const SizedBox(height: 12),
@@ -834,7 +833,7 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> {
             _bleService.isConnected
                 ? 'This monitor is connected. It will stay in My Devices after you leave this screen.'
                 : l10n.noPairedDevicesYet,
-            style: const TextStyle(color: AppColors.textSecondary),
+            style: TextStyle(color: AppColors.of(context).textMuted),
           ),
         ..._pairedDevices.map((device) => _buildPairedDeviceTile(l10n, device)),
       ],
@@ -873,7 +872,7 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> {
         statusColor = AppColors.error;
         break;
       default:
-        statusColor = AppColors.textTertiary;
+        statusColor = AppColors.of(context).textFaint;
     }
     if (isLive) statusColor = AppColors.success;
 
@@ -883,7 +882,7 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: AppColors.primaryLight,
+          backgroundColor: AppColors.of(context).primarySoft,
           child: Icon(icon, color: AppColors.primary),
         ),
         title: Text(device.deviceName),
@@ -929,7 +928,7 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> {
               child: Text(isLive ? l10n.measureAction : l10n.connectAction),
             ),
             IconButton(
-              icon: const Icon(Icons.delete_outline, color: AppColors.error),
+              icon: Icon(Icons.delete_outline, color: AppColors.error),
               onPressed: () => _deleteDevice(device),
             ),
           ],
@@ -947,37 +946,37 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Last Reading from Device',
-            style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+            style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.of(context).text),
           ),
           const SizedBox(height: 8),
           if (type == 'blood_pressure')
             Text(
               'BP: ${reading['systolic']}/${reading['diastolic']} mmHg',
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.primary),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.primary),
             ),
           if (type == 'blood_sugar')
             Text(
               'Glucose: ${reading['glucose']} ${reading['unit']}',
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.primary),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.primary),
             ),
           if (type == 'weight')
             Text(
               'Weight: ${reading['weight']} kg',
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.primary),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.primary),
             ),
           if (reading['pulse'] != null)
-            Text('Pulse: ${reading['pulse']} bpm', style: const TextStyle(color: AppColors.textSecondary)),
+            Text('Pulse: ${reading['pulse']} bpm', style: TextStyle(color: AppColors.of(context).textMuted)),
           if (reading['protocol'] != null)
             Text(
               'Protocol: ${reading['protocol']}',
-              style: const TextStyle(fontSize: 12, color: AppColors.textTertiary),
+              style: TextStyle(fontSize: 12, color: AppColors.of(context).textFaint),
             ),
         ],
       ),
@@ -988,7 +987,7 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.errorLight,
+        color: AppColors.of(context).errorSoft,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.error.withOpacity(0.3)),
       ),
@@ -1029,14 +1028,14 @@ class _DevicePairingScreenState extends State<DevicePairingScreen> {
                     ),
                   );
                 },
-                icon: const Icon(Icons.copy, size: 16),
+                icon: Icon(Icons.copy, size: 16),
                 label: const Text('Copy logs'),
               ),
             ],
           ),
           ...agentLogRing.reversed.take(12).map((line) => Text(
                 line.length > 220 ? '${line.substring(0, 220)}…' : line,
-                style: const TextStyle(fontSize: 10, fontFamily: 'monospace'),
+                style: TextStyle(fontSize: 10, fontFamily: 'monospace'),
               )),
           // #endregion
         ],
@@ -1087,7 +1086,7 @@ class _PairingDialogState extends State<_PairingDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Device ID: ${widget.deviceId}', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+            Text('Device ID: ${widget.deviceId}', style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted)),
             const SizedBox(height: 16),
             TextField(
               controller: _nameController,

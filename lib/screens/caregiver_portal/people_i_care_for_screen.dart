@@ -11,6 +11,7 @@ import '../services/appointments_screen.dart';
 import '../services/medicine_order_screen.dart';
 import 'add_family_member_screen.dart';
 import 'caregiver_history_screen.dart';
+import '../../widgets/health_pin_gate.dart';
 
 class PeopleICareForScreen extends StatefulWidget {
   const PeopleICareForScreen({super.key});
@@ -70,7 +71,7 @@ class _PeopleICareForScreenState extends State<PeopleICareForScreen> {
             onChanged: (_) => setState(() {}),
             decoration: InputDecoration(
               hintText: l10n.searchByName,
-              prefixIcon: const Icon(Icons.search),
+              prefixIcon: Icon(Icons.search),
             ),
           ),
           const SizedBox(height: 12),
@@ -116,10 +117,10 @@ class _PeopleICareForScreenState extends State<PeopleICareForScreen> {
                     Row(
                       children: [
                         CircleAvatar(
-                          backgroundColor: AppColors.primaryLight,
+                          backgroundColor: AppColors.of(context).primarySoft,
                           child: Text(
                             p.patientName.isEmpty ? '?' : p.patientName[0],
-                            style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w800),
+                            style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w800),
                           ),
                         ),
                         const SizedBox(width: 10),
@@ -127,7 +128,7 @@ class _PeopleICareForScreenState extends State<PeopleICareForScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(p.patientName, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+                              Text(p.patientName, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
                               Text(
                                 [
                                   p.relationship,
@@ -147,12 +148,12 @@ class _PeopleICareForScreenState extends State<PeopleICareForScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                           decoration: BoxDecoration(
-                            color: p.isActive ? AppColors.successLight : AppColors.warningLight,
+                            color: p.isActive ? AppColors.of(context).successSoft : AppColors.of(context).warningSoft,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
                             p.isActive ? l10n.filterActiveStatus : l10n.filterInactiveStatus,
-                            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+                            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
                           ),
                         ),
                       ],
@@ -185,9 +186,14 @@ class _PeopleICareForScreenState extends State<PeopleICareForScreen> {
                           child: Text(l10n.filterMedicines),
                         ),
                         OutlinedButton(
-                          onPressed: () {
-                            provider.setActiveCarePerson(p);
-                            Navigator.push(context, MaterialPageRoute(builder: (_) => const CaregiverHistoryScreen()));
+                          onPressed: () async {
+                            await provider.setActiveCarePerson(p);
+                            if (!context.mounted) return;
+                            await pushAfterHealthPin(
+                              context,
+                              const CaregiverHistoryScreen(),
+                              patientId: p.patient,
+                            );
                           },
                           child: Text(l10n.viewHistory),
                         ),
@@ -205,7 +211,7 @@ class _PeopleICareForScreenState extends State<PeopleICareForScreen> {
                 await Navigator.push(context, MaterialPageRoute(builder: (_) => const AddFamilyMemberScreen()));
                 if (context.mounted) context.read<AppProvider>().refreshPeopleICareFor();
               },
-              icon: const Icon(Icons.add),
+              icon: Icon(Icons.add),
               label: Text(l10n.addFamilyMember),
             ),
           ),

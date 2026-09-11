@@ -67,6 +67,18 @@
   "channelEmail": "Email",
   "channelEmailSublabel": "To the email on file",
   "sendCode": "Send Code",
+  "waitCountdown": "Wait {countdown}",
+  "@waitCountdown": {
+    "placeholders": {
+      "countdown": {"type": "String"}
+    }
+  },
+  "pleaseWaitBeforeAnotherCode": "Please wait {countdown} before requesting another code",
+  "@pleaseWaitBeforeAnotherCode": {
+    "placeholders": {
+      "countdown": {"type": "String"}
+    }
+  },
   "infoSafeWithUs": "Your information is safe with us",
   "newToHiraal": "New to Hiraal?",
   "createAnAccount": "Create an account",
@@ -100,7 +112,7 @@
   "navHome": "Home",
   "navServices": "Services",
   "navHistory": "History",
-  "navProfile": "Profile",
+  "navProfile": "My Account",
   "offlineBanner": "You're offline – readings will be saved on this phone",
   "backOnlineSyncing": "Back online – syncing…",
 
@@ -275,7 +287,7 @@
   "statusPending": "Pending",
   "statusSent": "Sent",
 
-  "profileTitle": "Profile",
+  "profileTitle": "My Account",
   "memberId": "Member ID: {id}",
   "@memberId": {
     "placeholders": {
@@ -687,7 +699,7 @@
   "measureAction": "Measure",
   "unknownDevice": "Unknown Device",
 
-  "caregiversTitle": "Caregivers",
+  "caregiversTitle": "Caregiver & Family",
   "addCaregiver": "Add Caregiver",
   "caregiversInfoBanner": "Invite family members to view selected health information and support your care journey.",
   "myCaregivers": "My Caregivers",
@@ -812,7 +824,7 @@
   "supportLovedOneSubtitle": "Create a free caregiver or sponsor account",
   "caregiverPortalHome": "My Care",
   "caregiverPortalConnect": "Connect",
-  "caregiverPortalAccount": "Account",
+  "caregiverPortalAccount": "My Account",
   "caregiverPortalWelcome": "For My Family",
   "caregiverPortalWelcomeHint": "View updates and support the people you care for.",
   "caregiverPortalAccountTitle": "Supporter account",
@@ -851,12 +863,12 @@
   "noPeopleYet": "You have not added anyone yet. Tap Add Family Member to start.",
   "addFamilyMember": "Add Family Member",
   "addFamilyMemberHint": "Create or link a loved one so you can manage their care.",
-  "plansAndPayments": "Plans and Payments",
-  "plansAndPaymentsHint": "Their care plans, payments and receipts.",
+  "plansAndPayments": "Care Plans & Payments",
+  "plansAndPaymentsHint": "What they get, pay, receipts.",
   "familyAccess": "Family Access",
   "familyAccessHint": "People allowed to help with care.",
   "caregiverAccountTitle": "Caregiver Account",
-  "caregiverAccountHint": "Manage your loved ones, plans, payments and settings.",
+  "caregiverAccountHint": "Your loved ones, plans and settings",
   "caregiverServicesTitle": "Services",
   "caregiverServicesHint": "Manage care and health services for your loved one.",
   "caregiverHistoryTitle": "History",
@@ -875,7 +887,7 @@
   "filterLabs": "Lab Tests",
   "filterMedicines": "Medicines",
   "viewMoreHistory": "View More History",
-  "darkTheme": "Dark theme",
+  "darkTheme": "Theme",
   "darkThemeSubtitle": "Easier on the eyes at night. Follows your phone unless you pick Light or Dark.",
   "darkThemeSystem": "Auto",
   "darkThemeLight": "Light",
@@ -959,6 +971,8 @@
   "createAccountCta": "Create Account",
   "alreadyHaveAccount": "Already have an account?",
   "signInLink": "Sign in",
+  "mobileAlreadyRegistered": "This mobile number is already registered. Sign in instead.",
+  "couldNotCreateAccount": "Could not create your account",
   "selectADate": "Select a Date",
   "selectATime": "Select a Time",
   "todayLabel": "Today",
@@ -982,5 +996,88 @@
   "includedLabs": "Lab tests and diagnostics",
   "includedMedicine": "Medicine delivery",
   "includedPriority": "Priority support",
-  "outOfPlanPaymentTitle": "Complete Payment"
+  "outOfPlanPaymentTitle": "Complete Payment",
+
+  "healthPinTitle": "Health PIN",
+  "createHealthPinTitle": "Create your health PIN",
+  "createHealthPinHint": "Choose a 4-digit PIN to protect lab results and medical records.",
+  "confirmHealthPinTitle": "Confirm your health PIN",
+  "confirmHealthPinHint": "Enter the same 4-digit PIN again.",
+  "enterHealthPinTitle": "Enter health PIN",
+  "enterHealthPinHint": "This PIN protects lab results and medical records.",
+  "healthPinMismatch": "PINs do not match. Try again.",
+  "healthPinWrong": "Incorrect PIN. Try again.",
+  "healthPinLocked": "Too many incorrect attempts. Please wait {countdown}.",
+  "@healthPinLocked": {
+    "placeholders": {
+      "countdown": {"type": "String"}
+    }
+  },
+  "healthPinForgot": "Forgot PIN?",
+  "healthPinResetTitle": "Reset health PIN",
+  "healthPinResetHint": "We will send a code to your phone so you can set a new PIN.",
+  "healthPinResetSendCode": "Send reset code",
+  "healthPinAskPatient": "Ask the patient for their health PIN",
+  "healthPinAskPatientHint": "This person's lab results and records are locked with a PIN they created in the Hiraal app. Ask them for it, or ask them to create one if they have not yet.",
+  "healthPinNoPinYet": "This patient has not created a health PIN yet. Ask them to open the Hiraal app and create one.",
+  "healthPinSave": "Save PIN",
+  "healthPinUnlock": "Unlock",
+  "healthPinRequired": "Enter your health PIN to view this information.",
+  "healthPinChange": "Change health PIN",
+  "healthPinChangeHint": "Update the PIN that protects your records",
+  "healthPinCreated": "Your health PIN is ready.",
+  "healthPinResetSuccess": "Your health PIN has been reset.",
+  "healthPinInvalid": "Enter a 4-digit PIN.",
+  "healthPinProtects": "Your PIN is never stored as plain text. Caregivers will need this PIN to view your labs and records.",
+
+  "yourCarePlan": "Your care plan",
+  "planPriceAMonth": "{plan} · {price} a month",
+  "@planPriceAMonth": {
+    "placeholders": {
+      "plan": {"type": "String"},
+      "price": {"type": "String"}
+    }
+  },
+  "aMonth": "a month",
+  "paidUntil": "Paid until {date}",
+  "@paidUntil": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "trialUntil": "Trial until {date}",
+  "@trialUntil": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "paymentDueShort": "Payment due",
+  "noCarePlanYet": "No care plan yet",
+  "personalInfoSubtitle": "Name, phone, age, medical records.",
+  "myCarePlan": "My Care Plan",
+  "myCarePlanSubtitle": "What you get, pay, receipts.",
+  "caregiverAndFamily": "Caregiver & Family",
+  "caregiverFamilySubtitle": "{active} active · {pending} pending.",
+  "@caregiverFamilySubtitle": {
+    "placeholders": {
+      "active": {"type": "int"},
+      "pending": {"type": "int"}
+    }
+  },
+  "settingsAccountSubtitle": "Language ({language}), addresses, privacy.",
+  "@settingsAccountSubtitle": {
+    "placeholders": {
+      "language": {"type": "String"}
+    }
+  },
+  "memberIdUnchangeable": "Given by Hiraal. Cannot be changed.",
+  "phoneLabel": "Phone",
+  "medicalRecordsHint": "Health summary and past records.",
+  "otherSettings": "Other settings",
+  "privacyWhoCanSee": "Who can see your information",
+  "addressesDeliveryHint": "Used for medicine delivery and home lab visits.",
+  "myDetails": "My details",
+  "freePlanLabel": "Free",
+  "assignedNurseLabel": "Assigned nurse",
+  "clinicLabel": "Clinic"
 }

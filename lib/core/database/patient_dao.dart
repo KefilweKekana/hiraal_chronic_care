@@ -53,6 +53,7 @@ class PatientDao {
         'risk_level': p.riskLevel,
         'device_assigned': p.deviceAssigned,
         'sex': p.sex,
+        'dob': p.dob,
         'subscription_active': p.subscriptionActive ? 1 : 0,
         'updated_at': DateTime.now().toIso8601String(),
       };
@@ -72,6 +73,7 @@ class PatientDao {
         riskLevel: (row['risk_level'] as String?) ?? 'Low',
         deviceAssigned: row['device_assigned'] as String?,
         sex: row['sex'] as String?,
+        dob: row['dob'] as String?,
         subscriptionActive: row['subscription_active'] == 1,
       );
 }

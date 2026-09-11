@@ -39,7 +39,7 @@ class CoverageOutcomePage extends StatelessWidget {
               ),
               child: Icon(
                 free ? Icons.check : Icons.payments_outlined,
-                color: AppColors.white,
+                color: AppColors.of(context).card,
                 size: 44,
               ),
             ),
@@ -63,7 +63,7 @@ class CoverageOutcomePage extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 '${coverage.currency} ${coverage.amount.toStringAsFixed(2)}',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w800,
                   color: AppColors.primary,
@@ -109,12 +109,12 @@ class BigChoiceButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final fg = enabled
         ? (selected ? AppColors.primary : AppColors.text(context))
-        : AppColors.textTertiary;
+        : AppColors.of(context).textFaint;
     return Opacity(
       opacity: enabled ? 1 : 0.45,
       child: Material(
         color: selected
-            ? (AppColors.isDark(context) ? AppColors.darkPrimaryLight : AppColors.primaryLight)
+            ? (AppColors.isDark(context) ? AppColors.darkPrimaryLight : AppColors.of(context).primarySoft)
             : AppColors.card(context),
         borderRadius: BorderRadius.circular(14),
         child: InkWell(

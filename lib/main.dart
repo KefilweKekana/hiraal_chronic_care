@@ -11,10 +11,14 @@ import 'core/config/env_config.dart';
 import 'core/theme/app_theme.dart';
 import 'core/network/connectivity_service.dart';
 import 'core/utils/app_logger.dart';
+import 'core/network/api_client.dart';
 import 'l10n/app_localizations.dart';
 import 'l10n/fallback_material_localizations.dart';
 import 'providers/app_provider.dart';
+import 'providers/health_pin_controller.dart';
 import 'models/patient.dart';
+import 'screens/auth/create_health_pin_screen.dart';
+import 'widgets/health_pin_gate.dart';
 import 'services/service_locator.dart';
 import 'services/background_sync_service.dart';
 import 'services/push_notification_service.dart';
@@ -132,6 +136,9 @@ class HiraalApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AppProvider()),
+        ChangeNotifierProvider<HealthPinController>.value(
+          value: HealthPinController.instance,
+        ),
         ChangeNotifierProvider(create: (_) => ConnectivityService()),
       ],
       child: const _LifecycleScope(child: _AppRoot()),
@@ -165,6 +172,9 @@ class _LifecycleScopeState extends State<_LifecycleScope>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     final provider = context.read<AppProvider>();
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.hidden) {
+      context.read<HealthPinController>().lockAll();
+    }
     if (state == AppLifecycleState.resumed) {
       unawaited(provider.handleAppResumed());
     }
@@ -215,7 +225,9 @@ class _AppRoot extends StatelessWidget {
           child: child ?? const SizedBox.shrink(),
         );
       },
-      home: _buildScreen(context, provider),
+      home: Builder(
+        builder: (context) => _buildScreen(context, provider),
+      ),
       routes: {
         '/book-doctor': (_) => const BookDoctorScreen(),
         '/lab-test': (_) => const LabTestScreen(),
@@ -223,7 +235,7 @@ class _AppRoot extends StatelessWidget {
         '/contact-care-team': (_) => const ContactCareTeamScreen(),
         '/notifications': (_) => const NotificationScreen(),
         '/health-tips': (_) => const HealthTipsScreen(),
-        '/weekly-summary': (_) => const WeeklySummaryScreen(),
+        '/weekly-summary': (_) => const HealthPinRoute(child: WeeklySummaryScreen()),
         '/offline': (_) => const OfflineScreen(),
         '/sync': (_) => const SyncScreen(),
         '/reminder': (ctx) => ReminderScreen(
@@ -237,6 +249,7 @@ class _AppRoot extends StatelessWidget {
   }
 
   Widget _buildScreen(BuildContext context, AppProvider provider) {
+    final l10n = AppLocalizations.of(context);
     switch (provider.state) {
       case AppState.splash:
         return SplashScreen(
@@ -277,7 +290,16 @@ class _AppRoot extends StatelessWidget {
             if (provider.isSignupFlow) {
               final ok = await provider.completeSignup();
               if (!ok) {
-                return provider.errorMessage ?? 'Could not create your account';
+                final raw = provider.errorMessage;
+                if (raw == null ||
+                    raw.isEmpty ||
+                    raw.toLowerCase() == 'registration failed') {
+                  return l10n.couldNotCreateAccount;
+                }
+                return displayRegistrationError(
+                  raw,
+                  alreadyRegistered: l10n.mobileAlreadyRegistered,
+                );
               }
               return null;
             }
@@ -296,13 +318,17 @@ class _AppRoot extends StatelessWidget {
             return null;
           },
           onBack: () => provider.setState(
-              provider.isSignupFlow ? AppState.signup : AppState.register),
+            provider.isSignupFlow ? AppState.signup : AppState.register,
+            clearError: !provider.isSignupFlow,
+          ),
         );
       case AppState.success:
         return RegistrationSuccessScreen(
           patient: provider.patient ?? Patient.mock(),
-          onContinue: () => provider.setState(AppState.home),
+          onContinue: () => provider.beginHealthPinSetup(next: AppState.home),
         );
+      case AppState.createHealthPin:
+        return const CreateHealthPinScreen();
       case AppState.paywall:
         return const PaywallScreen();
       case AppState.roleChooser:

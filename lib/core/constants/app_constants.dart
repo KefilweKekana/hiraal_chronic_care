@@ -42,6 +42,9 @@ class AppConstants {
   static const int otpLength = 6;
   static const int otpResendSeconds = 25;
   static const int otpExpiryMinutes = 5;
+  static const int healthPinLength = 4;
+  static const int healthPinUnlockMinutes = 10;
+  static const int healthPinFailLimit = 5;
 
   // Subscription
   static const double standardPlanPrice = 5.00;

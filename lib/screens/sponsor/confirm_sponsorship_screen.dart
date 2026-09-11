@@ -67,11 +67,9 @@ class _ConfirmSponsorshipScreenState extends State<ConfirmSponsorshipScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).scaffold,
       appBar: AppBar(
         title: Text(l10n.confirmSponsorshipTitle),
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: ListView(
@@ -89,7 +87,7 @@ class _ConfirmSponsorshipScreenState extends State<ConfirmSponsorshipScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          Text(l10n.payWith, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+          Text(l10n.payWith, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
           const SizedBox(height: 10),
           if (_loadingMethods)
             const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator()))
@@ -167,14 +165,14 @@ class _SummaryCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+          Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
           const SizedBox(height: 12),
           ...rows.map(
             (row) => Padding(
@@ -182,9 +180,9 @@ class _SummaryCard extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(
-                    child: Text(row.label, style: const TextStyle(color: AppColors.textSecondary)),
+                    child: Text(row.label, style: TextStyle(color: AppColors.of(context).textMuted)),
                   ),
-                  Text(row.value, style: const TextStyle(fontWeight: FontWeight.w600)),
+                  Text(row.value, style: TextStyle(fontWeight: FontWeight.w600)),
                 ],
               ),
             ),
@@ -214,9 +212,9 @@ class _InlineError extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: Column(
         children: [

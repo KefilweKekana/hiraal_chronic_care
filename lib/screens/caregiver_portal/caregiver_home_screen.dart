@@ -7,6 +7,7 @@ import '../../l10n/app_localizations.dart';
 import '../../providers/app_provider.dart';
 import '../../services/service_locator.dart';
 import '../../widgets/active_patient_card.dart';
+import '../../widgets/health_pin_gate.dart';
 import '../notifications/notification_screen.dart';
 import '../services/appointments_screen.dart';
 import '../services/lab_test_screen.dart';
@@ -86,7 +87,7 @@ class _CaregiverHomeScreenState extends State<CaregiverHomeScreen> {
                   IconButton(
                     icon: Stack(
                       children: [
-                        const Icon(Icons.notifications_outlined, size: 28),
+                        Icon(Icons.notifications_outlined, size: 28),
                         if (provider.unreadNotificationCount > 0)
                           Positioned(
                             right: 0,
@@ -94,7 +95,7 @@ class _CaregiverHomeScreenState extends State<CaregiverHomeScreen> {
                             child: Container(
                               width: 14,
                               height: 14,
-                              decoration: const BoxDecoration(
+                              decoration: BoxDecoration(
                                 color: AppColors.error,
                                 shape: BoxShape.circle,
                               ),
@@ -124,10 +125,10 @@ class _CaregiverHomeScreenState extends State<CaregiverHomeScreen> {
                   children: [
                     Text(
                       l10n.todaysReadings,
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
                     ),
                     const Spacer(),
-                    TextButton(onPressed: () => provider.setTab(2), child: Text(l10n.seeAll)),
+                    TextButton(onPressed: () => openHealthHistoryTab(context), child: Text(l10n.seeAll)),
                   ],
                 ),
                 Row(
@@ -163,7 +164,7 @@ class _CaregiverHomeScreenState extends State<CaregiverHomeScreen> {
                   ],
                 ),
                 const SizedBox(height: 20),
-                Text(l10n.upNext, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                Text(l10n.upNext, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 8),
                 _NextCard(
                   color: AppColors.info,
@@ -188,7 +189,7 @@ class _CaregiverHomeScreenState extends State<CaregiverHomeScreen> {
                 const SizedBox(height: 12),
                 Text(
                   l10n.needsYourAttention,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 8),
                 if (refill != null)
@@ -251,7 +252,7 @@ class _ReadingTile extends StatelessWidget {
         children: [
           Text(title, style: TextStyle(fontSize: 13, color: color, fontWeight: FontWeight.w700)),
           const SizedBox(height: 6),
-          Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+          Text(value, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
           Text(status, style: TextStyle(fontSize: 12, color: AppColors.textMuted(context))),
         ],
       ),
@@ -294,7 +295,7 @@ class _NextCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                Text(title, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
                 Text(body, style: TextStyle(color: AppColors.textMuted(context))),
               ],
             ),

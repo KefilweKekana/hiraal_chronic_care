@@ -54,11 +54,9 @@ class _MedicalHistoryScreenState extends State<MedicalHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).scaffold,
       appBar: AppBar(
         title: const Text('Medical History'),
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: _loading
@@ -67,13 +65,13 @@ class _MedicalHistoryScreenState extends State<MedicalHistoryScreen> {
               ? Center(child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(_error!, style: const TextStyle(color: AppColors.error)),
+                    Text(_error!, style: TextStyle(color: AppColors.error)),
                     const SizedBox(height: 8),
                     TextButton(onPressed: _load, child: const Text('Retry')),
                   ],
                 ))
               : _records.isEmpty
-                  ? const Center(child: Text('No medical records yet', style: TextStyle(color: AppColors.textSecondary)))
+                  ? Center(child: Text('No medical records yet', style: TextStyle(color: AppColors.of(context).textMuted)))
                   : RefreshIndicator(
                       onRefresh: _load,
                       child: ListView.builder(
@@ -116,9 +114,9 @@ class _HistoryItem extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -137,11 +135,11 @@ class _HistoryItem extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(date, style: const TextStyle(fontSize: 11, color: AppColors.textTertiary)),
+                Text(date, style: TextStyle(fontSize: 11, color: AppColors.of(context).textFaint)),
                 const SizedBox(height: 2),
-                Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.of(context).text)),
                 const SizedBox(height: 2),
-                Text(subtitle, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                Text(subtitle, style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted)),
               ],
             ),
           ),

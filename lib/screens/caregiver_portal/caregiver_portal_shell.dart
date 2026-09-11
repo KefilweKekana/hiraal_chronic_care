@@ -7,6 +7,7 @@ import 'caregiver_home_screen.dart';
 import 'caregiver_history_screen.dart';
 import 'caregiver_portal_account_screen.dart';
 import 'caregiver_services_screen.dart';
+import '../../widgets/health_pin_gate.dart';
 
 class CaregiverPortalShell extends StatelessWidget {
   const CaregiverPortalShell({super.key});
@@ -18,7 +19,7 @@ class CaregiverPortalShell extends StatelessWidget {
     final screens = const [
       CaregiverHomeScreen(),
       CaregiverServicesScreen(),
-      CaregiverHistoryScreen(),
+      HealthPinLockedPane(child: CaregiverHistoryScreen()),
       CaregiverPortalAccountScreen(),
     ];
     final tab = provider.currentTab.clamp(0, screens.length - 1);
@@ -30,29 +31,35 @@ class CaregiverPortalShell extends StatelessWidget {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: tab,
-        onTap: provider.setTab,
+        onTap: (index) async {
+          if (index == 2) {
+            final ok = await ensureHealthPinUnlocked(context);
+            if (!ok || !context.mounted) return;
+          }
+          provider.setTab(index);
+        },
         type: BottomNavigationBarType.fixed,
         selectedFontSize: 11,
         unselectedFontSize: 10,
         items: [
           BottomNavigationBarItem(
-            icon: const Icon(Icons.home_outlined),
-            activeIcon: const Icon(Icons.home),
+            icon: Icon(Icons.home_outlined),
+            activeIcon: Icon(Icons.home),
             label: l10n.caregiverPortalHome,
           ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.medical_services_outlined),
-            activeIcon: const Icon(Icons.medical_services),
+            icon: Icon(Icons.medical_services_outlined),
+            activeIcon: Icon(Icons.medical_services),
             label: l10n.caregiverServicesTitle,
           ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.history),
-            activeIcon: const Icon(Icons.history),
+            icon: Icon(Icons.history),
+            activeIcon: Icon(Icons.history),
             label: l10n.caregiverHistoryTitle,
           ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.account_circle_outlined),
-            activeIcon: const Icon(Icons.account_circle),
+            icon: Icon(Icons.account_circle_outlined),
+            activeIcon: Icon(Icons.account_circle),
             label: l10n.caregiverPortalAccount,
           ),
         ],

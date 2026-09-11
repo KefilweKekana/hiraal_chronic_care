@@ -72,11 +72,9 @@ class _SponsorshipDetailScreenState extends State<SponsorshipDetailScreen> {
         (dash?.isAccepted == true || dash?.isActive == true);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).scaffold,
       appBar: AppBar(
         title: Text(l10n.sponsorshipDetailsTitle),
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: _loading
@@ -115,7 +113,7 @@ class _SponsorshipDetailScreenState extends State<SponsorshipDetailScreen> {
                     ],
                     if (dash != null && dash.updates.isNotEmpty) ...[
                       const SizedBox(height: 20),
-                      Text(l10n.latestUpdates, style: const TextStyle(fontWeight: FontWeight.w700)),
+                      Text(l10n.latestUpdates, style: TextStyle(fontWeight: FontWeight.w700)),
                       const SizedBox(height: 8),
                       ...dash.updates.map(
                         (update) => Padding(
@@ -123,7 +121,7 @@ class _SponsorshipDetailScreenState extends State<SponsorshipDetailScreen> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Icon(Icons.check_circle, size: 18, color: AppColors.success),
+                              Icon(Icons.check_circle, size: 18, color: AppColors.success),
                               const SizedBox(width: 8),
                               Expanded(child: Text(update)),
                             ],
@@ -158,38 +156,39 @@ class _HeaderCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(patientName, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+          Text(patientName, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
           const SizedBox(height: 12),
-          _row(l10n.status, status),
-          _row(l10n.planLabel, plan?.isNotEmpty == true ? plan! : '–'),
+          _row(context, l10n.status, status),
+          _row(context, l10n.planLabel, plan?.isNotEmpty == true ? plan! : '–'),
           _row(
+            context,
             l10n.nextPaymentLabel,
             nextPaymentDate != null ? DateFormat('dd MMM yyyy').format(nextPaymentDate!) : '–',
           ),
           const SizedBox(height: 8),
           Text(
             '${AppConstants.currencySymbol}${monthlyAmount.toStringAsFixed(2)} / month',
-            style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700, fontSize: 16),
+            style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700, fontSize: 16),
           ),
         ],
       ),
     );
   }
 
-  Widget _row(String label, String value) {
+  Widget _row(BuildContext context, String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
         children: [
-          Expanded(child: Text(label, style: const TextStyle(color: AppColors.textSecondary))),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
+          Expanded(child: Text(label, style: TextStyle(color: AppColors.of(context).textMuted))),
+          Text(value, style: TextStyle(fontWeight: FontWeight.w600)),
         ],
       ),
     );
@@ -207,7 +206,7 @@ class _InfoBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.primarySurface,
+        color: AppColors.of(context).primaryMuted,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
       ),
@@ -216,7 +215,7 @@ class _InfoBanner extends StatelessWidget {
         children: [
           Icon(icon, color: AppColors.primary),
           const SizedBox(width: 10),
-          Expanded(child: Text(message, style: const TextStyle(height: 1.4))),
+          Expanded(child: Text(message, style: TextStyle(height: 1.4))),
         ],
       ),
     );

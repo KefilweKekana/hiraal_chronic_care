@@ -111,11 +111,9 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).scaffold,
       appBar: AppBar(
         title: Text(l10n.payments),
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: _loading
@@ -140,7 +138,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(_error!, style: const TextStyle(color: AppColors.error)),
+            Text(_error!, style: TextStyle(color: AppColors.error)),
             const SizedBox(height: 8),
             TextButton(onPressed: _load, child: Text(l10n.retry)),
           ],
@@ -152,12 +150,12 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         child: ListView(
           children: [
             const SizedBox(height: 120),
-            const Icon(Icons.receipt_long, size: 56, color: AppColors.textTertiary),
+            Icon(Icons.receipt_long, size: 56, color: AppColors.of(context).textFaint),
             const SizedBox(height: 12),
-            Center(child: Text(l10n.noPaymentsYet, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600))),
+            Center(child: Text(l10n.noPaymentsYet, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600))),
             const SizedBox(height: 4),
             Center(child: Text(l10n.paymentsEmptyHint,
-                style: const TextStyle(fontSize: 13, color: AppColors.textSecondary))),
+                style: TextStyle(fontSize: 13, color: AppColors.of(context).textMuted))),
           ],
         ),
       );
@@ -169,9 +167,9 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: AppColors.of(context).card,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.cardBorder),
+          border: Border.all(color: AppColors.of(context).border),
         ),
         child: Row(
           children: [
@@ -182,7 +180,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                 color: AppColors.success.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(Icons.check_circle, color: AppColors.success, size: 20),
+              child: Icon(Icons.check_circle, color: AppColors.success, size: 20),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -190,20 +188,20 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(e.title, maxLines: 1, overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 2),
                   Text(
                     e.date != null ? DateFormat('MMM dd, yyyy').format(e.date!) : '–',
-                    style: const TextStyle(fontSize: 12, color: AppColors.textTertiary),
+                    style: TextStyle(fontSize: 12, color: AppColors.of(context).textFaint),
                   ),
                 ],
               ),
             ),
             Text('$_cur${e.amount.toStringAsFixed(2)}',
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
             IconButton(
               onPressed: () => _showReceipt(l10n, e),
-              icon: const Icon(Icons.ios_share, size: 18, color: AppColors.textTertiary),
+              icon: Icon(Icons.ios_share, size: 18, color: AppColors.of(context).textFaint),
               tooltip: l10n.paymentReceipt,
               visualDensity: VisualDensity.compact,
             ),
@@ -219,7 +217,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
   void _showReceipt(AppLocalizations l10n, _PaymentEntry e) {
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.of(context).card,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -235,13 +233,13 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                   width: 36,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.cardBorder,
+                    color: AppColors.of(context).border,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
               ),
               const SizedBox(height: 16),
-              Text(l10n.paymentReceipt, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+              Text(l10n.paymentReceipt, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
               const SizedBox(height: 12),
               _receiptRow(l10n.item, e.title),
               _receiptRow(l10n.reference, e.reference ?? '–'),
@@ -254,7 +252,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                 height: 48,
                 child: ElevatedButton.icon(
                   onPressed: () => _shareReceipt(e),
-                  icon: const Icon(Icons.ios_share, size: 18),
+                  icon: Icon(Icons.ios_share, size: 18),
                   label: Text(l10n.shareReceipt),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
@@ -273,11 +271,11 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         padding: const EdgeInsets.symmetric(vertical: 5),
         child: Row(
           children: [
-            Text(label, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+            Text(label, style: TextStyle(fontSize: 13, color: AppColors.of(context).textMuted)),
             const Spacer(),
             Flexible(
               child: Text(value, maxLines: 1, overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
             ),
           ],
         ),

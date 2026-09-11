@@ -65,11 +65,9 @@ class _MyLabTestsScreenState extends State<MyLabTestsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).scaffold,
       appBar: AppBar(
         title: const Text('My Lab Tests'),
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: _loading
@@ -92,7 +90,7 @@ class _MyLabTestsScreenState extends State<MyLabTestsScreen> {
           context,
           MaterialPageRoute(builder: (_) => const LabTestScreen()),
         ).then((_) => _load()),
-        icon: const Icon(Icons.add),
+        icon: Icon(Icons.add),
         label: const Text('Request Test'),
       ),
     );
@@ -106,9 +104,9 @@ class _MyLabTestsScreenState extends State<MyLabTestsScreen> {
         margin: const EdgeInsets.symmetric(vertical: 5),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: AppColors.of(context).card,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.cardBorder),
+          border: Border.all(color: AppColors.of(context).border),
         ),
         child: Row(
         children: [
@@ -116,10 +114,10 @@ class _MyLabTestsScreenState extends State<MyLabTestsScreen> {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: AppColors.primaryLight,
+              color: AppColors.of(context).primarySoft,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.science, size: 20, color: AppColors.primary),
+            child: Icon(Icons.science, size: 20, color: AppColors.primary),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -127,14 +125,14 @@ class _MyLabTestsScreenState extends State<MyLabTestsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(t.template,
-                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 3),
                 Text(
                   [
                     if (t.created != null) 'Requested ${DateFormat('MMM d, yyyy').format(t.created!)}',
                     if (t.resultDate != null) 'Result ${DateFormat('MMM d, yyyy').format(t.resultDate!)}',
                   ].join(' · '),
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted),
                 ),
               ],
             ),
@@ -179,7 +177,7 @@ class _MyLabTestsScreenState extends State<MyLabTestsScreen> {
                 child: Container(
                   width: 40, height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.inputBorder,
+                    color: AppColors.of(context).inputBorder,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -189,7 +187,7 @@ class _MyLabTestsScreenState extends State<MyLabTestsScreen> {
                 children: [
                   Expanded(
                     child: Text(t.template,
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -218,9 +216,9 @@ class _MyLabTestsScreenState extends State<MyLabTestsScreen> {
                       Navigator.pop(ctx);
                       _confirmCancel(t);
                     },
-                    icon: const Icon(Icons.cancel_outlined, size: 18, color: AppColors.error),
+                    icon: Icon(Icons.cancel_outlined, size: 18, color: AppColors.error),
                     label: const Text('Cancel this test', style: TextStyle(color: AppColors.error)),
-                    style: OutlinedButton.styleFrom(side: const BorderSide(color: AppColors.error)),
+                    style: OutlinedButton.styleFrom(side: BorderSide(color: AppColors.error)),
                   ),
                 ),
               ],
@@ -237,9 +235,9 @@ class _MyLabTestsScreenState extends State<MyLabTestsScreen> {
           children: [
             SizedBox(
               width: 90,
-              child: Text(label, style: const TextStyle(fontSize: 13, color: AppColors.textTertiary)),
+              child: Text(label, style: TextStyle(fontSize: 13, color: AppColors.of(context).textFaint)),
             ),
-            Expanded(child: Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500))),
+            Expanded(child: Text(value, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500))),
           ],
         ),
       );
@@ -282,10 +280,10 @@ class _MyLabTestsScreenState extends State<MyLabTestsScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline, size: 40, color: AppColors.error),
+              Icon(Icons.error_outline, size: 40, color: AppColors.error),
               const SizedBox(height: 12),
               Text(_error!, textAlign: TextAlign.center,
-                  style: const TextStyle(color: AppColors.textSecondary)),
+                  style: TextStyle(color: AppColors.of(context).textMuted)),
               const SizedBox(height: 12),
               TextButton(onPressed: _load, child: const Text('Retry')),
             ],
@@ -297,19 +295,19 @@ class _MyLabTestsScreenState extends State<MyLabTestsScreen> {
         onRefresh: _load,
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
-          children: const [
-            SizedBox(height: 120),
-            Icon(Icons.science_outlined, size: 56, color: AppColors.textTertiary),
+          children: [
+            const SizedBox(height: 120),
+            Icon(Icons.science_outlined, size: 56, color: AppColors.of(context).textFaint),
             SizedBox(height: 12),
             Center(
               child: Text('No lab tests yet',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.of(context).textMuted)),
             ),
             SizedBox(height: 4),
             Center(
               child: Text('Request a lab test and it will\nappear here with its status.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 12, color: AppColors.textTertiary, height: 1.5)),
+                  style: TextStyle(fontSize: 12, color: AppColors.of(context).textFaint, height: 1.5)),
             ),
           ],
         ),

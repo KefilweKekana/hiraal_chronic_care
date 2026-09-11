@@ -12,7 +12,7 @@ class ContactCareTeamScreen extends StatelessWidget {
       context: context,
       // Dispose the controller once the sheet closes, however it closes.
       isScrollControlled: true,
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.of(context).card,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -26,9 +26,9 @@ class ContactCareTeamScreen extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.chat_bubble_outline, size: 20, color: AppColors.primary),
+                  Icon(Icons.chat_bubble_outline, size: 20, color: AppColors.primary),
                   const SizedBox(width: 8),
-                  Text(l10n.messageCareTeam, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                  Text(l10n.messageCareTeam, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                 ],
               ),
               const SizedBox(height: 12),
@@ -45,7 +45,7 @@ class ContactCareTeamScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  icon: const Icon(Icons.send, size: 18),
+                  icon: Icon(Icons.send, size: 18),
                   label: Text(l10n.sendMessage),
                   onPressed: () {
                     if (controller.text.trim().isEmpty) return;
@@ -72,10 +72,10 @@ class ContactCareTeamScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.of(context).scaffold,
       appBar: AppBar(
         title: Text(l10n.careTeamCall),
-        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
+        leading: IconButton(icon: Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(24),
@@ -85,34 +85,34 @@ class ContactCareTeamScreen extends StatelessWidget {
             Container(
               width: 72, height: 72,
               decoration: BoxDecoration(
-                color: AppColors.primaryLight,
+                color: AppColors.of(context).primarySoft,
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Icon(Icons.support_agent, color: AppColors.primary, size: 36),
+              child: Icon(Icons.support_agent, color: AppColors.primary, size: 36),
             ),
             const SizedBox(height: 12),
-            Text(l10n.youreCalling, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
-            Text(l10n.careTeamNurse, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
-            Text(l10n.wereHereToHelp, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+            Text(l10n.youreCalling, style: TextStyle(fontSize: 13, color: AppColors.of(context).textMuted)),
+            Text(l10n.careTeamNurse, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+            Text(l10n.wereHereToHelp, style: TextStyle(fontSize: 13, color: AppColors.of(context).textMuted)),
             const SizedBox(height: 24),
             // Info rows
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.cardBorder),
+                border: Border.all(color: AppColors.of(context).border),
               ),
               child: Column(
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.phone, size: 18, color: AppColors.primary),
+                      Icon(Icons.phone, size: 18, color: AppColors.primary),
                       const SizedBox(width: 12),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(l10n.expectedWaitTime, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                          Text(l10n.lessThan2Minutes, style: const TextStyle(fontSize: 13, color: AppColors.success, fontWeight: FontWeight.w600)),
+                          Text(l10n.expectedWaitTime, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                          Text(l10n.lessThan2Minutes, style: TextStyle(fontSize: 13, color: AppColors.success, fontWeight: FontWeight.w600)),
                         ],
                       ),
                     ],
@@ -120,13 +120,13 @@ class ContactCareTeamScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      const Icon(Icons.verified, size: 18, color: AppColors.success),
+                      Icon(Icons.verified, size: 18, color: AppColors.success),
                       const SizedBox(width: 12),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(l10n.availableHours, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                          Text(l10n.availableHoursValue, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                          Text(l10n.availableHours, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                          Text(l10n.availableHoursValue, style: TextStyle(fontSize: 13, color: AppColors.of(context).textMuted)),
                         ],
                       ),
                     ],
@@ -138,17 +138,17 @@ class ContactCareTeamScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppColors.infoLight,
+                color: AppColors.of(context).infoSoft,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.info_outline, size: 16, color: AppColors.info),
+                  Icon(Icons.info_outline, size: 16, color: AppColors.info),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       l10n.careTeamCanSeeReadings,
-                      style: const TextStyle(fontSize: 12, color: AppColors.info),
+                      style: TextStyle(fontSize: 12, color: AppColors.info),
                     ),
                   ),
                 ],
@@ -161,26 +161,26 @@ class ContactCareTeamScreen extends StatelessWidget {
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.cardBorder),
+                border: Border.all(color: AppColors.of(context).border),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(l10n.recentConcern, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                  Text(l10n.recentConcern, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(Icons.favorite, size: 16, color: AppColors.error),
+                      Icon(Icons.favorite, size: 16, color: AppColors.error),
                       const SizedBox(width: 8),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(l10n.highBloodPressureTitle, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-                          const Text('Today, 8:30 AM • 162/98 mmHg', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                          Text(l10n.highBloodPressureTitle, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                          Text('Today, 8:30 AM • 162/98 mmHg', style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted)),
                         ],
                       ),
                       const Spacer(),
-                      Text(l10n.viewAction, style: const TextStyle(fontSize: 13, color: AppColors.primary, fontWeight: FontWeight.w600)),
+                      Text(l10n.viewAction, style: TextStyle(fontSize: 13, color: AppColors.primary, fontWeight: FontWeight.w600)),
                     ],
                   ),
                 ],
@@ -197,17 +197,17 @@ class ContactCareTeamScreen extends StatelessWidget {
                       onTap: () => Navigator.pop(context),
                       child: Container(
                         width: 56, height: 56,
-                        decoration: const BoxDecoration(color: AppColors.error, shape: BoxShape.circle),
-                        child: const Icon(Icons.call_end, color: AppColors.white, size: 28),
+                        decoration: BoxDecoration(color: AppColors.error, shape: BoxShape.circle),
+                        child: Icon(Icons.call_end, color: AppColors.white, size: 28),
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(l10n.endCall, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                    Text(l10n.endCall, style: TextStyle(fontSize: 11, color: AppColors.of(context).textMuted)),
                   ],
                 ),
                 Column(
                   children: [
-                    Text(l10n.callingStatus, style: const TextStyle(fontSize: 14, color: AppColors.primary, fontWeight: FontWeight.w500)),
+                    Text(l10n.callingStatus, style: TextStyle(fontSize: 14, color: AppColors.primary, fontWeight: FontWeight.w500)),
                     const SizedBox(height: 4),
                     Row(
                       children: List.generate(3, (_) => Container(
@@ -232,15 +232,15 @@ class ContactCareTeamScreen extends StatelessWidget {
                       child: Container(
                         width: 56, height: 56,
                         decoration: BoxDecoration(
-                          color: AppColors.inputBackground,
+                          color: AppColors.of(context).inputFill,
                           shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.cardBorder),
+                          border: Border.all(color: AppColors.of(context).border),
                         ),
-                        child: const Icon(Icons.volume_up, color: AppColors.textPrimary, size: 28),
+                        child: Icon(Icons.volume_up, color: AppColors.of(context).text, size: 28),
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(l10n.speaker, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                    Text(l10n.speaker, style: TextStyle(fontSize: 11, color: AppColors.of(context).textMuted)),
                   ],
                 ),
               ],
@@ -250,17 +250,17 @@ class ContactCareTeamScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.cardBorder),
+                border: Border.all(color: AppColors.of(context).border),
               ),
               child: GestureDetector(
                 onTap: () => _openComposer(context),
                 child: Row(
                   children: [
-                    const Icon(Icons.chat_bubble_outline, size: 18, color: AppColors.textSecondary),
+                    Icon(Icons.chat_bubble_outline, size: 18, color: AppColors.of(context).textMuted),
                     const SizedBox(width: 8),
-                    Text(l10n.preferToMessage, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                    Text(l10n.preferToMessage, style: TextStyle(fontSize: 13, color: AppColors.of(context).textMuted)),
                     const Spacer(),
-                    Text(l10n.sendMessageArrow, style: const TextStyle(fontSize: 13, color: AppColors.primary, fontWeight: FontWeight.w600)),
+                    Text(l10n.sendMessageArrow, style: TextStyle(fontSize: 13, color: AppColors.primary, fontWeight: FontWeight.w600)),
                   ],
                 ),
               ),

@@ -265,17 +265,15 @@ class _SubscriptionPaymentScreenState extends State<SubscriptionPaymentScreen>
   }
 
   void _snack(String m, {bool error = false}) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(m), backgroundColor: error ? AppColors.error : AppColors.textSecondary),
+        SnackBar(content: Text(m), backgroundColor: error ? AppColors.error : AppColors.of(context).textMuted),
       );
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).scaffold,
       appBar: AppBar(
         title: const Text('Subscription Payment'),
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: switch (_stage) {
@@ -328,10 +326,10 @@ class _SubscriptionPaymentScreenState extends State<SubscriptionPaymentScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(widget.planName ?? 'Care subscription', style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+            Text(widget.planName ?? 'Care subscription', style: TextStyle(fontSize: 13, color: AppColors.of(context).textMuted)),
             const SizedBox(height: 4),
             Text('${AppConstants.currencySymbol}${_amount.toStringAsFixed(2)} / month',
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.primary)),
           ],
         ),
       );
@@ -349,11 +347,11 @@ class _SubscriptionPaymentScreenState extends State<SubscriptionPaymentScreen>
         else if (_methodsError != null)
           Container(
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: AppColors.inputBackground, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.inputBorder)),
+            decoration: BoxDecoration(color: AppColors.of(context).inputFill, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.of(context).inputBorder)),
             child: Row(children: [
-              const Icon(Icons.info_outline, size: 18, color: AppColors.textSecondary),
+              Icon(Icons.info_outline, size: 18, color: AppColors.of(context).textMuted),
               const SizedBox(width: 8),
-              Expanded(child: Text(_methodsError!, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary))),
+              Expanded(child: Text(_methodsError!, style: TextStyle(fontSize: 13, color: AppColors.of(context).textMuted))),
               TextButton(onPressed: _loadMethods, child: const Text('Retry')),
             ]),
           )
@@ -363,7 +361,7 @@ class _SubscriptionPaymentScreenState extends State<SubscriptionPaymentScreen>
                 groupValue: _selected,
                 onChanged: (v) => setState(() => _selected = v),
                 title: Text(m.label),
-                subtitle: Text(m.provider, style: const TextStyle(fontSize: 12)),
+                subtitle: Text(m.provider, style: TextStyle(fontSize: 12)),
                 activeColor: AppColors.primary,
                 contentPadding: EdgeInsets.zero,
                 dense: true,
@@ -377,7 +375,7 @@ class _SubscriptionPaymentScreenState extends State<SubscriptionPaymentScreen>
           inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(15)],
           decoration: InputDecoration(
             hintText: 'e.g. 252612345678',
-            prefixIcon: const Icon(Icons.phone_iphone, color: AppColors.textSecondary),
+            prefixIcon: Icon(Icons.phone_iphone, color: AppColors.of(context).textMuted),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),

@@ -86,11 +86,9 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).scaffold,
       appBar: AppBar(
         title: Text(l10n.myOrders),
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -101,8 +99,8 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
           _load();
         },
         backgroundColor: AppColors.primary,
-        icon: const Icon(Icons.add, color: AppColors.white),
-        label: Text(l10n.newOrder, style: const TextStyle(color: AppColors.white)),
+        icon: Icon(Icons.add, color: AppColors.white),
+        label: Text(l10n.newOrder, style: TextStyle(color: AppColors.white)),
       ),
       body: _loading
           ? const SkeletonList(itemCount: 5)
@@ -126,7 +124,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(_error!, style: const TextStyle(color: AppColors.error)),
+            Text(_error!, style: TextStyle(color: AppColors.error)),
             const SizedBox(height: 8),
             TextButton(onPressed: _load, child: Text(l10n.retry)),
           ],
@@ -138,12 +136,12 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
         child: ListView(
           children: [
             const SizedBox(height: 120),
-            const Icon(Icons.medical_services_outlined, size: 56, color: AppColors.textTertiary),
+            Icon(Icons.medical_services_outlined, size: 56, color: AppColors.of(context).textFaint),
             const SizedBox(height: 12),
-            Center(child: Text(l10n.noOrdersYet, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600))),
+            Center(child: Text(l10n.noOrdersYet, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600))),
             const SizedBox(height: 4),
             Center(child: Text(l10n.tapNewOrderHint,
-                style: const TextStyle(fontSize: 13, color: AppColors.textSecondary))),
+                style: TextStyle(fontSize: 13, color: AppColors.of(context).textMuted))),
           ],
         ),
       );
@@ -160,9 +158,9 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: AppColors.of(context).card,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.cardBorder),
+          border: Border.all(color: AppColors.of(context).border),
         ),
         child: Row(
           children: [
@@ -182,7 +180,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                 children: [
                   Row(
                     children: [
-                      Text('#${o.id}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                      Text('#${o.id}', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
                       const Spacer(),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -194,13 +192,13 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text('$first$more', maxLines: 1, overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 13, color: AppColors.textPrimary)),
+                      style: TextStyle(fontSize: 13, color: AppColors.of(context).text)),
                   const SizedBox(height: 2),
                   Row(
                     children: [
                       Text(
                         o.createdAt != null ? DateFormat('MMM dd, yyyy').format(o.createdAt!) : _localizedStatus(l10n, o),
-                        style: const TextStyle(fontSize: 12, color: AppColors.textTertiary),
+                        style: TextStyle(fontSize: 12, color: AppColors.of(context).textFaint),
                       ),
                       if (o.payable) ...[
                         const Spacer(),
@@ -211,7 +209,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: AppColors.textTertiary),
+            Icon(Icons.chevron_right, color: AppColors.of(context).textFaint),
           ],
         ),
       ),

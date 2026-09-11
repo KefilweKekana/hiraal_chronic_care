@@ -121,11 +121,9 @@ class _DeviceMeasureScreenState extends State<DeviceMeasureScreen> {
   Widget build(BuildContext context) {
     final title = _isGlucose ? 'Blood Sugar' : 'Blood Pressure';
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).scaffold,
       appBar: AppBar(
         title: Text(title),
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: SafeArea(
@@ -138,7 +136,7 @@ class _DeviceMeasureScreenState extends State<DeviceMeasureScreen> {
                 _ble.connectedDevice?.advName.isNotEmpty == true
                     ? _ble.connectedDevice!.advName
                     : (_ble.activeProtocol?.name ?? 'Connected monitor'),
-                style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 14, color: AppColors.of(context).textMuted),
               ),
               const Spacer(),
               _gauge(),
@@ -199,13 +197,13 @@ class _DeviceMeasureScreenState extends State<DeviceMeasureScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(display,
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontSize: 52,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary)),
+                      color: AppColors.of(context).text)),
               Text('$unit',
-                  style: const TextStyle(
-                      fontSize: 14, color: AppColors.textSecondary)),
+                  style: TextStyle(
+                      fontSize: 14, color: AppColors.of(context).textMuted)),
             ],
           );
         }
@@ -220,36 +218,36 @@ class _DeviceMeasureScreenState extends State<DeviceMeasureScreen> {
               textBaseline: TextBaseline.alphabetic,
               children: [
                 Text('${sys ?? '--'}',
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontSize: 52,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary)),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4),
+                        color: AppColors.of(context).text)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: Text('/',
                       style: TextStyle(
-                          fontSize: 32, color: AppColors.textTertiary)),
+                          fontSize: 32, color: AppColors.of(context).textFaint)),
                 ),
                 Text('${dia ?? '--'}',
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontSize: 52,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary)),
+                        color: AppColors.of(context).text)),
               ],
             ),
-            const Text('mmHg',
-                style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+            Text('mmHg',
+                style: TextStyle(fontSize: 14, color: AppColors.of(context).textMuted)),
           ],
         );
       case _Phase.measuring:
         if (_isGlucose) {
-          return const Column(
+          return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(Icons.water_drop, size: 40, color: AppColors.primary),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text('Fetching…',
-                  style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+                  style: TextStyle(fontSize: 14, color: AppColors.of(context).textMuted)),
             ],
           );
         }
@@ -257,13 +255,13 @@ class _DeviceMeasureScreenState extends State<DeviceMeasureScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(_livePressure != null ? '$_livePressure' : '· · ·',
-                style: const TextStyle(
+                style: TextStyle(
                     fontSize: 48,
                     fontWeight: FontWeight.w800,
                     color: AppColors.primary)),
-            const Text('Measuring…',
+            Text('Measuring…',
                 style:
-                    TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+                    TextStyle(fontSize: 14, color: AppColors.of(context).textMuted)),
           ],
         );
       case _Phase.waiting:
@@ -273,9 +271,9 @@ class _DeviceMeasureScreenState extends State<DeviceMeasureScreen> {
             Icon(_isGlucose ? Icons.water_drop : Icons.favorite,
                 size: 40, color: AppColors.primary),
             const SizedBox(height: 8),
-            const Text('Ready',
+            Text('Ready',
                 style:
-                    TextStyle(fontSize: 16, color: AppColors.textSecondary)),
+                    TextStyle(fontSize: 16, color: AppColors.of(context).textMuted)),
           ],
         );
       case _Phase.disconnected:
@@ -289,10 +287,10 @@ class _DeviceMeasureScreenState extends State<DeviceMeasureScreen> {
           ],
         );
       case _Phase.reconnecting:
-        return const Column(
+        return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(
+            const SizedBox(
               width: 40,
               height: 40,
               child: CircularProgressIndicator(
@@ -300,10 +298,10 @@ class _DeviceMeasureScreenState extends State<DeviceMeasureScreen> {
                 color: AppColors.primary,
               ),
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Text('Reconnecting…',
                 style:
-                    TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+                    TextStyle(fontSize: 14, color: AppColors.of(context).textMuted)),
           ],
         );
     }
@@ -317,7 +315,7 @@ class _DeviceMeasureScreenState extends State<DeviceMeasureScreen> {
               ? 'Take a reading on the meter, then tap Get Reading again if needed.'
               : 'Place the cuff and press START on your monitor.',
           textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 15, color: AppColors.textSecondary),
+          style: TextStyle(fontSize: 15, color: AppColors.of(context).textMuted),
         );
       case _Phase.measuring:
         return Text(
@@ -325,7 +323,7 @@ class _DeviceMeasureScreenState extends State<DeviceMeasureScreen> {
               ? 'Asking the meter for your reading – keep Bluetooth connected.'
               : 'Measuring, please wait – keep still.',
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
               color: AppColors.primary),
@@ -338,13 +336,13 @@ class _DeviceMeasureScreenState extends State<DeviceMeasureScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.favorite, size: 18, color: AppColors.error),
+                  Icon(Icons.favorite, size: 18, color: AppColors.error),
                   const SizedBox(width: 6),
                   Text('$pulse bpm',
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary)),
+                          color: AppColors.of(context).text)),
                 ],
               ),
             const SizedBox(height: 8),
@@ -360,16 +358,16 @@ class _DeviceMeasureScreenState extends State<DeviceMeasureScreen> {
           ],
         );
       case _Phase.disconnected:
-        return const Text(
+        return Text(
           'Your monitor isn’t connected. Reconnect it and try again.',
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 15, color: AppColors.textSecondary),
+          style: TextStyle(fontSize: 15, color: AppColors.of(context).textMuted),
         );
       case _Phase.reconnecting:
-        return const Text(
+        return Text(
           'Looking for your last monitor…',
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 15, color: AppColors.textSecondary),
+          style: TextStyle(fontSize: 15, color: AppColors.of(context).textMuted),
         );
     }
   }

@@ -93,7 +93,7 @@ class _CaregiverDetailScreenState extends State<CaregiverDetailScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: error ? AppColors.error : AppColors.textSecondary,
+        backgroundColor: error ? AppColors.error : AppColors.of(context).textMuted,
       ),
     );
   }
@@ -102,11 +102,9 @@ class _CaregiverDetailScreenState extends State<CaregiverDetailScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).scaffold,
       appBar: AppBar(
         title: Text(widget.link.displayName),
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -118,29 +116,29 @@ class _CaregiverDetailScreenState extends State<CaregiverDetailScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.white,
+                color: AppColors.of(context).card,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.cardBorder),
+                border: Border.all(color: AppColors.of(context).border),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(widget.link.displayName, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                  Text(widget.link.displayName, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 6),
                   Text('${widget.link.relationship} • ${widget.link.fullWhatsappNumber}',
-                      style: const TextStyle(color: AppColors.textSecondary)),
+                      style: TextStyle(color: AppColors.of(context).textMuted)),
                   if ((widget.link.familyMemberName ?? '').isNotEmpty) ...[
                     const SizedBox(height: 6),
                     Text(
                       '${l10n.familyMemberName}: ${widget.link.familyMemberName}',
-                      style: const TextStyle(color: AppColors.textSecondary),
+                      style: TextStyle(color: AppColors.of(context).textMuted),
                     ),
                   ],
                 ],
               ),
             ),
             const SizedBox(height: 20),
-            Text(l10n.permissionsTitle, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+            Text(l10n.permissionsTitle, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
             _PermissionTile(
               title: l10n.viewReadings,
@@ -167,7 +165,7 @@ class _CaregiverDetailScreenState extends State<CaregiverDetailScreen> {
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: _sendingInvite ? null : _resendInvite,
-                icon: const Icon(Icons.send_outlined),
+                icon: Icon(Icons.send_outlined),
                 label: Text(l10n.sendInvitationAgain),
               ),
             ),
@@ -199,7 +197,7 @@ class _CaregiverDetailScreenState extends State<CaregiverDetailScreen> {
                       )
                     : Text(
                         l10n.revokeCaregiver,
-                        style: const TextStyle(color: AppColors.error),
+                        style: TextStyle(color: AppColors.error),
                       ),
               ),
             ),
@@ -226,9 +224,9 @@ class _PermissionTile extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: CheckboxListTile(
         value: value,

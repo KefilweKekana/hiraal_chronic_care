@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 import '../../providers/app_provider.dart';
 
 class HealthInfoScreen extends StatelessWidget {
@@ -9,13 +10,13 @@ class HealthInfoScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final patient = context.watch<AppProvider>().patient;
+    final l10n = AppLocalizations.of(context);
+    final conditions = patient?.conditions ?? const <String>[];
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).scaffold,
       appBar: AppBar(
-        title: const Text('Health Information'),
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.textPrimary,
+        title: Text(l10n.healthInformation),
         elevation: 0,
       ),
       body: ListView(
@@ -23,19 +24,24 @@ class HealthInfoScreen extends StatelessWidget {
         children: [
           _SectionCard(
             title: 'Current Conditions',
-            child: Wrap(
+            child: conditions.isEmpty
+                ? Text('–', style: TextStyle(color: AppColors.of(context).textMuted))
+                : Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: (patient?.conditions ?? ['Hypertension', 'Diabetes']).map((c) => Chip(
-                label: Text(c, style: const TextStyle(fontSize: 13)),
-                backgroundColor: AppColors.primarySurface,
+              children: conditions.map((c) => Chip(
+                label: Text(c, style: TextStyle(fontSize: 13)),
+                backgroundColor: AppColors.of(context).primaryMuted,
                 side: BorderSide.none,
               )).toList(),
             ),
           ),
           _SectionCard(
-            title: 'Care Plan',
-            child: Text(patient?.carePlan ?? 'Daily monitoring & follow-up', style: const TextStyle(fontSize: 14, color: AppColors.textPrimary)),
+            title: l10n.yourCarePlan,
+            child: Text(
+              (patient?.carePlan.isNotEmpty == true) ? patient!.carePlan : '–',
+              style: TextStyle(fontSize: 14, color: AppColors.of(context).text),
+            ),
           ),
           _SectionCard(
             title: 'Risk Level',
@@ -45,8 +51,8 @@ class HealthInfoScreen extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: (patient?.riskLevel == 'Very High' || patient?.riskLevel == 'High')
-                        ? AppColors.errorLight
-                        : AppColors.successLight,
+                        ? AppColors.of(context).errorSoft
+                        : AppColors.of(context).successSoft,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -67,13 +73,13 @@ class HealthInfoScreen extends StatelessWidget {
             title: 'Assigned Nurse',
             child: Row(
               children: [
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 18,
-                  backgroundColor: AppColors.primaryLight,
-                  child: Icon(Icons.person, size: 18, color: AppColors.primary),
+                  backgroundColor: AppColors.of(context).primarySoft,
+                  child: const Icon(Icons.person, size: 18, color: AppColors.primary),
                 ),
                 const SizedBox(width: 10),
-                Text(patient?.assignedNurse ?? '–', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+                Text(patient?.assignedNurse ?? '–', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
               ],
             ),
           ),
@@ -81,15 +87,15 @@ class HealthInfoScreen extends StatelessWidget {
             title: 'Next Check-in',
             child: Row(
               children: [
-                const Icon(Icons.calendar_today, size: 16, color: AppColors.primary),
+                Icon(Icons.calendar_today, size: 16, color: AppColors.primary),
                 const SizedBox(width: 8),
-                Text(patient?.nextCheckIn ?? '–', style: const TextStyle(fontSize: 14)),
+                Text(patient?.nextCheckIn ?? '–', style: TextStyle(fontSize: 14)),
               ],
             ),
           ),
           _SectionCard(
             title: 'Device',
-            child: Text(patient?.deviceAssigned ?? 'No device assigned', style: const TextStyle(fontSize: 14, color: AppColors.textPrimary)),
+            child: Text(patient?.deviceAssigned ?? 'No device assigned', style: TextStyle(fontSize: 14, color: AppColors.of(context).text)),
           ),
         ],
       ),
@@ -108,14 +114,14 @@ class _SectionCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: const TextStyle(fontSize: 12, color: AppColors.textTertiary, fontWeight: FontWeight.w500)),
+          Text(title, style: TextStyle(fontSize: 12, color: AppColors.of(context).textFaint, fontWeight: FontWeight.w500)),
           const SizedBox(height: 8),
           child,
         ],

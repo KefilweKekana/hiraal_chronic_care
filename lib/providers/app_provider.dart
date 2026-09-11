@@ -10,6 +10,7 @@ import '../core/database/patient_dao.dart';
 import '../core/database/readings_dao.dart';
 import '../core/network/sync_manager.dart';
 import '../core/utils/app_logger.dart';
+import '../core/utils/otp_wait.dart';
 import '../core/utils/phone_number.dart';
 import '../core/network/api_client.dart';
 import '../core/utils/result.dart';
@@ -22,8 +23,9 @@ import '../services/biometric_service.dart';
 import '../services/device_auto_submit_service.dart';
 import '../services/push_notification_service.dart';
 import '../services/service_locator.dart';
+import 'health_pin_controller.dart';
 
-enum AppState { splash, register, signup, otp, success, paywall, home, caregiverPortal, roleChooser, sessionExpired }
+enum AppState { splash, register, signup, otp, success, paywall, home, caregiverPortal, roleChooser, sessionExpired, createHealthPin }
 
 enum AppUserMode { patient, caregiver }
 
@@ -65,6 +67,8 @@ class AppProvider extends ChangeNotifier {
   int _currentTab = 0;
   bool _isLoading = false;
   String? _errorMessage;
+  int _otpCooldownSeconds = 0;
+  Timer? _otpCooldownTimer;
   bool _largeText = false;
   Locale _locale = const Locale('en');
   AppUserMode _userMode = AppUserMode.patient;
@@ -72,6 +76,7 @@ class AppProvider extends ChangeNotifier {
   ThemeMode _themeMode = ThemeMode.system;
   List<SponsorshipSummary> _peopleICareFor = [];
   SponsorshipSummary? _activeCarePerson;
+  AppState? _afterHealthPinState;
 
   final _services = ServiceLocator.instance;
   final _readingsDao = ReadingsDao();
@@ -94,6 +99,8 @@ class AppProvider extends ChangeNotifier {
   int get currentTab => _currentTab;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+  int get otpCooldownSeconds => _otpCooldownSeconds;
+  bool get otpCooldownActive => _otpCooldownSeconds > 0;
   bool get largeText => _largeText;
   Locale get locale => _locale;
   AppUserMode get userMode => _userMode;
@@ -144,9 +151,11 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
-  void setState(AppState state) {
+  void setState(AppState state, {bool clearError = true}) {
     _state = state;
-    _errorMessage = null;
+    if (clearError) {
+      _errorMessage = null;
+    }
     // Landing on the sign-in or splash screen means we're no longer mid-signup;
     // clear the flag so a subsequent OTP is treated as a sign-in, not a signup.
     if (state == AppState.register || state == AppState.splash) {
@@ -197,11 +206,13 @@ class AppProvider extends ChangeNotifier {
       _services.updatePatientId(_patient!.id, sex: _patient!.sex);
     }
     if (_patient?.subscriptionActive == true) {
-      _state = AppState.home;
-      await _loadReadings();
-      _startDeviceServices();
+      _state = await _maybeGateHealthPinSetup(AppState.home);
+      if (_state == AppState.home) {
+        await _loadReadings();
+        _startDeviceServices();
+      }
     } else {
-      _state = AppState.paywall;
+      _state = await _maybeGateHealthPinSetup(AppState.paywall);
     }
     notifyListeners();
   }
@@ -335,7 +346,6 @@ class AppProvider extends ChangeNotifier {
   Future<void> _completePatientLogin(Patient patient, AppState route) async {
     _patient = patient;
     _isLoggedIn = true;
-    _state = route;
     if (route == AppState.caregiverPortal &&
         _activeCarePerson != null &&
         _activeCarePerson!.patient.isNotEmpty) {
@@ -345,13 +355,53 @@ class AppProvider extends ChangeNotifier {
     }
     await _patientDao.save(patient);
     await _enableBiometricAfterLogin();
-    if (route == AppState.home) {
+    final gated = await _maybeGateHealthPinSetup(route);
+    _state = gated;
+    if (gated == AppState.home) {
       await _loadReadings();
       _startDeviceServices();
-    } else if (route == AppState.caregiverPortal || route == AppState.roleChooser) {
+    } else if (gated == AppState.caregiverPortal || gated == AppState.roleChooser) {
       _currentTab = 0;
     }
     unawaited(fetchUnreadNotificationCount());
+    notifyListeners();
+  }
+
+  Future<AppState> _maybeGateHealthPinSetup(AppState route) async {
+    if (route == AppState.caregiverPortal || route == AppState.createHealthPin) {
+      return route;
+    }
+    if (route != AppState.home &&
+        route != AppState.paywall &&
+        route != AppState.roleChooser &&
+        route != AppState.success) {
+      return route;
+    }
+    final result = await _services.healthPin.hasHealthPin();
+    if (result case Success(data: false)) {
+      _afterHealthPinState = route;
+      return AppState.createHealthPin;
+    }
+    return route;
+  }
+
+  void beginHealthPinSetup({AppState next = AppState.home}) {
+    _afterHealthPinState = next;
+    _state = AppState.createHealthPin;
+    notifyListeners();
+  }
+
+  Future<void> finishHealthPinSetup() async {
+    final next = _afterHealthPinState ?? AppState.home;
+    _afterHealthPinState = null;
+    if (_patient != null) {
+      HealthPinController.instance.markUnlocked(_patient!.id);
+    }
+    _state = next;
+    if (next == AppState.home) {
+      await _loadReadings();
+      _startDeviceServices();
+    }
     notifyListeners();
   }
 
@@ -450,10 +500,34 @@ class AppProvider extends ChangeNotifier {
 
   void clearError() {
     _errorMessage = null;
+    _clearOtpCooldown();
     notifyListeners();
   }
 
+  void _clearOtpCooldown() {
+    _otpCooldownTimer?.cancel();
+    _otpCooldownTimer = null;
+    _otpCooldownSeconds = 0;
+  }
+
+  void _beginOtpCooldown(int seconds) {
+    _otpCooldownTimer?.cancel();
+    _otpCooldownSeconds = seconds.clamp(1, 3600);
+    _otpCooldownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (_otpCooldownSeconds <= 1) {
+        _clearOtpCooldown();
+        _errorMessage = null;
+      } else {
+        _otpCooldownSeconds--;
+      }
+      notifyListeners();
+    });
+  }
+
   Future<bool> requestOtp({String channel = 'sms'}) async {
+    if (_otpCooldownSeconds > 0) {
+      return false;
+    }
     _isLoading = true;
     _errorMessage = null;
     _otpRequestedChannel = channel;
@@ -473,6 +547,10 @@ class AppProvider extends ChangeNotifier {
         })(),
       Failure(message: final msg) => (() {
           _errorMessage = msg;
+          final wait = parseOtpRetryAfterSeconds(msg);
+          if (wait != null) {
+            _beginOtpCooldown(wait);
+          }
           notifyListeners();
           return false;
         })(),
@@ -599,16 +677,18 @@ class AppProvider extends ChangeNotifier {
       final choiceMade = prefs.getBool(_portalChoiceMadeKey) ?? false;
       await _refreshHasSponsorships();
       if (!choiceMade && _hasSponsorships && p.subscriptionActive) {
-        _state = AppState.roleChooser;
+        _state = await _maybeGateHealthPinSetup(AppState.roleChooser);
       } else if (_userMode == AppUserMode.caregiver) {
         _state = AppState.caregiverPortal;
       } else if (p.subscriptionActive) {
-        _state = AppState.home;
-        await _loadReadings();
-        _startDeviceServices();
+        _state = await _maybeGateHealthPinSetup(AppState.home);
+        if (_state == AppState.home) {
+          await _loadReadings();
+          _startDeviceServices();
+        }
       } else if (_state != AppState.paywall) {
         final route = await _resolvePostLoginRoute(p);
-        _state = route;
+        _state = await _maybeGateHealthPinSetup(route);
       }
       notifyListeners();
     }
@@ -759,7 +839,7 @@ class AppProvider extends ChangeNotifier {
       if (savedMode == 'caregiver') {
         _userMode = AppUserMode.caregiver;
       }
-      final route = await _resolvePostLoginRoute(patient);
+      final route = await _maybeGateHealthPinSetup(await _resolvePostLoginRoute(patient));
       _state = route;
       if (route == AppState.home) {
         await _loadReadings();
@@ -930,13 +1010,17 @@ class AppProvider extends ChangeNotifier {
     _readings = [];
     _currentTab = 0;
     _errorMessage = null;
+    _clearOtpCooldown();
     _pendingSyncCount = 0;
     _userMode = AppUserMode.patient;
     _hasSponsorships = false;
+    _afterHealthPinState = null;
+    HealthPinController.instance.lockAll();
   }
 
   @override
   void dispose() {
+    _otpCooldownTimer?.cancel();
     _autoSubmitService?.dispose();
     super.dispose();
   }

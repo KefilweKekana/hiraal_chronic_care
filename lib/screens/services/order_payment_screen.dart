@@ -298,18 +298,16 @@ class _OrderPaymentScreenState extends State<OrderPaymentScreen>
 
   void _snack(String m, {bool error = false}) =>
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(m), backgroundColor: error ? AppColors.error : AppColors.textSecondary),
+        SnackBar(content: Text(m), backgroundColor: error ? AppColors.error : AppColors.of(context).textMuted),
       );
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).scaffold,
       appBar: AppBar(
         title: Text(l10n.confirmAndPay),
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: switch (_stage) {
@@ -362,13 +360,13 @@ class _OrderPaymentScreenState extends State<OrderPaymentScreen>
                     style: TextStyle(
                         fontSize: bold ? 15 : 13,
                         fontWeight: bold ? FontWeight.w700 : FontWeight.w400,
-                        color: bold ? AppColors.textPrimary : AppColors.textSecondary)),
+                        color: bold ? AppColors.of(context).text : AppColors.of(context).textMuted)),
               ),
               Text('$_currency${(value ?? 0).toStringAsFixed(2)}',
                   style: TextStyle(
                       fontSize: bold ? 16 : 13,
                       fontWeight: bold ? FontWeight.w700 : FontWeight.w500,
-                      color: bold ? AppColors.primary : AppColors.textPrimary)),
+                      color: bold ? AppColors.primary : AppColors.of(context).text)),
             ],
           ),
         );
@@ -384,7 +382,7 @@ class _OrderPaymentScreenState extends State<OrderPaymentScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l10n.orderNumber(o.id), style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+          Text(l10n.orderNumber(o.id), style: TextStyle(fontSize: 13, color: AppColors.of(context).textMuted)),
           const SizedBox(height: 10),
           ...o.medicines.map((m) => Padding(
                 padding: const EdgeInsets.symmetric(vertical: 3),
@@ -392,10 +390,10 @@ class _OrderPaymentScreenState extends State<OrderPaymentScreen>
                   children: [
                     Expanded(
                       child: Text('${m.name}  ×${m.quantity}',
-                          style: const TextStyle(fontSize: 13)),
+                          style: TextStyle(fontSize: 13)),
                     ),
                     Text('$_currency${(m.totalPrice ?? 0).toStringAsFixed(2)}',
-                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
                   ],
                 ),
               )),
@@ -416,7 +414,7 @@ class _OrderPaymentScreenState extends State<OrderPaymentScreen>
       children: [
         _summaryCard(l10n),
         const SizedBox(height: 20),
-        Text(l10n.payWith, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+        Text(l10n.payWith, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
         const SizedBox(height: 8),
         if (_loadingMethods)
           const Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator()))
@@ -424,13 +422,13 @@ class _OrderPaymentScreenState extends State<OrderPaymentScreen>
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-                color: AppColors.inputBackground,
+                color: AppColors.of(context).inputFill,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.inputBorder)),
+                border: Border.all(color: AppColors.of(context).inputBorder)),
             child: Row(children: [
-              const Icon(Icons.info_outline, size: 18, color: AppColors.textSecondary),
+              Icon(Icons.info_outline, size: 18, color: AppColors.of(context).textMuted),
               const SizedBox(width: 8),
-              Expanded(child: Text(_methodsError!, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary))),
+              Expanded(child: Text(_methodsError!, style: TextStyle(fontSize: 13, color: AppColors.of(context).textMuted))),
               TextButton(onPressed: _loadMethods, child: Text(l10n.retry)),
             ]),
           )
@@ -440,13 +438,13 @@ class _OrderPaymentScreenState extends State<OrderPaymentScreen>
                 groupValue: _selected,
                 onChanged: (v) => setState(() => _selected = v),
                 title: Text(m.label),
-                subtitle: Text(m.provider, style: const TextStyle(fontSize: 12)),
+                subtitle: Text(m.provider, style: TextStyle(fontSize: 12)),
                 activeColor: AppColors.primary,
                 contentPadding: EdgeInsets.zero,
                 dense: true,
               )),
         const SizedBox(height: 12),
-        Text(l10n.mobileMoneyNumber, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+        Text(l10n.mobileMoneyNumber, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
         const SizedBox(height: 8),
         TextField(
           controller: _phoneCtrl,
@@ -454,7 +452,7 @@ class _OrderPaymentScreenState extends State<OrderPaymentScreen>
           inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(15)],
           decoration: InputDecoration(
             hintText: l10n.mobileMoneyHint,
-            prefixIcon: const Icon(Icons.phone_iphone, color: AppColors.textSecondary),
+            prefixIcon: Icon(Icons.phone_iphone, color: AppColors.of(context).textMuted),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),

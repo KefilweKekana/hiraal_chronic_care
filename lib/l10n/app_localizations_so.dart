@@ -133,6 +133,16 @@ class AppLocalizationsSo extends AppLocalizations {
   String get sendCode => 'Soo dir koodhka';
 
   @override
+  String waitCountdown(String countdown) {
+    return 'Sug $countdown';
+  }
+
+  @override
+  String pleaseWaitBeforeAnotherCode(String countdown) {
+    return 'Fadlan sug $countdown ka hor intaadan koodh kale weydiisan';
+  }
+
+  @override
   String get infoSafeWithUs =>
       'Macluumaadkaagu waa ammaan, si fiicanna waannu u ilaalinaa.';
 
@@ -203,7 +213,7 @@ class AppLocalizationsSo extends AppLocalizations {
   String get navHistory => 'Diiwaan';
 
   @override
-  String get navProfile => 'Akoon';
+  String get navProfile => 'Xisaabtayda';
 
   @override
   String get offlineBanner =>
@@ -663,7 +673,7 @@ class AppLocalizationsSo extends AppLocalizations {
   String get statusSent => 'La diray';
 
   @override
-  String get profileTitle => 'Akoonkayga';
+  String get profileTitle => 'Xisaabtayda';
 
   @override
   String memberId(String id) {
@@ -1586,7 +1596,7 @@ class AppLocalizationsSo extends AppLocalizations {
   String get unknownDevice => 'Qalab aan la aqoon';
 
   @override
-  String get caregiversTitle => 'Daryeelayaasha';
+  String get caregiversTitle => 'Daryeele & Qoys';
 
   @override
   String get addCaregiver => 'Ku dar daryeele';
@@ -1926,7 +1936,7 @@ class AppLocalizationsSo extends AppLocalizations {
   String get caregiverPortalConnect => 'Ku xidh';
 
   @override
-  String get caregiverPortalAccount => 'Akoon';
+  String get caregiverPortalAccount => 'Xisaabtayda';
 
   @override
   String get caregiverPortalWelcome => 'Qoyskayga';
@@ -2043,11 +2053,10 @@ class AppLocalizationsSo extends AppLocalizations {
       'Samee ama ku xidh qof aad jeceshahay si aad u maamusho daryeelkiisa.';
 
   @override
-  String get plansAndPayments => 'Qorshayaasha iyo lacag-bixinta';
+  String get plansAndPayments => 'Qorshayaasha Daryeelka & Lacag-bixinta';
 
   @override
-  String get plansAndPaymentsHint =>
-      'Qorshayaashooda daryeel, lacag-bixinta iyo rasiidhyada.';
+  String get plansAndPaymentsHint => 'Waxay helaan, bixi, rasiidyo.';
 
   @override
   String get familyAccess => 'Gelitaanka qoyska';
@@ -2061,7 +2070,7 @@ class AppLocalizationsSo extends AppLocalizations {
 
   @override
   String get caregiverAccountHint =>
-      'Maamul kuwa aad jeceshahay, qorshayaasha, lacag-bixinta iyo dejinta.';
+      'Dadkaaga aad jeceshahay, qorshayaasha iyo dejinta';
 
   @override
   String get caregiverServicesTitle => 'Adeegyada';
@@ -2117,7 +2126,7 @@ class AppLocalizationsSo extends AppLocalizations {
   String get viewMoreHistory => 'Eeg taariikh dheeraad ah';
 
   @override
-  String get darkTheme => 'Mowduuca mugdiga';
+  String get darkTheme => 'Mowduuca';
 
   @override
   String get darkThemeSubtitle =>
@@ -2137,7 +2146,7 @@ class AppLocalizationsSo extends AppLocalizations {
 
   @override
   String get languageHelper =>
-      'Waxaad luqadda ka beddeli kartaa wakhti kasta Akoonkayga.';
+      'Waxaad luqadda ka beddeli kartaa wakhti kasta Xisaabtayda.';
 
   @override
   String get languagePreviewTitle =>
@@ -2336,6 +2345,13 @@ class AppLocalizationsSo extends AppLocalizations {
   String get signInLink => 'Gal';
 
   @override
+  String get mobileAlreadyRegistered =>
+      'Lambarkan moobaylka horey ayaa loo diiwaangeliyey. Gal halkii.';
+
+  @override
+  String get couldNotCreateAccount => 'Xisaabtaada lama sameyn karin';
+
+  @override
   String get selectADate => 'Dooro taariikh';
 
   @override
@@ -2393,4 +2409,175 @@ class AppLocalizationsSo extends AppLocalizations {
 
   @override
   String get outOfPlanPaymentTitle => 'Dhammaystir lacag-bixinta';
+
+  @override
+  String get healthPinTitle => 'PIN-ka caafimaadka';
+
+  @override
+  String get createHealthPinTitle => 'Samee PIN-kaaga caafimaadka';
+
+  @override
+  String get createHealthPinHint =>
+      'Dooro PIN afar lambar ah si aad u ilaaliso natiijooyinka shaybaadhka iyo diiwaanka caafimaadka.';
+
+  @override
+  String get confirmHealthPinTitle => 'Xaqiiji PIN-kaaga caafimaadka';
+
+  @override
+  String get confirmHealthPinHint =>
+      'Mar kale geli isla PIN-ka afar lambar ah.';
+
+  @override
+  String get enterHealthPinTitle => 'Geli PIN-ka caafimaadka';
+
+  @override
+  String get enterHealthPinHint =>
+      'PIN-kan wuxuu ilaaliyaa natiijooyinka shaybaadhka iyo diiwaanka caafimaadka.';
+
+  @override
+  String get healthPinMismatch => 'PIN-yadu isma mid aha. Isku day mar kale.';
+
+  @override
+  String get healthPinWrong => 'PIN khaldan. Isku day mar kale.';
+
+  @override
+  String healthPinLocked(String countdown) {
+    return 'Isku dayo khaldan oo badan. Fadlan sug $countdown.';
+  }
+
+  @override
+  String get healthPinForgot => 'PIN-ka ma hilmaamtay?';
+
+  @override
+  String get healthPinResetTitle => 'Dib u deji PIN-ka caafimaadka';
+
+  @override
+  String get healthPinResetHint =>
+      'Waxaan kood u diri doonaa telefoonkaaga si aad PIN cusub u samaysato.';
+
+  @override
+  String get healthPinResetSendCode => 'Dir koodka dib-u-dejinta';
+
+  @override
+  String get healthPinAskPatient => 'Weydiiso bukaanka PIN-ka caafimaadka';
+
+  @override
+  String get healthPinAskPatientHint =>
+      'Natiijooyinka shaybaadhka iyo diiwaanka qofkan waxaa xiray PIN ay ku sameeyeen abka Hiraal. Weydiiso, ama weydiiso inay mid sameeyaan haddii aysan weli samayn.';
+
+  @override
+  String get healthPinNoPinYet =>
+      'Bukaanku weli ma samayn PIN caafimaad. Weydiiso inuu furo abka Hiraal oo uu mid sameeyo.';
+
+  @override
+  String get healthPinSave => 'Kaydi PIN-ka';
+
+  @override
+  String get healthPinUnlock => 'Fur';
+
+  @override
+  String get healthPinRequired =>
+      'Geli PIN-kaaga caafimaadka si aad u aragto xogtan.';
+
+  @override
+  String get healthPinChange => 'Beddel PIN-ka caafimaadka';
+
+  @override
+  String get healthPinChangeHint => 'Cusbooneysii PIN-ka ilaaliya diiwaankaaga';
+
+  @override
+  String get healthPinCreated => 'PIN-kaaga caafimaadka waa diyaar.';
+
+  @override
+  String get healthPinResetSuccess =>
+      'PIN-kaaga caafimaadka waa la dib u dejiyey.';
+
+  @override
+  String get healthPinInvalid => 'Geli PIN afar lambar ah.';
+
+  @override
+  String get healthPinProtects =>
+      'PIN-kaaga weligiis looma kaydiyo qoraal cad. Daryeelayaashu waxay u baahan doonaan PIN-kan si ay u arkaan shaybaadhkaaga iyo diiwaankaaga.';
+
+  @override
+  String get yourCarePlan => 'Qorshahaaga daryeelka';
+
+  @override
+  String planPriceAMonth(String plan, String price) {
+    return '$plan · $price bishiiba';
+  }
+
+  @override
+  String get aMonth => 'bishiiba';
+
+  @override
+  String paidUntil(String date) {
+    return 'La bixiyay ilaa $date';
+  }
+
+  @override
+  String trialUntil(String date) {
+    return 'Tijaabo ilaa $date';
+  }
+
+  @override
+  String get paymentDueShort => 'Lacag baa la sugayaa';
+
+  @override
+  String get noCarePlanYet => 'Weli qorshe daryeel ma jiro';
+
+  @override
+  String get personalInfoSubtitle =>
+      'Magaca, taleefanka, da\'da, diiwaanka caafimaadka.';
+
+  @override
+  String get myCarePlan => 'Qorshahayga Daryeelka';
+
+  @override
+  String get myCarePlanSubtitle => 'Waxaad hesho, bixi, rasiidyo.';
+
+  @override
+  String get caregiverAndFamily => 'Daryeele & Qoys';
+
+  @override
+  String caregiverFamilySubtitle(int active, int pending) {
+    return '$active firfircoon · $pending la sugayo.';
+  }
+
+  @override
+  String settingsAccountSubtitle(String language) {
+    return 'Luqadda ($language), cinwaannada, asturnaanta.';
+  }
+
+  @override
+  String get memberIdUnchangeable => 'Waxaa bixiyay Hiraal. Lama beddeli karo.';
+
+  @override
+  String get phoneLabel => 'Taleefanka';
+
+  @override
+  String get medicalRecordsHint =>
+      'Soo koobidda caafimaadka iyo diiwaannadii hore.';
+
+  @override
+  String get otherSettings => 'Dejin kale';
+
+  @override
+  String get privacyWhoCanSee => 'Cidda arki karta xogtaada';
+
+  @override
+  String get addressesDeliveryHint =>
+      'Waxaa loo isticmaalaa gaarsiinta daawada iyo booqashooyinka shaybaarka guriga.';
+
+  @override
+  String get myDetails => 'Faahfaahintayda';
+
+  @override
+  String get freePlanLabel => 'Bilaash';
+
+  @override
+  String get assignedNurseLabel => 'Kalkaaliyaha laguu xilsaaray';
+
+  @override
+  String get clinicLabel => 'Kiliniko';
 }

@@ -112,17 +112,15 @@ class _MySponsorshipScreenState extends State<MySponsorshipScreen> {
 
     if (!widget.showAppBar) {
       return Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: AppColors.of(context).scaffold,
         body: SafeArea(child: body),
       );
     }
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).scaffold,
       appBar: AppBar(
         title: Text(l10n.mySponsorshipTitle),
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: body,
@@ -145,8 +143,8 @@ class _WelcomeHero extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppColors.primarySurface,
-            AppColors.primaryLight.withValues(alpha: 0.55),
+            AppColors.of(context).primaryMuted,
+            AppColors.of(context).primarySoft.withValues(alpha: 0.55),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
@@ -161,7 +159,7 @@ class _WelcomeHero extends StatelessWidget {
               color: AppColors.white.withValues(alpha: 0.85),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: const Icon(Icons.favorite_rounded, color: AppColors.primary, size: 26),
+            child: Icon(Icons.favorite_rounded, color: AppColors.primary, size: 26),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -170,17 +168,17 @@ class _WelcomeHero extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.navy,
+                    color: AppColors.of(context).brandMark,
                     height: 1.2,
                   ),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   hint,
-                  style: const TextStyle(color: AppColors.textSecondary, height: 1.45, fontSize: 14),
+                  style: TextStyle(color: AppColors.of(context).textMuted, height: 1.45, fontSize: 14),
                 ),
               ],
             ),
@@ -203,10 +201,10 @@ class _SectionHeader extends StatelessWidget {
       children: [
         Text(
           title.toUpperCase(),
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w700,
-            color: AppColors.textSecondary,
+            color: AppColors.of(context).textMuted,
             letterSpacing: 0.6,
           ),
         ),
@@ -214,12 +212,12 @@ class _SectionHeader extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
           decoration: BoxDecoration(
-            color: AppColors.primaryLight,
+            color: AppColors.of(context).primarySoft,
             borderRadius: BorderRadius.circular(999),
           ),
           child: Text(
             '$count',
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary),
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary),
           ),
         ),
       ],
@@ -245,25 +243,25 @@ class _SponsorshipCard extends StatelessWidget {
     return parts.join(' · ');
   }
 
-  ({Color bg, Color fg, String label}) _statusStyle(AppLocalizations l10n) {
+  ({Color bg, Color fg, String label}) _statusStyle(BuildContext context, AppLocalizations l10n) {
     if (item.isActive) {
-      return (bg: AppColors.successLight, fg: AppColors.success, label: l10n.statusActive);
+      return (bg: AppColors.of(context).successSoft, fg: AppColors.success, label: l10n.statusActive);
     }
     if (item.isPending) {
-      return (bg: AppColors.warningLight, fg: AppColors.warning, label: l10n.statusPending);
+      return (bg: AppColors.of(context).warningSoft, fg: AppColors.warning, label: l10n.statusPending);
     }
-    return (bg: AppColors.primaryLight, fg: AppColors.primary, label: item.status);
+    return (bg: AppColors.of(context).primarySoft, fg: AppColors.primary, label: item.status);
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final status = _statusStyle(l10n);
+    final status = _statusStyle(context, l10n);
     final subtitle = _subtitle();
     final initials = _initials(item.patientName);
 
     return Material(
-      color: AppColors.white,
+      color: AppColors.of(context).card,
       borderRadius: BorderRadius.circular(18),
       clipBehavior: Clip.antiAlias,
       elevation: 0,
@@ -272,7 +270,7 @@ class _SponsorshipCard extends StatelessWidget {
         child: Ink(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: AppColors.cardBorder),
+            border: Border.all(color: AppColors.of(context).border),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.04),
@@ -290,13 +288,13 @@ class _SponsorshipCard extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: AppColors.primaryLight,
+                    color: AppColors.of(context).primarySoft,
                     borderRadius: BorderRadius.circular(14),
                   ),
                   alignment: Alignment.center,
                   child: Text(
                     initials.isEmpty ? '?' : initials,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w800,
                       fontSize: 16,
@@ -310,10 +308,10 @@ class _SponsorshipCard extends StatelessWidget {
                     children: [
                       Text(
                         item.patientName,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
+                          color: AppColors.of(context).text,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -322,7 +320,7 @@ class _SponsorshipCard extends StatelessWidget {
                         const SizedBox(height: 3),
                         Text(
                           subtitle,
-                          style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                          style: TextStyle(fontSize: 13, color: AppColors.of(context).textMuted),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -336,19 +334,19 @@ class _SponsorshipCard extends StatelessWidget {
                                 children: [
                                   TextSpan(
                                     text: '${l10n.monthlyCostLabel}: ',
-                                    style: const TextStyle(fontSize: 12, color: AppColors.textTertiary),
+                                    style: TextStyle(fontSize: 12, color: AppColors.of(context).textFaint),
                                   ),
                                   TextSpan(
                                     text: '${AppConstants.currencySymbol}${item.monthlyAmount.toStringAsFixed(2)}',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w700,
                                       color: AppColors.primary,
                                     ),
                                   ),
-                                  const TextSpan(
+                                  TextSpan(
                                     text: ' / month',
-                                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                                    style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted),
                                   ),
                                 ],
                               ),
@@ -381,7 +379,7 @@ class _SponsorshipCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    const Icon(Icons.chevron_right_rounded, color: AppColors.textTertiary, size: 22),
+                    Icon(Icons.chevron_right_rounded, color: AppColors.of(context).textFaint, size: 22),
                   ],
                 ),
               ],
@@ -405,7 +403,7 @@ class _ErrorCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppColors.error.withValues(alpha: 0.25)),
       ),
@@ -414,13 +412,13 @@ class _ErrorCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.errorLight,
+              color: AppColors.of(context).errorSoft,
               borderRadius: BorderRadius.circular(14),
             ),
-            child: const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 28),
+            child: Icon(Icons.error_outline_rounded, color: AppColors.error, size: 28),
           ),
           const SizedBox(height: 12),
-          Text(message, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textSecondary)),
+          Text(message, textAlign: TextAlign.center, style: TextStyle(color: AppColors.of(context).textMuted)),
           const SizedBox(height: 14),
           ElevatedButton(onPressed: onRetry, child: Text(l10n.retry)),
         ],
@@ -440,27 +438,27 @@ class _EmptyCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: Column(
         children: [
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: AppColors.primarySurface,
+              color: AppColors.of(context).primaryMuted,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Icon(Icons.volunteer_activism_outlined, size: 32, color: AppColors.primary),
+            child: Icon(Icons.volunteer_activism_outlined, size: 32, color: AppColors.primary),
           ),
           const SizedBox(height: 14),
-          Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+          Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
           const SizedBox(height: 6),
           Text(
             subtitle,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: AppColors.textSecondary, height: 1.4),
+            style: TextStyle(color: AppColors.of(context).textMuted, height: 1.4),
           ),
         ],
       ),

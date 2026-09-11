@@ -107,13 +107,13 @@ class _PlansPaymentsScreenState extends State<PlansPaymentsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(l10n.currentPlan, style: const TextStyle(fontWeight: FontWeight.w700)),
-                    Text(person.plan ?? '—', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+                    Text(l10n.currentPlan, style: TextStyle(fontWeight: FontWeight.w700)),
+                    Text(person.plan ?? '—', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
                     Text('\$${person.monthlyAmount.toStringAsFixed(0)} / Month'),
                     if (person.nextPaymentDate != null)
                       Text('${l10n.nextPaymentLabel}: ${DateFormat('d MMM yyyy').format(person.nextPaymentDate!)}'),
                     const SizedBox(height: 12),
-                    Text(l10n.whatsIncluded, style: const TextStyle(fontWeight: FontWeight.w700)),
+                    Text(l10n.whatsIncluded, style: TextStyle(fontWeight: FontWeight.w700)),
                     Text('• ${l10n.includedConsultations}'),
                     Text('• ${l10n.includedLabs}'),
                     Text('• ${l10n.includedMedicine}'),
@@ -160,7 +160,7 @@ class _PlansPaymentsScreenState extends State<PlansPaymentsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(l10n.upcomingPayment, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+                      Text(l10n.upcomingPayment, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
                       Text(DateFormat('d MMM yyyy').format(person.nextPaymentDate!)),
                       Text('\$${person.monthlyAmount.toStringAsFixed(0)}'),
                       Text(l10n.dueInDays(person.nextPaymentDate!.difference(DateTime.now()).inDays.clamp(0, 365))),
@@ -179,7 +179,7 @@ class _PlansPaymentsScreenState extends State<PlansPaymentsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(l10n.wereHereToHelp, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+                    Text(l10n.wereHereToHelp, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
                     const SizedBox(height: 8),
                     SizedBox(
                       width: double.infinity,

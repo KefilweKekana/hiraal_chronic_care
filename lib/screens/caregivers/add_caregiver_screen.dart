@@ -77,7 +77,7 @@ class _AddCaregiverScreenState extends State<AddCaregiverScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: error ? AppColors.error : AppColors.textSecondary,
+        backgroundColor: error ? AppColors.error : AppColors.of(context).textMuted,
       ),
     );
   }
@@ -97,7 +97,7 @@ class _AddCaregiverScreenState extends State<AddCaregiverScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(l10n.addCaregiverIntro, style: const TextStyle(color: AppColors.textSecondary)),
+              Text(l10n.addCaregiverIntro, style: TextStyle(color: AppColors.of(context).textMuted)),
               const SizedBox(height: 18),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,7 +129,7 @@ class _AddCaregiverScreenState extends State<AddCaregiverScreen> {
                 ],
               ),
               const SizedBox(height: 14),
-              Text(l10n.relationship, style: const TextStyle(fontWeight: FontWeight.w700)),
+              Text(l10n.relationship, style: TextStyle(fontWeight: FontWeight.w700)),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
@@ -153,7 +153,7 @@ class _AddCaregiverScreenState extends State<AddCaregiverScreen> {
                 ),
               ),
               const SizedBox(height: 18),
-              Text(l10n.permissionsTitle, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+              Text(l10n.permissionsTitle, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
               const SizedBox(height: 8),
               _PermissionTile(
                 title: l10n.viewReadings,
@@ -179,17 +179,17 @@ class _AddCaregiverScreenState extends State<AddCaregiverScreen> {
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: AppColors.primarySurface,
+                  color: AppColors.of(context).primaryMuted,
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.chat, color: AppColors.primary),
+                    Icon(Icons.chat, color: AppColors.primary),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         l10n.whatsappInviteNote,
-                        style: const TextStyle(color: AppColors.primary),
+                        style: TextStyle(color: AppColors.primary),
                       ),
                     ),
                   ],

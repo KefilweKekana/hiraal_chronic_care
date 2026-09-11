@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/utils/otp_wait.dart';
 import '../../core/utils/result.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/otp_delivery.dart';
@@ -43,6 +46,7 @@ class _OtpScreenState extends State<OtpScreen> {
   bool _canResend = false;
   bool _isVerifying = false;
   late OtpDelivery _delivery;
+  Timer? _resendTicker;
 
   @override
   void initState() {
@@ -51,21 +55,29 @@ class _OtpScreenState extends State<OtpScreen> {
     _startResendTimer();
   }
 
+  @override
+  void dispose() {
+    _resendTicker?.cancel();
+    super.dispose();
+  }
+
   // Note: _pinController is passed to PinCodeTextField, which disposes it
   // itself. Disposing it here too would double-dispose, so we don't.
 
   void _startResendTimer() {
-    Future.doWhile(() async {
-      await Future.delayed(const Duration(seconds: 1));
-      if (!mounted) return false;
+    _resendTicker?.cancel();
+    _resendTicker = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
       setState(() {
         if (_resendTimer > 0) _resendTimer--;
-        // Enable resend the moment the counter reaches zero. (Previously the
-        // loop exited on reaching 0 before _canResend was ever set, so it stuck
-        // at "Resend in 0s".)
-        if (_resendTimer == 0) _canResend = true;
+        if (_resendTimer == 0) {
+          _canResend = true;
+          timer.cancel();
+        }
       });
-      return _resendTimer > 0;
     });
   }
 
@@ -107,27 +119,30 @@ class _OtpScreenState extends State<OtpScreen> {
 
   Future<void> _resendOtp() async {
     setState(() {
-      _resendTimer = AppConstants.otpResendSeconds;
       _canResend = false;
-      // Clear the previously entered code so the user can type the new one.
       _pinController.clear();
       _currentCode = '';
     });
-    _startResendTimer();
 
     final result = await ServiceLocator.instance.auth.resendOtp(widget.phoneNumber, channel: widget.channel);
     if (!mounted) return;
 
     final l10n = AppLocalizations.of(context);
+    var wait = AppConstants.otpResendSeconds;
 
     if (result case Success(data: final delivery)) {
       setState(() => _delivery = delivery);
     }
 
     if (result.isFailure) {
+      wait = parseOtpRetryAfterSeconds(result.errorMessage) ?? wait;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(result.errorMessage ?? l10n.failedToResendOtp),
+          content: Text(
+            wait > AppConstants.otpResendSeconds
+                ? l10n.pleaseWaitBeforeAnotherCode(formatOtpCountdown(wait))
+                : (result.errorMessage ?? l10n.failedToResendOtp),
+          ),
           backgroundColor: AppColors.error,
         ),
       );
@@ -141,6 +156,12 @@ class _OtpScreenState extends State<OtpScreen> {
         ),
       );
     }
+
+    setState(() {
+      _resendTimer = wait;
+      _canResend = false;
+    });
+    _startResendTimer();
   }
 
   @override
@@ -148,7 +169,7 @@ class _OtpScreenState extends State<OtpScreen> {
     final l10n = AppLocalizations.of(context);
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.of(context).scaffold,
       resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: LayoutBuilder(
@@ -166,7 +187,7 @@ class _OtpScreenState extends State<OtpScreen> {
                         children: [
                           IconButton(
                             onPressed: widget.onBack,
-                            icon: const Icon(Icons.arrow_back_ios, size: 20),
+                            icon: Icon(Icons.arrow_back_ios, size: 20),
                           ),
                         ],
                       ),
@@ -175,10 +196,10 @@ class _OtpScreenState extends State<OtpScreen> {
                       const SizedBox(height: 24),
                       Text(
                         l10n.verifyYourAccount,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
+                          color: AppColors.of(context).text,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -187,9 +208,9 @@ class _OtpScreenState extends State<OtpScreen> {
                             ? l10n.otpSentEmail
                             : l10n.otpSentSms,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
-                          color: AppColors.textSecondary,
+                          color: AppColors.of(context).textMuted,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -202,7 +223,7 @@ class _OtpScreenState extends State<OtpScreen> {
                                   ? (_delivery.sentTo ?? l10n.yourEmailFallback)
                                   : widget.phoneNumber,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.primary,
@@ -214,7 +235,7 @@ class _OtpScreenState extends State<OtpScreen> {
                             onTap: widget.onBack,
                             child: Text(
                               l10n.edit,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.primary,
@@ -229,10 +250,10 @@ class _OtpScreenState extends State<OtpScreen> {
                         alignment: Alignment.centerLeft,
                         child: Text(
                           l10n.enterSixDigitCode,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
+                            color: AppColors.of(context).text,
                           ),
                         ),
                       ),
@@ -242,21 +263,21 @@ class _OtpScreenState extends State<OtpScreen> {
                         controller: _pinController,
                         length: AppConstants.otpLength,
                         animationType: AnimationType.fade,
-                        textStyle: const TextStyle(
+                        textStyle: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
+                          color: AppColors.of(context).text,
                         ),
                         pinTheme: PinTheme(
                           shape: PinCodeFieldShape.box,
                           borderRadius: BorderRadius.circular(12),
                           fieldHeight: 56,
                           fieldWidth: 48,
-                          activeFillColor: AppColors.white,
-                          inactiveFillColor: AppColors.inputBackground,
-                          selectedFillColor: AppColors.primaryLight,
+                          activeFillColor: AppColors.of(context).card,
+                          inactiveFillColor: AppColors.of(context).inputFill,
+                          selectedFillColor: AppColors.of(context).primarySoft,
                           activeColor: AppColors.primary,
-                          inactiveColor: AppColors.inputBorder,
+                          inactiveColor: AppColors.of(context).inputBorder,
                           selectedColor: AppColors.primary,
                           borderWidth: 1.5,
                         ),
@@ -281,9 +302,9 @@ class _OtpScreenState extends State<OtpScreen> {
                         children: [
                           Text(
                             '${l10n.didntReceiveCode} ',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 13,
-                              color: AppColors.textSecondary,
+                              color: AppColors.of(context).textMuted,
                             ),
                           ),
                           GestureDetector(
@@ -297,7 +318,7 @@ class _OtpScreenState extends State<OtpScreen> {
                                 fontWeight: FontWeight.w600,
                                 color: _canResend
                                     ? AppColors.primary
-                                    : AppColors.textTertiary,
+                                    : AppColors.of(context).textFaint,
                               ),
                             ),
                           ),
@@ -313,7 +334,7 @@ class _OtpScreenState extends State<OtpScreen> {
                             child: Text(
                               l10n.otpExpiresInMinutes(AppConstants.otpExpiryMinutes),
                               textAlign: TextAlign.center,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12,
                                 color: AppColors.primary,
                                 height: 1.4,

@@ -88,15 +88,15 @@ class _NotificationScreenState extends State<NotificationScreen> with SingleTick
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).scaffold,
       appBar: AppBar(
         title: Text(l10n.notifications),
-        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
+        leading: IconButton(icon: Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
         actions: [
           if (_hasUnread)
             TextButton(
               onPressed: _markAllRead,
-              child: Text(l10n.markAllRead, style: const TextStyle(fontSize: 13)),
+              child: Text(l10n.markAllRead, style: TextStyle(fontSize: 13)),
             ),
         ],
       ),
@@ -106,18 +106,18 @@ class _NotificationScreenState extends State<NotificationScreen> with SingleTick
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: AppColors.white,
+              color: AppColors.of(context).card,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.cardBorder),
+              border: Border.all(color: AppColors.of(context).border),
             ),
             child: TabBar(
               controller: _tabController,
               indicator: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(10)),
               indicatorSize: TabBarIndicatorSize.tab,
               labelColor: AppColors.white,
-              unselectedLabelColor: AppColors.textSecondary,
-              labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 11, height: 1.1),
-              unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 11, height: 1.1),
+              unselectedLabelColor: AppColors.of(context).textMuted,
+              labelStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 11, height: 1.1),
+              unselectedLabelStyle: TextStyle(fontWeight: FontWeight.w500, fontSize: 11, height: 1.1),
               labelPadding: const EdgeInsets.symmetric(horizontal: 2),
               tabs: [
                 Tab(height: 40, child: Text(l10n.tabAll, maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center)),
@@ -155,17 +155,17 @@ class _NotificationScreenState extends State<NotificationScreen> with SingleTick
           physics: const AlwaysScrollableScrollPhysics(),
           children: [
             const SizedBox(height: 120),
-            const Icon(Icons.notifications_none, size: 56, color: AppColors.textTertiary),
+            Icon(Icons.notifications_none, size: 56, color: AppColors.of(context).textFaint),
             const SizedBox(height: 12),
             Center(
               child: Text(l10n.noNotificationsYet,
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.of(context).textMuted)),
             ),
             const SizedBox(height: 4),
             Center(
               child: Text(l10n.notificationsEmptyHint,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 12, color: AppColors.textTertiary, height: 1.5)),
+                  style: TextStyle(fontSize: 12, color: AppColors.of(context).textFaint, height: 1.5)),
             ),
           ],
         ),
@@ -182,7 +182,7 @@ class _NotificationScreenState extends State<NotificationScreen> with SingleTick
         children.add(Padding(
           padding: const EdgeInsets.only(top: 14, bottom: 6, left: 2),
           child: Text(section,
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textTertiary)),
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.of(context).textFaint)),
         ));
         lastSection = section;
       }
@@ -218,25 +218,25 @@ class _NotificationScreenState extends State<NotificationScreen> with SingleTick
     if (n.documentType == 'Medicine Request') {
       final t = n.title.toLowerCase();
       if (t.contains('paid') || t.contains('delivered')) {
-        return (icon: Icons.check_circle, color: AppColors.success, bg: AppColors.successLight);
+        return (icon: Icons.check_circle, color: AppColors.success, bg: AppColors.of(context).successSoft);
       }
       if (t.contains('cancelled')) {
-        return (icon: Icons.cancel, color: AppColors.error, bg: AppColors.errorLight);
+        return (icon: Icons.cancel, color: AppColors.error, bg: AppColors.of(context).errorSoft);
       }
       if (t.contains('awaiting payment')) {
-        return (icon: Icons.payments, color: AppColors.warning, bg: AppColors.warningLight);
+        return (icon: Icons.payments, color: AppColors.warning, bg: AppColors.of(context).warningSoft);
       }
-      return (icon: Icons.inventory_2, color: AppColors.primary, bg: AppColors.primaryLight);
+      return (icon: Icons.inventory_2, color: AppColors.primary, bg: AppColors.of(context).primarySoft);
     }
     switch (n.type) {
       case 'message':
-        return (icon: Icons.mail, color: AppColors.primary, bg: AppColors.primaryLight);
+        return (icon: Icons.mail, color: AppColors.primary, bg: AppColors.of(context).primarySoft);
       case 'reminder':
-        return (icon: Icons.alarm, color: AppColors.warning, bg: AppColors.warningLight);
+        return (icon: Icons.alarm, color: AppColors.warning, bg: AppColors.of(context).warningSoft);
       case 'alert':
-        return (icon: Icons.warning_amber, color: AppColors.error, bg: AppColors.errorLight);
+        return (icon: Icons.warning_amber, color: AppColors.error, bg: AppColors.of(context).errorSoft);
       default:
-        return (icon: Icons.info, color: AppColors.info, bg: AppColors.infoLight);
+        return (icon: Icons.info, color: AppColors.info, bg: AppColors.of(context).infoSoft);
     }
   }
 
@@ -267,9 +267,9 @@ class _NotificationScreenState extends State<NotificationScreen> with SingleTick
         margin: const EdgeInsets.symmetric(vertical: 4),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: n.isRead ? AppColors.inputBackground : AppColors.white,
+          color: n.isRead ? AppColors.of(context).inputFill : AppColors.of(context).card,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.cardBorder),
+          border: Border.all(color: AppColors.of(context).border),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -290,13 +290,13 @@ class _NotificationScreenState extends State<NotificationScreen> with SingleTick
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: n.isRead ? FontWeight.w500 : FontWeight.w700,
-                      color: n.isRead ? AppColors.textSecondary : AppColors.textPrimary,
+                      color: n.isRead ? AppColors.of(context).textMuted : AppColors.of(context).text,
                     ),
                   ),
                   const SizedBox(height: 2),
-                  Text(n.body, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.4)),
+                  Text(n.body, style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted, height: 1.4)),
                   const SizedBox(height: 4),
-                  Text(_formatTime(l10n, n.date), style: const TextStyle(fontSize: 11, color: AppColors.textTertiary)),
+                  Text(_formatTime(l10n, n.date), style: TextStyle(fontSize: 11, color: AppColors.of(context).textFaint)),
                 ],
               ),
             ),
@@ -305,7 +305,7 @@ class _NotificationScreenState extends State<NotificationScreen> with SingleTick
             Padding(
               padding: const EdgeInsets.only(top: 14),
               child: n.isRead
-                  ? const Icon(Icons.chevron_right, color: AppColors.textTertiary, size: 18)
+                  ? Icon(Icons.chevron_right, color: AppColors.of(context).textFaint, size: 18)
                   : Container(
                       width: 9,
                       height: 9,

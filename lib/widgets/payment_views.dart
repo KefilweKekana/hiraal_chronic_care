@@ -53,19 +53,19 @@ class PaymentWaitingView extends StatelessWidget {
           const Spacer(),
           _PulseRings(animation: pulse),
           const SizedBox(height: 32),
-          const Text(
+          Text(
             'Waiting for payment',
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.of(context).text),
           ),
           const SizedBox(height: 10),
           Text.rich(
             TextSpan(
-              style: const TextStyle(fontSize: 15, color: AppColors.textSecondary, height: 1.4),
+              style: TextStyle(fontSize: 15, color: AppColors.of(context).textMuted, height: 1.4),
               children: [
-                const TextSpan(text: 'Approve the payment of '),
+                TextSpan(text: 'Approve the payment of '),
                 TextSpan(
                   text: amountText,
-                  style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                  style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.of(context).text),
                 ),
                 TextSpan(text: ' in $methodLabel'),
               ],
@@ -75,24 +75,24 @@ class PaymentWaitingView extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             'Request sent to $phone',
-            style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+            style: TextStyle(fontSize: 13, color: AppColors.of(context).textMuted),
           ),
           const SizedBox(height: 18),
           if (secondsLeft > 0)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
-                color: AppColors.inputBackground,
+                color: AppColors.of(context).inputFill,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.inputBorder),
+                border: Border.all(color: AppColors.of(context).inputBorder),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.timer_outlined, size: 16, color: AppColors.textSecondary),
+                  Icon(Icons.timer_outlined, size: 16, color: AppColors.of(context).textMuted),
                   const SizedBox(width: 6),
                   Text('Expires in $_mmss',
-                      style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                      style: TextStyle(fontSize: 13, color: AppColors.of(context).textMuted)),
                 ],
               ),
             )
@@ -100,23 +100,23 @@ class PaymentWaitingView extends StatelessWidget {
             Text(
               expiredMessage,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.4),
+              style: TextStyle(fontSize: 13, color: AppColors.of(context).textMuted, height: 1.4),
             ),
           const SizedBox(height: 28),
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: AppColors.white,
+              color: AppColors.of(context).card,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: AppColors.inputBorder),
+              border: Border.all(color: AppColors.of(context).inputBorder),
             ),
             child: Column(
               children: [
-                _step('1', 'Open $methodLabel on your phone'),
+                _step(context, '1', 'Open $methodLabel on your phone'),
                 const SizedBox(height: 10),
-                _step('2', 'Enter your PIN to approve the payment'),
+                _step(context, '2', 'Enter your PIN to approve the payment'),
                 const SizedBox(height: 10),
-                _step('3', 'This screen confirms automatically'),
+                _step(context, '3', 'This screen confirms automatically'),
               ],
             ),
           ),
@@ -145,7 +145,7 @@ class PaymentWaitingView extends StatelessWidget {
     );
   }
 
-  Widget _step(String n, String text) => Row(
+  Widget _step(BuildContext context, String n, String text) => Row(
         children: [
           Container(
             width: 22,
@@ -157,12 +157,12 @@ class PaymentWaitingView extends StatelessWidget {
             ),
             child: Text(
               n,
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary),
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary),
             ),
           ),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(text, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+            child: Text(text, style: TextStyle(fontSize: 13, color: AppColors.of(context).textMuted)),
           ),
         ],
       );
@@ -269,7 +269,7 @@ class PaymentResultView extends StatelessWidget {
               ),
               child: Icon(
                 success ? Icons.check : Icons.close,
-                color: success ? AppColors.white : AppColors.error,
+                color: success ? AppColors.of(context).card : AppColors.error,
                 size: 44,
               ),
             ),
@@ -285,7 +285,7 @@ class PaymentResultView extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 15, color: AppColors.textSecondary, height: 1.5),
+              style: TextStyle(fontSize: 15, color: AppColors.of(context).textMuted, height: 1.5),
             ),
           ],
           const Spacer(),
@@ -339,7 +339,7 @@ class _PulseRings extends StatelessWidget {
           color: AppColors.primary.withValues(alpha: 0.12),
           shape: BoxShape.circle,
         ),
-        child: const Icon(Icons.phone_iphone, size: 40, color: AppColors.primary),
+        child: Icon(Icons.phone_iphone, size: 40, color: AppColors.primary),
       ),
     );
   }

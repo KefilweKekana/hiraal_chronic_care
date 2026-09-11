@@ -24,7 +24,7 @@ class RegistrationSuccessScreen extends StatelessWidget {
         .take(2)
         .join();
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.of(context).scaffold,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -35,32 +35,32 @@ class RegistrationSuccessScreen extends StatelessWidget {
                 Container(
                   width: 72,
                   height: 72,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     color: AppColors.success,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.check,
                     color: AppColors.white,
                     size: 40,
                   ),
                 ),
                 const SizedBox(height: 24),
-                const Text(
+                Text(
                   "You're all set!",
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: AppColors.of(context).text,
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   'Your phone number has been verified and\nlinked to the patient profile.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
-                    color: AppColors.textSecondary,
+                    color: AppColors.of(context).textMuted,
                     height: 1.5,
                   ),
                 ),
@@ -69,19 +69,19 @@ class RegistrationSuccessScreen extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: AppColors.white,
+                    color: AppColors.of(context).card,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.cardBorder),
+                    border: Border.all(color: AppColors.of(context).border),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Patient Details',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
+                          color: AppColors.of(context).text,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -89,10 +89,10 @@ class RegistrationSuccessScreen extends StatelessWidget {
                         children: [
                           CircleAvatar(
                             radius: 28,
-                            backgroundColor: AppColors.primaryLight,
+                            backgroundColor: AppColors.of(context).primarySoft,
                             child: Text(
                               initials.isEmpty ? '?' : initials,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.primary,
@@ -105,17 +105,17 @@ class RegistrationSuccessScreen extends StatelessWidget {
                             children: [
                               Text(
                                 patient.name,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
-                                  color: AppColors.textPrimary,
+                                  color: AppColors.of(context).text,
                                 ),
                               ),
                               Text(
                                 'ID: ${patient.patientId}',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 13,
-                                  color: AppColors.textSecondary,
+                                  color: AppColors.of(context).textMuted,
                                 ),
                               ),
                               const SizedBox(height: 4),
@@ -163,7 +163,7 @@ class RegistrationSuccessScreen extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.infoLight,
+                    color: AppColors.of(context).infoSoft,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Row(

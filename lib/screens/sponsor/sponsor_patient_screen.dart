@@ -53,11 +53,9 @@ class _SponsorPatientScreenState extends State<SponsorPatientScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).scaffold,
       appBar: AppBar(
         title: Text(l10n.sponsorPatientTitle),
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: ListView(
@@ -66,26 +64,26 @@ class _SponsorPatientScreenState extends State<SponsorPatientScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.white,
+              color: AppColors.of(context).card,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.cardBorder),
+              border: Border.all(color: AppColors.of(context).border),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(widget.match.patientName, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                Text(widget.match.patientName, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 6),
-                Text(l10n.memberId(widget.match.patientId), style: const TextStyle(color: AppColors.textSecondary)),
-                Text(widget.match.phone, style: const TextStyle(color: AppColors.textSecondary)),
+                Text(l10n.memberId(widget.match.patientId), style: TextStyle(color: AppColors.of(context).textMuted)),
+                Text(widget.match.phone, style: TextStyle(color: AppColors.of(context).textMuted)),
                 if ((widget.match.clinic ?? '').isNotEmpty) ...[
                   const SizedBox(height: 6),
-                  Text(widget.match.clinic!, style: const TextStyle(color: AppColors.textSecondary)),
+                  Text(widget.match.clinic!, style: TextStyle(color: AppColors.of(context).textMuted)),
                 ],
               ],
             ),
           ),
           const SizedBox(height: 20),
-          Text(l10n.chooseMonthlyPlan, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+          Text(l10n.chooseMonthlyPlan, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
           const SizedBox(height: 10),
           if (_loading)
             const Padding(
@@ -104,10 +102,10 @@ class _SponsorPatientScreenState extends State<SponsorPatientScreen> {
                   margin: const EdgeInsets.only(bottom: 10),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppColors.white,
+                    color: AppColors.of(context).card,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: _selectedPlan?.name == plan.name ? AppColors.primary : AppColors.cardBorder,
+                      color: _selectedPlan?.name == plan.name ? AppColors.primary : AppColors.of(context).border,
                       width: _selectedPlan?.name == plan.name ? 1.5 : 1,
                     ),
                   ),
@@ -124,15 +122,15 @@ class _SponsorPatientScreenState extends State<SponsorPatientScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(plan.displayName, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                            Text(plan.displayName, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                             const SizedBox(height: 4),
                             Text(
                               '${AppConstants.currencySymbol}${plan.monthlyFee.toStringAsFixed(2)} / month',
-                              style: const TextStyle(fontSize: 14, color: AppColors.primary, fontWeight: FontWeight.w600),
+                              style: TextStyle(fontSize: 14, color: AppColors.primary, fontWeight: FontWeight.w600),
                             ),
                             if (plan.description.isNotEmpty) ...[
                               const SizedBox(height: 4),
-                              Text(plan.description, style: const TextStyle(color: AppColors.textSecondary)),
+                              Text(plan.description, style: TextStyle(color: AppColors.of(context).textMuted)),
                             ],
                             if (plan.features.isNotEmpty) ...[
                               const SizedBox(height: 8),
@@ -142,9 +140,9 @@ class _SponsorPatientScreenState extends State<SponsorPatientScreen> {
                                   child: Row(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      const Icon(Icons.check_circle, size: 16, color: AppColors.success),
+                                      Icon(Icons.check_circle, size: 16, color: AppColors.success),
                                       const SizedBox(width: 6),
-                                      Expanded(child: Text(feature, style: const TextStyle(fontSize: 12))),
+                                      Expanded(child: Text(feature, style: TextStyle(fontSize: 12))),
                                     ],
                                   ),
                                 ),
@@ -196,9 +194,9 @@ class _ErrorCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: Column(
         children: [

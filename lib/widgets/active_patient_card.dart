@@ -59,7 +59,7 @@ class ActivePatientCard extends StatelessWidget {
                 width: 148,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: selected ? AppColors.primarySurface : AppColors.card(context),
+                  color: selected ? AppColors.of(context).primaryMuted : AppColors.card(context),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: selected ? AppColors.primary : AppColors.border(context),
@@ -73,14 +73,14 @@ class ActivePatientCard extends StatelessWidget {
                       children: [
                         CircleAvatar(
                           radius: 16,
-                          backgroundColor: AppColors.primaryLight,
+                          backgroundColor: AppColors.of(context).primarySoft,
                           child: Text(
                             chipInitials.isEmpty ? '?' : chipInitials,
-                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary),
+                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary),
                           ),
                         ),
                         const Spacer(),
-                        if (selected) const Icon(Icons.check_circle, color: AppColors.primary, size: 18),
+                        if (selected) Icon(Icons.check_circle, color: AppColors.primary, size: 18),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -88,7 +88,7 @@ class ActivePatientCard extends StatelessWidget {
                       chipName.split(' ').first,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
                     ),
                     Text(
                       [p.relationship, p.plan].where((e) => (e ?? '').isNotEmpty).join(' · '),
@@ -116,10 +116,10 @@ class ActivePatientCard extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 26,
-            backgroundColor: AppColors.primaryLight,
+            backgroundColor: AppColors.of(context).primarySoft,
             child: Text(
               initials.isEmpty ? '?' : initials,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w700,
                 color: AppColors.primary,
                 fontSize: 16,
@@ -185,7 +185,7 @@ class ActivePatientCard extends StatelessWidget {
             children: [
               Text(
                 l10n.peopleICareFor,
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 12),
               if (list.isEmpty)
@@ -203,7 +203,7 @@ class ActivePatientCard extends StatelessWidget {
                             : AppColors.border(ctx),
                       ),
                     ),
-                    title: Text(p.patientName, style: const TextStyle(fontWeight: FontWeight.w700)),
+                    title: Text(p.patientName, style: TextStyle(fontWeight: FontWeight.w700)),
                     subtitle: Text(
                       [p.relationship, p.plan].where((e) => (e ?? '').isNotEmpty).join(' • '),
                     ),

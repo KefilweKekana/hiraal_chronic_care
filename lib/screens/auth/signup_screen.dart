@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
+import '../../core/network/api_client.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/age_dob.dart';
 import '../../core/utils/phone_number.dart';
@@ -88,19 +89,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
     if (asset != null) {
       return SvgPicture.asset(asset, width: 24, height: 16, semanticsLabel: '${country['name']} flag');
     }
-    return Text(country['flag']!, style: const TextStyle(fontSize: 18));
+    return Text(country['flag']!, style: TextStyle(fontSize: 18));
   }
 
   Widget _label(String text) => Padding(
         padding: const EdgeInsets.only(bottom: 8, top: 18),
         child: Text(text,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.of(context).text)),
       );
 
   BoxDecoration get _fieldDecoration => BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.inputBorder),
-        color: AppColors.inputBackground,
+        border: Border.all(color: AppColors.of(context).inputBorder),
+        color: AppColors.of(context).inputFill,
       );
 
   Widget _genderChip(String value, IconData icon, String label) {
@@ -112,23 +113,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
-            color: selected ? AppColors.primaryLight : AppColors.white,
+            color: selected ? AppColors.of(context).primarySoft : AppColors.of(context).card,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: selected ? AppColors.primary : AppColors.inputBorder,
+              color: selected ? AppColors.primary : AppColors.of(context).inputBorder,
               width: selected ? 2 : 1,
             ),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 18, color: selected ? AppColors.primary : AppColors.textSecondary),
+              Icon(icon, size: 18, color: selected ? AppColors.primary : AppColors.of(context).textMuted),
               const SizedBox(width: 8),
               Text(label,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: selected ? AppColors.primary : AppColors.textPrimary,
+                    color: selected ? AppColors.primary : AppColors.of(context).text,
                   )),
             ],
           ),
@@ -152,7 +153,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               children: [
                 const SizedBox(height: 8),
                 Row(children: [
-                  IconButton(onPressed: widget.onBack, icon: const Icon(Icons.arrow_back_ios, size: 20)),
+                  IconButton(onPressed: widget.onBack, icon: Icon(Icons.arrow_back_ios, size: 20)),
                   const Spacer(),
                 ]),
                 const SizedBox(height: 8),
@@ -161,7 +162,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 Center(
                   child: Text(
                     isSupporter ? l10n.supportLovedOneTitle : l10n.createYourAccount,
-                    style: const TextStyle(fontSize: 23, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                    style: TextStyle(fontSize: 23, fontWeight: FontWeight.w700, color: AppColors.of(context).text),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -171,7 +172,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ? l10n.signupAsSupporterHint
                         : l10n.fourQuickDetails,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 14, color: AppColors.textSecondary, height: 1.5),
+                    style: TextStyle(fontSize: 14, color: AppColors.of(context).textMuted, height: 1.5),
                   ),
                 ),
 
@@ -184,11 +185,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     onChanged: (_) => setState(() {}),
                     decoration: InputDecoration(
                       hintText: l10n.fullNameHint,
-                      prefixIcon: const Icon(Icons.person_outline, size: 20, color: AppColors.textSecondary),
+                      prefixIcon: Icon(Icons.person_outline, size: 20, color: AppColors.of(context).textMuted),
                       border: InputBorder.none,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
                     ),
-                    style: const TextStyle(fontSize: 16, color: AppColors.textPrimary),
+                    style: TextStyle(fontSize: 16, color: AppColors.of(context).text),
                   ),
                 ),
 
@@ -210,11 +211,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   decoration: _fieldDecoration,
                   child: Row(children: [
                     if (isSupporter)
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 12),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: Text(
                           '+252',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.of(context).text),
                         ),
                       )
                     else
@@ -224,7 +225,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           child: DropdownButton<int>(
                             value: _countryCodes
                                 .indexWhere((c) => c['code'] == _selectedCountryCode && c['flag'] == _selectedFlag),
-                            icon: const Icon(Icons.keyboard_arrow_down, size: 20, color: AppColors.textSecondary),
+                            icon: Icon(Icons.keyboard_arrow_down, size: 20, color: AppColors.of(context).textMuted),
                             isDense: true,
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             borderRadius: BorderRadius.circular(12),
@@ -234,8 +235,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 _flagWidget(country),
                                 const SizedBox(width: 6),
                                 Text(country['code']!,
-                                    style: const TextStyle(
-                                        fontSize: 15, fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
+                                    style: TextStyle(
+                                        fontSize: 15, fontWeight: FontWeight.w500, color: AppColors.of(context).text)),
                               ]);
                             }).toList(),
                             items: _countryCodes.asMap().entries.map((entry) {
@@ -246,11 +247,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   _flagWidget(country),
                                   const SizedBox(width: 8),
                                   Text(country['code']!,
-                                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+                                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(country['name']!,
-                                        style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                                        style: TextStyle(fontSize: 13, color: AppColors.of(context).textMuted),
                                         overflow: TextOverflow.ellipsis),
                                   ),
                                 ]),
@@ -267,7 +268,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         ),
                       ),
-                    Container(width: 1, height: 30, color: AppColors.inputBorder),
+                    Container(width: 1, height: 30, color: AppColors.of(context).inputBorder),
                     Expanded(
                       child: TextField(
                         controller: _phoneController,
@@ -282,7 +283,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           border: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                         ),
-                        style: const TextStyle(fontSize: 16, color: AppColors.textPrimary),
+                        style: TextStyle(fontSize: 16, color: AppColors.of(context).text),
                       ),
                     ),
                   ]),
@@ -296,11 +297,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
                       hintText: l10n.enterEmailHint,
-                      prefixIcon: const Icon(Icons.email_outlined, size: 20, color: AppColors.textSecondary),
+                      prefixIcon: Icon(Icons.email_outlined, size: 20, color: AppColors.of(context).textMuted),
                       border: InputBorder.none,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
                     ),
-                    style: const TextStyle(fontSize: 16, color: AppColors.textPrimary),
+                    style: TextStyle(fontSize: 16, color: AppColors.of(context).text),
                   ),
                 ),
 
@@ -313,16 +314,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.red.shade50,
+                          color: AppColors.of(context).errorSoft,
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.red.shade200),
+                          border: Border.all(color: AppColors.error.withValues(alpha: 0.45)),
                         ),
                         child: Row(children: [
-                          Icon(Icons.error_outline, color: Colors.red.shade700, size: 20),
+                          Icon(Icons.error_outline, color: AppColors.of(context).errorFg, size: 20),
                           const SizedBox(width: 8),
                           Expanded(
-                            child: Text(provider.errorMessage!,
-                                style: TextStyle(fontSize: 13, color: Colors.red.shade700)),
+                            child: Text(
+                                displayRegistrationError(
+                                  provider.errorMessage!,
+                                  alreadyRegistered: l10n.mobileAlreadyRegistered,
+                                ),
+                                style: TextStyle(fontSize: 13, color: AppColors.of(context).errorFg)),
                           ),
                         ]),
                       ),
@@ -370,11 +375,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     child: RichText(
                       text: TextSpan(
                         text: '${l10n.alreadyHaveAccount}  ',
-                        style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                        style: TextStyle(fontSize: 14, color: AppColors.of(context).textMuted),
                         children: [
                           TextSpan(
                             text: l10n.signInLink,
-                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primary),
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primary),
                           ),
                         ],
                       ),

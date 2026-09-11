@@ -130,6 +130,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sendCode => 'Send Code';
 
   @override
+  String waitCountdown(String countdown) {
+    return 'Wait $countdown';
+  }
+
+  @override
+  String pleaseWaitBeforeAnotherCode(String countdown) {
+    return 'Please wait $countdown before requesting another code';
+  }
+
+  @override
   String get infoSafeWithUs => 'Your information is safe with us';
 
   @override
@@ -197,7 +207,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navHistory => 'History';
 
   @override
-  String get navProfile => 'Profile';
+  String get navProfile => 'My Account';
 
   @override
   String get offlineBanner =>
@@ -655,7 +665,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statusSent => 'Sent';
 
   @override
-  String get profileTitle => 'Profile';
+  String get profileTitle => 'My Account';
 
   @override
   String memberId(String id) {
@@ -1567,7 +1577,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unknownDevice => 'Unknown Device';
 
   @override
-  String get caregiversTitle => 'Caregivers';
+  String get caregiversTitle => 'Caregiver & Family';
 
   @override
   String get addCaregiver => 'Add Caregiver';
@@ -1904,7 +1914,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get caregiverPortalConnect => 'Connect';
 
   @override
-  String get caregiverPortalAccount => 'Account';
+  String get caregiverPortalAccount => 'My Account';
 
   @override
   String get caregiverPortalWelcome => 'For My Family';
@@ -2018,10 +2028,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Create or link a loved one so you can manage their care.';
 
   @override
-  String get plansAndPayments => 'Plans and Payments';
+  String get plansAndPayments => 'Care Plans & Payments';
 
   @override
-  String get plansAndPaymentsHint => 'Their care plans, payments and receipts.';
+  String get plansAndPaymentsHint => 'What they get, pay, receipts.';
 
   @override
   String get familyAccess => 'Family Access';
@@ -2033,8 +2043,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get caregiverAccountTitle => 'Caregiver Account';
 
   @override
-  String get caregiverAccountHint =>
-      'Manage your loved ones, plans, payments and settings.';
+  String get caregiverAccountHint => 'Your loved ones, plans and settings';
 
   @override
   String get caregiverServicesTitle => 'Services';
@@ -2090,7 +2099,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get viewMoreHistory => 'View More History';
 
   @override
-  String get darkTheme => 'Dark theme';
+  String get darkTheme => 'Theme';
 
   @override
   String get darkThemeSubtitle =>
@@ -2308,6 +2317,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signInLink => 'Sign in';
 
   @override
+  String get mobileAlreadyRegistered =>
+      'This mobile number is already registered. Sign in instead.';
+
+  @override
+  String get couldNotCreateAccount => 'Could not create your account';
+
+  @override
   String get selectADate => 'Select a Date';
 
   @override
@@ -2365,4 +2381,171 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get outOfPlanPaymentTitle => 'Complete Payment';
+
+  @override
+  String get healthPinTitle => 'Health PIN';
+
+  @override
+  String get createHealthPinTitle => 'Create your health PIN';
+
+  @override
+  String get createHealthPinHint =>
+      'Choose a 4-digit PIN to protect lab results and medical records.';
+
+  @override
+  String get confirmHealthPinTitle => 'Confirm your health PIN';
+
+  @override
+  String get confirmHealthPinHint => 'Enter the same 4-digit PIN again.';
+
+  @override
+  String get enterHealthPinTitle => 'Enter health PIN';
+
+  @override
+  String get enterHealthPinHint =>
+      'This PIN protects lab results and medical records.';
+
+  @override
+  String get healthPinMismatch => 'PINs do not match. Try again.';
+
+  @override
+  String get healthPinWrong => 'Incorrect PIN. Try again.';
+
+  @override
+  String healthPinLocked(String countdown) {
+    return 'Too many incorrect attempts. Please wait $countdown.';
+  }
+
+  @override
+  String get healthPinForgot => 'Forgot PIN?';
+
+  @override
+  String get healthPinResetTitle => 'Reset health PIN';
+
+  @override
+  String get healthPinResetHint =>
+      'We will send a code to your phone so you can set a new PIN.';
+
+  @override
+  String get healthPinResetSendCode => 'Send reset code';
+
+  @override
+  String get healthPinAskPatient => 'Ask the patient for their health PIN';
+
+  @override
+  String get healthPinAskPatientHint =>
+      'This person\'s lab results and records are locked with a PIN they created in the Hiraal app. Ask them for it, or ask them to create one if they have not yet.';
+
+  @override
+  String get healthPinNoPinYet =>
+      'This patient has not created a health PIN yet. Ask them to open the Hiraal app and create one.';
+
+  @override
+  String get healthPinSave => 'Save PIN';
+
+  @override
+  String get healthPinUnlock => 'Unlock';
+
+  @override
+  String get healthPinRequired =>
+      'Enter your health PIN to view this information.';
+
+  @override
+  String get healthPinChange => 'Change health PIN';
+
+  @override
+  String get healthPinChangeHint => 'Update the PIN that protects your records';
+
+  @override
+  String get healthPinCreated => 'Your health PIN is ready.';
+
+  @override
+  String get healthPinResetSuccess => 'Your health PIN has been reset.';
+
+  @override
+  String get healthPinInvalid => 'Enter a 4-digit PIN.';
+
+  @override
+  String get healthPinProtects =>
+      'Your PIN is never stored as plain text. Caregivers will need this PIN to view your labs and records.';
+
+  @override
+  String get yourCarePlan => 'Your care plan';
+
+  @override
+  String planPriceAMonth(String plan, String price) {
+    return '$plan · $price a month';
+  }
+
+  @override
+  String get aMonth => 'a month';
+
+  @override
+  String paidUntil(String date) {
+    return 'Paid until $date';
+  }
+
+  @override
+  String trialUntil(String date) {
+    return 'Trial until $date';
+  }
+
+  @override
+  String get paymentDueShort => 'Payment due';
+
+  @override
+  String get noCarePlanYet => 'No care plan yet';
+
+  @override
+  String get personalInfoSubtitle => 'Name, phone, age, medical records.';
+
+  @override
+  String get myCarePlan => 'My Care Plan';
+
+  @override
+  String get myCarePlanSubtitle => 'What you get, pay, receipts.';
+
+  @override
+  String get caregiverAndFamily => 'Caregiver & Family';
+
+  @override
+  String caregiverFamilySubtitle(int active, int pending) {
+    return '$active active · $pending pending.';
+  }
+
+  @override
+  String settingsAccountSubtitle(String language) {
+    return 'Language ($language), addresses, privacy.';
+  }
+
+  @override
+  String get memberIdUnchangeable => 'Given by Hiraal. Cannot be changed.';
+
+  @override
+  String get phoneLabel => 'Phone';
+
+  @override
+  String get medicalRecordsHint => 'Health summary and past records.';
+
+  @override
+  String get otherSettings => 'Other settings';
+
+  @override
+  String get privacyWhoCanSee => 'Who can see your information';
+
+  @override
+  String get addressesDeliveryHint =>
+      'Used for medicine delivery and home lab visits.';
+
+  @override
+  String get myDetails => 'My details';
+
+  @override
+  String get freePlanLabel => 'Free';
+
+  @override
+  String get assignedNurseLabel => 'Assigned nurse';
+
+  @override
+  String get clinicLabel => 'Clinic';
 }

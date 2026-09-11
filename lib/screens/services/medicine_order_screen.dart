@@ -11,6 +11,7 @@ import '../../providers/app_provider.dart';
 import '../../services/address_service.dart';
 import '../../services/service_locator.dart';
 import '../../widgets/coverage_gate.dart';
+import '../../widgets/health_pin_gate.dart';
 import '../profile/addresses_screen.dart';
 import 'my_orders_screen.dart';
 import 'order_tracking_screen.dart';
@@ -98,10 +99,10 @@ class _MedicineOrderScreenState extends State<MedicineOrderScreen> {
             Padding(
               padding: const EdgeInsets.all(16),
               child: Text(l10n.addYourPrescription,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
             ),
             ListTile(
-              leading: const Icon(Icons.photo_camera_outlined, color: AppColors.primary),
+              leading: Icon(Icons.photo_camera_outlined, color: AppColors.primary),
               title: Text(l10n.takeAPhoto),
               onTap: () {
                 Navigator.pop(ctx);
@@ -109,7 +110,7 @@ class _MedicineOrderScreenState extends State<MedicineOrderScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.photo_library_outlined, color: AppColors.primary),
+              leading: Icon(Icons.photo_library_outlined, color: AppColors.primary),
               title: Text(l10n.chooseFromGallery),
               onTap: () {
                 Navigator.pop(ctx);
@@ -137,7 +138,7 @@ class _MedicineOrderScreenState extends State<MedicineOrderScreen> {
             Padding(
               padding: const EdgeInsets.all(16),
               child: Text(l10n.selectDeliveryAddress,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
             ),
             ..._addresses.map((a) => ListTile(
                   leading: Icon(
@@ -150,7 +151,7 @@ class _MedicineOrderScreenState extends State<MedicineOrderScreen> {
                 )),
             const Divider(height: 1),
             ListTile(
-              leading: const Icon(Icons.add, color: AppColors.primary),
+              leading: Icon(Icons.add, color: AppColors.primary),
               title: Text(l10n.addNewAddress),
               onTap: () => Navigator.pop(ctx, _addNewAddress),
             ),
@@ -230,7 +231,7 @@ class _MedicineOrderScreenState extends State<MedicineOrderScreen> {
 
   void _snack(String msg, {bool error = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: error ? AppColors.error : AppColors.textSecondary),
+      SnackBar(content: Text(msg), backgroundColor: error ? AppColors.error : AppColors.of(context).textMuted),
     );
   }
 
@@ -241,12 +242,10 @@ class _MedicineOrderScreenState extends State<MedicineOrderScreen> {
       backgroundColor: AppColors.scaffold(context),
       appBar: AppBar(
         title: Text(l10n.hiraalPharma),
-        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
+        leading: IconButton(icon: Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const MyOrdersScreen()),
-            ),
+            onPressed: () => pushAfterHealthPin(context, const MyOrdersScreen()),
             child: Text(l10n.myOrders),
           ),
         ],
@@ -257,17 +256,17 @@ class _MedicineOrderScreenState extends State<MedicineOrderScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(l10n.uploadYourPrescription,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
             const SizedBox(height: 4),
             Text(
               l10n.uploadPrescriptionExplain,
-              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              style: TextStyle(fontSize: 13, color: AppColors.of(context).textMuted),
             ),
             const SizedBox(height: 16),
             _prescriptionPicker(l10n),
             const SizedBox(height: 20),
             Text(l10n.noteForPharmacistOptional,
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             TextField(
               controller: _note,
@@ -277,17 +276,17 @@ class _MedicineOrderScreenState extends State<MedicineOrderScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            Text(l10n.deliveryAddress, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            Text(l10n.deliveryAddress, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             _addressTile(l10n),
             const SizedBox(height: 16),
             Row(
               children: [
-                const Icon(Icons.verified_user, size: 14, color: AppColors.success),
+                Icon(Icons.verified_user, size: 14, color: AppColors.success),
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(l10n.prescriptionPrivacyNote,
-                      style: const TextStyle(fontSize: 12, color: AppColors.success)),
+                      style: TextStyle(fontSize: 12, color: AppColors.success)),
                 ),
               ],
             ),
@@ -358,12 +357,12 @@ class _MedicineOrderScreenState extends State<MedicineOrderScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.add_a_photo_outlined, size: 40, color: AppColors.primary),
+            Icon(Icons.add_a_photo_outlined, size: 40, color: AppColors.primary),
             const SizedBox(height: 12),
             Text(l10n.tapToAddPrescriptionPhoto,
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.primary)),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.primary)),
             const SizedBox(height: 4),
-            Text(l10n.cameraOrGallery, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+            Text(l10n.cameraOrGallery, style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted)),
           ],
         ),
       ),
@@ -377,11 +376,11 @@ class _MedicineOrderScreenState extends State<MedicineOrderScreen> {
     if (_selected == null) {
       return OutlinedButton.icon(
         onPressed: _pickAddress,
-        icon: const Icon(Icons.add_location_alt_outlined, size: 18),
+        icon: Icon(Icons.add_location_alt_outlined, size: 18),
         label: Text(l10n.addADeliveryAddress),
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.primary,
-          side: const BorderSide(color: AppColors.primary),
+          side: BorderSide(color: AppColors.primary),
           padding: const EdgeInsets.symmetric(vertical: 14),
         ),
       );
@@ -393,26 +392,26 @@ class _MedicineOrderScreenState extends State<MedicineOrderScreen> {
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.cardBorder),
+          border: Border.all(color: AppColors.of(context).border),
         ),
         child: Row(
           children: [
-            const Icon(Icons.location_on, size: 18, color: AppColors.primary),
+            Icon(Icons.location_on, size: 18, color: AppColors.primary),
             const SizedBox(width: 10),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(_selected!.label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+                  Text(_selected!.label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
                   const SizedBox(height: 2),
                   Text(_selected!.address,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                      style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted)),
                 ],
               ),
             ),
-            Text(l10n.change, style: const TextStyle(fontSize: 12, color: AppColors.primary)),
+            Text(l10n.change, style: TextStyle(fontSize: 12, color: AppColors.primary)),
           ],
         ),
       ),

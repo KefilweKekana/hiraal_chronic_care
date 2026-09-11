@@ -10,8 +10,8 @@ class OfflineScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final pending = context.watch<AppProvider>().pendingSyncCount;
     return Scaffold(
-      backgroundColor: AppColors.white,
-      appBar: AppBar(title: const Text('Offline Mode'), leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context))),
+      backgroundColor: AppColors.of(context).scaffold,
+      appBar: AppBar(title: const Text('Offline Mode'), leading: IconButton(icon: Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context))),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -19,17 +19,17 @@ class OfflineScreen extends StatelessWidget {
             const SizedBox(height: 20),
             Container(
               width: 64, height: 64,
-              decoration: BoxDecoration(color: AppColors.warningLight, borderRadius: BorderRadius.circular(16)),
-              child: const Icon(Icons.wifi_off, color: AppColors.warning, size: 32),
+              decoration: BoxDecoration(color: AppColors.of(context).warningSoft, borderRadius: BorderRadius.circular(16)),
+              child: Icon(Icons.wifi_off, color: AppColors.warning, size: 32),
             ),
             const SizedBox(height: 16),
             const Text("You're Offline", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.warning)),
             const SizedBox(height: 8),
-            const Text('No internet connection detected.\nDon\'t worry – your data is safe.', textAlign: TextAlign.center, style: TextStyle(color: AppColors.textSecondary)),
+            Text('No internet connection detected.\nDon\'t worry – your data is safe.', textAlign: TextAlign.center, style: TextStyle(color: AppColors.of(context).textMuted)),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(color: AppColors.infoLight, borderRadius: BorderRadius.circular(10)),
+              decoration: BoxDecoration(color: AppColors.of(context).infoSoft, borderRadius: BorderRadius.circular(10)),
               child: const Row(
                 children: [
                   Icon(Icons.info_outline, size: 16, color: AppColors.info),
@@ -48,17 +48,17 @@ class OfflineScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: AppColors.warningLight,
+                color: AppColors.of(context).warningSoft,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.sync, size: 18, color: AppColors.warning),
+                  Icon(Icons.sync, size: 18, color: AppColors.warning),
                   const SizedBox(width: 8),
                   const Expanded(child: Text('Pending Sync\nReadings will be sent when you\'re back online.', style: TextStyle(fontSize: 12, color: AppColors.warning))),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    child: Text('$pending items', style: const TextStyle(fontSize: 12, color: AppColors.warning, fontWeight: FontWeight.w600)),
+                    child: Text('$pending items', style: TextStyle(fontSize: 12, color: AppColors.warning, fontWeight: FontWeight.w600)),
                   ),
                 ],
               ),
@@ -66,7 +66,7 @@ class OfflineScreen extends StatelessWidget {
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(color: AppColors.primarySurface, borderRadius: BorderRadius.circular(10)),
+              decoration: BoxDecoration(color: AppColors.of(context).primaryMuted, borderRadius: BorderRadius.circular(10)),
               child: Row(
                 children: const [
                   Icon(Icons.lightbulb, size: 16, color: AppColors.primary),
@@ -94,18 +94,18 @@ class _OfflineAction extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.cardBorder)),
+      decoration: BoxDecoration(color: AppColors.of(context).card, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.of(context).border)),
       child: Row(
         children: [
           Icon(icon, size: 20, color: AppColors.primary),
           const SizedBox(width: 12),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-              Text(subtitle, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+              Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+              Text(subtitle, style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted)),
             ]),
           ),
-          const Icon(Icons.chevron_right, color: AppColors.textTertiary, size: 18),
+          Icon(Icons.chevron_right, color: AppColors.of(context).textFaint, size: 18),
         ],
       ),
     );

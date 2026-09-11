@@ -22,7 +22,7 @@ class WeeklySummaryScreen extends StatelessWidget {
     final medPct = medTotal > 0 ? (medTaken / medTotal * 100).round() : 0;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).scaffold,
       appBar: AppBar(title: const Text('Summary')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -33,7 +33,7 @@ class WeeklySummaryScreen extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.primaryLight,
+                color: AppColors.of(context).primarySoft,
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Row(
@@ -41,14 +41,14 @@ class WeeklySummaryScreen extends StatelessWidget {
                   Container(
                     width: 40, height: 40,
                     decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(10)),
-                    child: const Icon(Icons.bar_chart, color: AppColors.white, size: 22),
+                    child: Icon(Icons.bar_chart, color: AppColors.white, size: 22),
                   ),
                   const SizedBox(width: 12),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(hasData ? 'Great job staying consistent!' : 'No data yet', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                      Text(hasData ? 'Based on your ${readings.length} readings.' : 'Log your first reading to see your summary.', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                      Text(hasData ? 'Great job staying consistent!' : 'No data yet', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                      Text(hasData ? 'Based on your ${readings.length} readings.' : 'Log your first reading to see your summary.', style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted)),
                     ],
                   ),
                 ],
@@ -62,11 +62,11 @@ class WeeklySummaryScreen extends StatelessWidget {
             const SizedBox(height: 12),
             Row(
               children: [
-                Expanded(child: _AverageCard(icon: Icons.favorite, label: 'Blood Pressure', value: hasData ? '$avgSys/$avgDia' : '--', unit: 'mmHg', status: !hasData ? 'No data' : (avgSys < 140 ? 'Good' : 'High'), statusColor: !hasData ? AppColors.textTertiary : (avgSys < 140 ? AppColors.success : AppColors.warning))),
+                Expanded(child: _AverageCard(icon: Icons.favorite, label: 'Blood Pressure', value: hasData ? '$avgSys/$avgDia' : '--', unit: 'mmHg', status: !hasData ? 'No data' : (avgSys < 140 ? 'Good' : 'High'), statusColor: !hasData ? AppColors.of(context).textFaint : (avgSys < 140 ? AppColors.success : AppColors.warning))),
                 const SizedBox(width: 8),
-                Expanded(child: _AverageCard(icon: Icons.water_drop, label: 'Blood Sugar', value: hasData ? avgSugar : '--', unit: 'mg/dL', status: !hasData ? 'No data' : (provider.avgSugar < 180 ? 'Good' : 'High'), statusColor: !hasData ? AppColors.textTertiary : (provider.avgSugar < 180 ? AppColors.success : AppColors.warning))),
+                Expanded(child: _AverageCard(icon: Icons.water_drop, label: 'Blood Sugar', value: hasData ? avgSugar : '--', unit: 'mg/dL', status: !hasData ? 'No data' : (provider.avgSugar < 180 ? 'Good' : 'High'), statusColor: !hasData ? AppColors.of(context).textFaint : (provider.avgSugar < 180 ? AppColors.success : AppColors.warning))),
                 const SizedBox(width: 8),
-                Expanded(child: _AverageCard(icon: Icons.medication, label: 'Medications', value: hasData ? '$medTaken/$medTotal' : '--', unit: 'Taken', status: !hasData ? 'No data' : (medTaken == medTotal ? 'Great' : 'Partial'), statusColor: !hasData ? AppColors.textTertiary : (medTaken == medTotal ? AppColors.success : AppColors.warning))),
+                Expanded(child: _AverageCard(icon: Icons.medication, label: 'Medications', value: hasData ? '$medTaken/$medTotal' : '--', unit: 'Taken', status: !hasData ? 'No data' : (medTaken == medTotal ? 'Great' : 'Partial'), statusColor: !hasData ? AppColors.of(context).textFaint : (medTaken == medTotal ? AppColors.success : AppColors.warning))),
               ],
             ),
             const SizedBox(height: 24),
@@ -75,21 +75,21 @@ class WeeklySummaryScreen extends StatelessWidget {
               child: Text('This Week at a Glance', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
             ),
             const SizedBox(height: 12),
-            _WeekItem(icon: Icons.favorite, color: AppColors.error, title: 'Blood Pressure', subtitle: '$bpCount readings', status: !hasData ? 'No data' : (avgSys < 140 ? 'Stable' : 'Elevated'), statusDetail: !hasData ? 'Log a reading' : (avgSys < 140 ? 'No concerns' : 'Monitor closely'), statusColor: !hasData ? AppColors.textTertiary : (avgSys < 140 ? AppColors.success : AppColors.warning)),
-            _WeekItem(icon: Icons.water_drop, color: AppColors.primary, title: 'Blood Sugar', subtitle: '$sugarCount readings', status: !hasData ? 'No data' : (provider.avgSugar < 180 ? 'Stable' : 'Elevated'), statusDetail: !hasData ? 'Log a reading' : (provider.avgSugar < 180 ? 'Keep it up' : 'Consult team'), statusColor: !hasData ? AppColors.textTertiary : (provider.avgSugar < 180 ? AppColors.success : AppColors.warning)),
-            _WeekItem(icon: Icons.medication, color: AppColors.success, title: 'Medications', subtitle: '$medTaken taken', status: hasData ? '$medPct%' : 'No data', statusDetail: !hasData ? 'Log a reading' : (medTaken == medTotal ? 'Excellent' : 'Missed some'), statusColor: !hasData ? AppColors.textTertiary : (medTaken == medTotal ? AppColors.success : AppColors.warning)),
+            _WeekItem(icon: Icons.favorite, color: AppColors.error, title: 'Blood Pressure', subtitle: '$bpCount readings', status: !hasData ? 'No data' : (avgSys < 140 ? 'Stable' : 'Elevated'), statusDetail: !hasData ? 'Log a reading' : (avgSys < 140 ? 'No concerns' : 'Monitor closely'), statusColor: !hasData ? AppColors.of(context).textFaint : (avgSys < 140 ? AppColors.success : AppColors.warning)),
+            _WeekItem(icon: Icons.water_drop, color: AppColors.primary, title: 'Blood Sugar', subtitle: '$sugarCount readings', status: !hasData ? 'No data' : (provider.avgSugar < 180 ? 'Stable' : 'Elevated'), statusDetail: !hasData ? 'Log a reading' : (provider.avgSugar < 180 ? 'Keep it up' : 'Consult team'), statusColor: !hasData ? AppColors.of(context).textFaint : (provider.avgSugar < 180 ? AppColors.success : AppColors.warning)),
+            _WeekItem(icon: Icons.medication, color: AppColors.success, title: 'Medications', subtitle: '$medTaken taken', status: hasData ? '$medPct%' : 'No data', statusDetail: !hasData ? 'Log a reading' : (medTaken == medTotal ? 'Excellent' : 'Missed some'), statusColor: !hasData ? AppColors.of(context).textFaint : (medTaken == medTotal ? AppColors.success : AppColors.warning)),
             const SizedBox(height: 16),
             if (hasData)
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: AppColors.successLight,
+                  color: AppColors.of(context).successSoft,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.check_circle, color: AppColors.success, size: 20),
+                    Icon(Icons.check_circle, color: AppColors.success, size: 20),
                     const SizedBox(width: 10),
                     const Expanded(
                       child: Column(
@@ -106,7 +106,7 @@ class WeeklySummaryScreen extends StatelessWidget {
                         color: AppColors.success.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(Icons.person, color: AppColors.success, size: 28),
+                      child: Icon(Icons.person, color: AppColors.success, size: 28),
                     ),
                   ],
                 ),
@@ -116,15 +116,15 @@ class WeeklySummaryScreen extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: AppColors.inputBackground,
+                  color: AppColors.of(context).inputFill,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(Icons.info_outline, color: AppColors.textSecondary, size: 20),
-                    SizedBox(width: 10),
+                    Icon(Icons.info_outline, color: AppColors.of(context).textMuted, size: 20),
+                    const SizedBox(width: 10),
                     Expanded(
-                      child: Text('No readings yet. Log your blood pressure,\nblood sugar, and medications to see your summary.', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                      child: Text('No readings yet. Log your blood pressure,\nblood sugar, and medications to see your summary.', style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted)),
                     ),
                   ],
                 ),
@@ -134,7 +134,7 @@ class WeeklySummaryScreen extends StatelessWidget {
               width: double.infinity, height: 56,
               child: ElevatedButton.icon(
                 onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.history, size: 18),
+                icon: Icon(Icons.history, size: 18),
                 label: const Text('View Full History'),
               ),
             ),
@@ -161,23 +161,23 @@ class _AverageCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: Column(
         children: [
           Icon(icon, color: AppColors.primary, size: 20),
           const SizedBox(height: 6),
-          Text(label, style: const TextStyle(fontSize: 10, color: AppColors.textTertiary), textAlign: TextAlign.center),
+          Text(label, style: TextStyle(fontSize: 10, color: AppColors.of(context).textFaint), textAlign: TextAlign.center),
           const SizedBox(height: 4),
-          Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
-          Text(unit, style: const TextStyle(fontSize: 10, color: AppColors.textTertiary)),
+          Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+          Text(unit, style: TextStyle(fontSize: 10, color: AppColors.of(context).textFaint)),
           const SizedBox(height: 6),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
             decoration: BoxDecoration(color: statusColor, borderRadius: BorderRadius.circular(8)),
-            child: Text(status, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.white)),
+            child: Text(status, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.white)),
           ),
         ],
       ),
@@ -202,9 +202,9 @@ class _WeekItem extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 3),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: Row(
         children: [
@@ -213,8 +213,8 @@ class _WeekItem extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-              Text(subtitle, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+              Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+              Text(subtitle, style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted)),
             ],
           ),
           const Spacer(),
@@ -222,11 +222,11 @@ class _WeekItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(status, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: statusColor)),
-              Text(statusDetail, style: const TextStyle(fontSize: 11, color: AppColors.textTertiary)),
+              Text(statusDetail, style: TextStyle(fontSize: 11, color: AppColors.of(context).textFaint)),
             ],
           ),
           const SizedBox(width: 4),
-          const Icon(Icons.chevron_right, color: AppColors.textTertiary, size: 18),
+          Icon(Icons.chevron_right, color: AppColors.of(context).textFaint, size: 18),
         ],
       ),
     );

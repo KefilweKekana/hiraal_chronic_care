@@ -18,13 +18,13 @@ class Skeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: AppColors.inputBackground,
-      highlightColor: AppColors.white,
+      baseColor: AppColors.of(context).shimmerBase,
+      highlightColor: AppColors.of(context).shimmerHighlight,
       child: Container(
         width: width,
         height: height,
         decoration: BoxDecoration(
-          color: AppColors.inputBackground,
+          color: AppColors.of(context).inputFill,
           borderRadius: BorderRadius.circular(radius),
         ),
       ),
@@ -42,9 +42,9 @@ class SkeletonCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: const Row(
         children: [

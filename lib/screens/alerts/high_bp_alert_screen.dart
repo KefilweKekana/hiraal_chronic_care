@@ -18,10 +18,10 @@ class HighBpAlertScreen extends StatelessWidget {
       defaultValue: '999',
     );
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.of(context).scaffold,
       appBar: AppBar(
         title: Text(l10n.alert),
-        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
+        leading: IconButton(icon: Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -30,21 +30,21 @@ class HighBpAlertScreen extends StatelessWidget {
             Container(
               width: 56, height: 56,
               decoration: BoxDecoration(
-                color: AppColors.errorLight,
+                color: AppColors.of(context).errorSoft,
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: const Icon(Icons.warning_amber_rounded, color: AppColors.error, size: 32),
+              child: Icon(Icons.warning_amber_rounded, color: AppColors.error, size: 32),
             ),
             const SizedBox(height: 16),
             Text(
               l10n.highBpDetected,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.error),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.error),
             ),
             const SizedBox(height: 8),
             Text(
               l10n.highBpSubtitle,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+              style: TextStyle(fontSize: 14, color: AppColors.of(context).textMuted),
             ),
             const SizedBox(height: 24),
             // Reading card
@@ -53,42 +53,42 @@ class HighBpAlertScreen extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.cardBorder),
+                border: Border.all(color: AppColors.of(context).border),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(l10n.yourLatestReading, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                  Text(l10n.yourLatestReading, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      const Icon(Icons.favorite, color: AppColors.error, size: 20),
+                      Icon(Icons.favorite, color: AppColors.error, size: 20),
                       const SizedBox(width: 8),
-                      Text(l10n.bloodPressure, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                      Text(l10n.bloodPressure, style: TextStyle(fontSize: 13, color: AppColors.of(context).textMuted)),
                       const Spacer(),
                       Text(
                         '${reading.systolic}/${reading.diastolic}',
-                        style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                        style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: AppColors.of(context).text),
                       ),
                       const SizedBox(width: 4),
-                      const Text('mmHg', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                      Text('mmHg', style: TextStyle(fontSize: 13, color: AppColors.of(context).textMuted)),
                       const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
-                          color: AppColors.errorLight,
+                          color: AppColors.of(context).errorSoft,
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Text(l10n.highBadge, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.error)),
+                        child: Text(l10n.highBadge, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.error)),
                       ),
                     ],
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(Icons.info_outline, size: 14, color: AppColors.textTertiary),
+                      Icon(Icons.info_outline, size: 14, color: AppColors.of(context).textFaint),
                       const SizedBox(width: 4),
-                      Text(l10n.safeRangeBp, style: const TextStyle(fontSize: 12, color: AppColors.textTertiary)),
+                      Text(l10n.safeRangeBp, style: TextStyle(fontSize: 12, color: AppColors.of(context).textFaint)),
                     ],
                   ),
                 ],
@@ -101,12 +101,12 @@ class HighBpAlertScreen extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.cardBorder),
+                border: Border.all(color: AppColors.of(context).border),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(l10n.whatYouShouldDo, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                  Text(l10n.whatYouShouldDo, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 16),
                   _ActionStep(
                     number: '1',
@@ -154,19 +154,19 @@ class HighBpAlertScreen extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: AppColors.errorLight,
+                color: AppColors.of(context).errorSoft,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.emergency, size: 20, color: AppColors.error),
+                  Icon(Icons.emergency, size: 20, color: AppColors.error),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(l10n.getHelpNow, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.error)),
-                        Text(l10n.getHelpNowHint, style: const TextStyle(fontSize: 11, color: AppColors.error)),
+                        Text(l10n.getHelpNow, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.error)),
+                        Text(l10n.getHelpNowHint, style: TextStyle(fontSize: 11, color: AppColors.error)),
                       ],
                     ),
                   ),
@@ -177,7 +177,7 @@ class HighBpAlertScreen extends StatelessWidget {
                       minimumSize: const Size(80, 36),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
-                    child: Text(l10n.callEmergencyNumber(emergencyNumber), style: const TextStyle(fontSize: 13)),
+                    child: Text(l10n.callEmergencyNumber(emergencyNumber), style: TextStyle(fontSize: 13)),
                   ),
                 ],
               ),
@@ -187,7 +187,7 @@ class HighBpAlertScreen extends StatelessWidget {
               width: double.infinity, height: 56,
               child: ElevatedButton.icon(
                 onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ContactCareTeamScreen())),
-                icon: const Icon(Icons.chat, size: 18),
+                icon: Icon(Icons.chat, size: 18),
                 label: Text(l10n.contactMyCareTeam),
               ),
             ),
@@ -196,7 +196,7 @@ class HighBpAlertScreen extends StatelessWidget {
               width: double.infinity, height: 48,
               child: OutlinedButton.icon(
                 onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.favorite, size: 18),
+                icon: Icon(Icons.favorite, size: 18),
                 label: Text(l10n.recheckMyBloodPressure),
               ),
             ),
@@ -221,7 +221,7 @@ class HighBpAlertScreen extends StatelessWidget {
         showDialog(
           context: context,
           builder: (_) => AlertDialog(
-            title: Row(children: [const Icon(Icons.emergency, color: AppColors.error), const SizedBox(width: 8), Text(l10n.emergencyCallTitle)]),
+            title: Row(children: [Icon(Icons.emergency, color: AppColors.error), const SizedBox(width: 8), Text(l10n.emergencyCallTitle)]),
             content: Text(l10n.unableToOpenDialer(emergencyNumber)),
             actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.ok))],
           ),
@@ -250,7 +250,7 @@ class _ActionStep extends StatelessWidget {
           Container(
             width: 36, height: 36,
             decoration: BoxDecoration(
-              color: AppColors.primaryLight,
+              color: AppColors.of(context).primarySoft,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: AppColors.primary, size: 18),
@@ -260,12 +260,12 @@ class _ActionStep extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('$number. $title', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                Text(subtitle, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                Text('$number. $title', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                Text(subtitle, style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted)),
               ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: AppColors.textTertiary),
+          Icon(Icons.chevron_right, color: AppColors.of(context).textFaint),
         ],
       ),
     );

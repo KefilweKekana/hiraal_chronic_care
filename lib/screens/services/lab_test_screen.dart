@@ -137,10 +137,10 @@ class _LabTestScreenState extends State<LabTestScreen> {
       backgroundColor: AppColors.scaffold(context),
       appBar: AppBar(
         title: Text(l10n.requestLabTest),
-        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
+        leading: IconButton(icon: Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
         actions: [
           IconButton(
-            icon: const Icon(Icons.info_outline),
+            icon: Icon(Icons.info_outline),
             onPressed: () {
               showDialog<void>(
                 context: context,
@@ -161,14 +161,14 @@ class _LabTestScreenState extends State<LabTestScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(l10n.selectTest, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+            Text(l10n.selectTest, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
             const SizedBox(height: 10),
             TextField(
               controller: _searchController,
               onChanged: _filterTemplates,
               decoration: InputDecoration(
                 hintText: l10n.searchLabTestsHint,
-                prefixIcon: const Icon(Icons.search, size: 20),
+                prefixIcon: Icon(Icons.search, size: 20),
                 isDense: true,
               ),
             ),
@@ -176,7 +176,7 @@ class _LabTestScreenState extends State<LabTestScreen> {
             if (_isLoadingTemplates)
               const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator()))
             else if (_templateError != null)
-              Text(_templateError!, style: const TextStyle(color: AppColors.error))
+              Text(_templateError!, style: TextStyle(color: AppColors.error))
             else
               ..._filteredTemplates.take(12).map((t) {
                 final templateName = t['name'] as String? ?? '';
@@ -184,16 +184,16 @@ class _LabTestScreenState extends State<LabTestScreen> {
                 final group = t['lab_test_group'] as String? ?? '';
                 final isSelected = _selectedTests.contains(templateName);
                 final colors = [
-                  (AppColors.info, AppColors.infoLight),
-                  (AppColors.success, AppColors.successLight),
+                  (AppColors.info, AppColors.of(context).infoSoft),
+                  (AppColors.success, AppColors.of(context).successSoft),
                   (AppColors.chartPurple, const Color(0xFFF0EAFD)),
-                  (AppColors.warning, AppColors.warningLight),
+                  (AppColors.warning, AppColors.of(context).warningSoft),
                 ];
                 final pair = colors[_filteredTemplates.indexOf(t) % colors.length];
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 10),
                   child: Material(
-                    color: isSelected ? pair.$2 : AppColors.white,
+                    color: isSelected ? pair.$2 : AppColors.of(context).card,
                     borderRadius: BorderRadius.circular(14),
                     child: InkWell(
                       borderRadius: BorderRadius.circular(14),
@@ -210,7 +210,7 @@ class _LabTestScreenState extends State<LabTestScreen> {
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: isSelected ? pair.$1 : AppColors.cardBorder, width: isSelected ? 2 : 1),
+                          border: Border.all(color: isSelected ? pair.$1 : AppColors.of(context).border, width: isSelected ? 2 : 1),
                         ),
                         child: Row(
                           children: [
@@ -225,13 +225,13 @@ class _LabTestScreenState extends State<LabTestScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(displayName, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                                  Text(displayName, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                                   if (group.isNotEmpty)
-                                    Text(group, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                                    Text(group, style: TextStyle(fontSize: 13, color: AppColors.of(context).textMuted)),
                                 ],
                               ),
                             ),
-                            Icon(isSelected ? Icons.check_circle : Icons.circle_outlined, color: isSelected ? pair.$1 : AppColors.textTertiary),
+                            Icon(isSelected ? Icons.check_circle : Icons.circle_outlined, color: isSelected ? pair.$1 : AppColors.of(context).textFaint),
                           ],
                         ),
                       ),
@@ -240,7 +240,7 @@ class _LabTestScreenState extends State<LabTestScreen> {
                 );
               }),
             const SizedBox(height: 16),
-            Text(l10n.selectADate, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+            Text(l10n.selectADate, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
             const SizedBox(height: 10),
             SizedBox(
               height: 78,
@@ -261,20 +261,20 @@ class _LabTestScreenState extends State<LabTestScreen> {
                       width: 72,
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       decoration: BoxDecoration(
-                        color: selected ? AppColors.successLight : AppColors.white,
+                        color: selected ? AppColors.of(context).successSoft : AppColors.of(context).card,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: selected ? AppColors.success : AppColors.cardBorder),
+                        border: Border.all(color: selected ? AppColors.success : AppColors.of(context).border),
                       ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
                             i == 0 ? l10n.todayLabel : DateFormat('E').format(day),
-                            style: TextStyle(fontSize: 13, color: selected ? AppColors.success : AppColors.textSecondary),
+                            style: TextStyle(fontSize: 13, color: selected ? AppColors.success : AppColors.of(context).textMuted),
                           ),
                           Text(
                             '${day.day}',
-                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: selected ? AppColors.success : AppColors.textPrimary),
+                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: selected ? AppColors.success : AppColors.of(context).text),
                           ),
                         ],
                       ),
@@ -284,7 +284,7 @@ class _LabTestScreenState extends State<LabTestScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            Text(l10n.whereWantTest, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+            Text(l10n.whereWantTest, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
             const SizedBox(height: 12),
             Row(
               children: [
@@ -312,15 +312,15 @@ class _LabTestScreenState extends State<LabTestScreen> {
             const SizedBox(height: 12),
             Row(
               children: [
-                const Icon(Icons.info_outline, size: 14, color: AppColors.warning),
+                Icon(Icons.info_outline, size: 14, color: AppColors.warning),
                 const SizedBox(width: 4),
                 Expanded(
-                  child: Text(l10n.fastingMayBeRequired, style: const TextStyle(fontSize: 12, color: AppColors.warning)),
+                  child: Text(l10n.fastingMayBeRequired, style: TextStyle(fontSize: 12, color: AppColors.warning)),
                 ),
               ],
             ),
             const SizedBox(height: 20),
-            Text(l10n.reasonOptional, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+            Text(l10n.reasonOptional, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             TextField(
               controller: _reasonController,
@@ -337,7 +337,7 @@ class _LabTestScreenState extends State<LabTestScreen> {
                     ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.white))
                     : Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: [Text(l10n.requestLabTest), const SizedBox(width: 8), const Icon(Icons.arrow_forward, size: 18)],
+                  children: [Text(l10n.requestLabTest), const SizedBox(width: 8), Icon(Icons.arrow_forward, size: 18)],
                 ),
               ),
             ),
@@ -345,9 +345,9 @@ class _LabTestScreenState extends State<LabTestScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.lock, size: 14, color: AppColors.textTertiary),
+                Icon(Icons.lock, size: 14, color: AppColors.of(context).textFaint),
                 const SizedBox(width: 4),
-                Text(l10n.requestSecurePrivate, style: const TextStyle(fontSize: 12, color: AppColors.textTertiary)),
+                Text(l10n.requestSecurePrivate, style: TextStyle(fontSize: 12, color: AppColors.of(context).textFaint)),
               ],
             ),
             const SizedBox(height: 24),
@@ -367,25 +367,25 @@ class _LabTestScreenState extends State<LabTestScreen> {
           children: [
             Container(
               width: 72, height: 72,
-              decoration: const BoxDecoration(color: AppColors.success, shape: BoxShape.circle),
-              child: const Icon(Icons.check, color: AppColors.white, size: 40),
+              decoration: BoxDecoration(color: AppColors.success, shape: BoxShape.circle),
+              child: Icon(Icons.check, color: AppColors.white, size: 40),
             ),
             const SizedBox(height: 16),
-            Text(l10n.testScheduled, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+            Text(l10n.testScheduled, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
-            Text(l10n.testScheduledBody, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textSecondary)),
+            Text(l10n.testScheduledBody, textAlign: TextAlign.center, style: TextStyle(color: AppColors.of(context).textMuted)),
             const SizedBox(height: 24),
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.cardBorder),
+                border: Border.all(color: AppColors.of(context).border),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(l10n.appointmentDetails, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                  Text(l10n.appointmentDetails, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 12),
                   _detailRow(Icons.science, l10n.testType, _selectedTests.map((name) {
                     final t = _templates.firstWhere((t) => t['name'] == name, orElse: () => {});
@@ -418,8 +418,8 @@ class _LabTestScreenState extends State<LabTestScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textTertiary)),
-              Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+              Text(label, style: TextStyle(fontSize: 12, color: AppColors.of(context).textFaint)),
+              Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
             ],
           ),
         ],
@@ -444,16 +444,16 @@ class _CollectionCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryLight : AppColors.white,
+          color: isSelected ? AppColors.of(context).primarySoft : AppColors.of(context).card,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: isSelected ? AppColors.primary : AppColors.cardBorder, width: isSelected ? 2 : 1),
+          border: Border.all(color: isSelected ? AppColors.primary : AppColors.of(context).border, width: isSelected ? 2 : 1),
         ),
         child: Column(
           children: [
-            Icon(icon, size: 28, color: isSelected ? AppColors.primary : AppColors.textTertiary),
+            Icon(icon, size: 28, color: isSelected ? AppColors.primary : AppColors.of(context).textFaint),
             const SizedBox(height: 8),
-            Text(label, textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: isSelected ? AppColors.primary : AppColors.textPrimary)),
-            Text(subtitle, textAlign: TextAlign.center, style: TextStyle(fontSize: 10, color: isSelected ? AppColors.primary : AppColors.textTertiary)),
+            Text(label, textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: isSelected ? AppColors.primary : AppColors.of(context).text)),
+            Text(subtitle, textAlign: TextAlign.center, style: TextStyle(fontSize: 10, color: isSelected ? AppColors.primary : AppColors.of(context).textFaint)),
           ],
         ),
       ),

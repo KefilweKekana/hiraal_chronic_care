@@ -30,7 +30,7 @@ class HiraalLogo extends StatelessWidget {
                 style: TextStyle(
                   fontSize: size * 0.4,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.navy,
+                  color: AppColors.of(context).brandMark,
                   height: 1.2,
                 ),
               ),
@@ -127,10 +127,10 @@ class InfoRow extends StatelessWidget {
             flex: 2,
             child: Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                color: AppColors.of(context).text,
               ),
             ),
           ),
@@ -139,9 +139,9 @@ class InfoRow extends StatelessWidget {
             flex: 3,
             child: Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color: AppColors.textSecondary,
+                color: AppColors.of(context).textMuted,
               ),
               textAlign: TextAlign.right,
             ),
@@ -172,9 +172,9 @@ class SectionCard extends StatelessWidget {
       width: double.infinity,
       margin: const EdgeInsets.symmetric(vertical: 6),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -187,10 +187,10 @@ class SectionCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       title!,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                        color: AppColors.of(context).text,
                       ),
                     ),
                   ),

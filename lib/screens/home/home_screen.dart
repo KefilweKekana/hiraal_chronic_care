@@ -15,6 +15,7 @@ import '../../services/bluetooth_service.dart';
 import '../../services/booking_service.dart';
 import '../../services/service_locator.dart';
 import '../../widgets/shared_widgets.dart';
+import '../../widgets/health_pin_gate.dart';
 import '../../widgets/skeleton.dart';
 import '../alerts/high_bp_alert_screen.dart';
 import '../devices/device_pairing_screen.dart';
@@ -121,7 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: AppColors.warningLight,
+            color: AppColors.of(context).warningSoft,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(color: AppColors.warning.withValues(alpha: 0.45)),
           ),
@@ -130,26 +131,26 @@ class _HomeScreenState extends State<HomeScreen> {
               Container(
                 width: 40, height: 40,
                 decoration: BoxDecoration(color: AppColors.warning.withValues(alpha: 0.18), borderRadius: BorderRadius.circular(11)),
-                child: const Icon(Icons.payments_outlined, color: AppColors.warning),
+                child: Icon(Icons.payments_outlined, color: AppColors.warning),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(l10n.paymentPending, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                    Text(l10n.paymentPending, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.of(context).text)),
                     const SizedBox(height: 2),
                     Text(
                       l10n.orderPayToContinue(
                         o.id,
                         '${AppConstants.currencySymbol}${o.amountDue.toStringAsFixed(2)}',
                       ),
-                      style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                      style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right, color: AppColors.warning),
+              Icon(Icons.chevron_right, color: AppColors.warning),
             ],
           ),
         ),
@@ -177,7 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: AppColors.primarySurface,
+            color: AppColors.of(context).primaryMuted,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
           ),
@@ -186,23 +187,23 @@ class _HomeScreenState extends State<HomeScreen> {
               Container(
                 width: 40, height: 40,
                 decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(11)),
-                child: const Icon(Icons.calendar_month_outlined, color: AppColors.primary),
+                child: Icon(Icons.calendar_month_outlined, color: AppColors.primary),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(l10n.nextAppointment, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                    Text(l10n.nextAppointment, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.of(context).text)),
                     const SizedBox(height: 2),
                     Text(
                       '$practitioner – ${DateFormat('EEE, MMM d').format(a.date)}${time.isNotEmpty ? ' · $time' : ''}',
-                      style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                      style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right, size: 18, color: AppColors.primary),
+              Icon(Icons.chevron_right, size: 18, color: AppColors.primary),
             ],
           ),
         ),
@@ -314,7 +315,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).scaffold,
       body: SafeArea(
         child: Stack(
           children: [
@@ -331,10 +332,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       CircleAvatar(
                         radius: 22,
-                        backgroundColor: AppColors.primaryLight,
+                        backgroundColor: AppColors.of(context).primarySoft,
                         child: Text(
                           patient?.name.split(' ').where((n) => n.isNotEmpty).map((n) => n[0]).take(2).join() ?? 'AA',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.w600,
                             color: AppColors.primary,
                           ),
@@ -347,19 +348,19 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             Text(
                               _greeting(l10n),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 13,
-                                color: AppColors.textSecondary,
+                                color: AppColors.of(context).textMuted,
                               ),
                             ),
                             Text(
                               patient?.name ?? l10n.patientFallback,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.w800,
-                                color: AppColors.textPrimary,
+                                color: AppColors.of(context).text,
                               ),
                             ),
                           ],
@@ -372,9 +373,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         textColor: AppColors.white,
                         child: IconButton(
                           onPressed: () => Navigator.pushNamed(context, '/notifications'),
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.notifications_outlined,
-                            color: AppColors.textPrimary,
+                            color: AppColors.of(context).text,
                           ),
                         ),
                       ),
@@ -387,13 +388,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.white,
+                      color: AppColors.of(context).card,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.cardBorder),
+                      border: Border.all(color: AppColors.of(context).border),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.calendar_today, size: 16, color: AppColors.primary),
+                        Icon(Icons.calendar_today, size: 16, color: AppColors.primary),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Column(
@@ -401,25 +402,25 @@ class _HomeScreenState extends State<HomeScreen> {
                             children: [
                               Text(
                                 l10n.todaysDate,
-                                style: const TextStyle(fontSize: 11, color: AppColors.textTertiary),
+                                style: TextStyle(fontSize: 11, color: AppColors.of(context).textFaint),
                               ),
                               Text(
                                 DateFormat('MMM dd, yyyy').format(now),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
-                                  color: AppColors.textPrimary,
+                                  color: AppColors.of(context).text,
                                 ),
                               ),
                               Text(
                                 DateFormat('EEEE').format(now),
-                                style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                                style: TextStyle(fontSize: 11, color: AppColors.of(context).textMuted),
                               ),
                             ],
                           ),
                         ),
                         const SizedBox(width: 8),
-                        const Icon(Icons.access_time, size: 16, color: AppColors.textTertiary),
+                        Icon(Icons.access_time, size: 16, color: AppColors.of(context).textFaint),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Column(
@@ -427,23 +428,23 @@ class _HomeScreenState extends State<HomeScreen> {
                             children: [
                               Text(
                                 l10n.lastSubmitted,
-                                style: const TextStyle(fontSize: 11, color: AppColors.textTertiary),
+                                style: TextStyle(fontSize: 11, color: AppColors.of(context).textFaint),
                               ),
                               Text(
                                 provider.readings.isNotEmpty
                                     ? DateFormat('MMM dd, yyyy').format(provider.readings.first.date)
                                     : '–',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
-                                  color: AppColors.textPrimary,
+                                  color: AppColors.of(context).text,
                                 ),
                               ),
                               Text(
                                 provider.readings.isNotEmpty
                                     ? DateFormat('h:mm a').format(provider.readings.first.date)
                                     : l10n.noReadingYetToday,
-                                style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                                style: TextStyle(fontSize: 11, color: AppColors.of(context).textMuted),
                               ),
                             ],
                           ),
@@ -456,17 +457,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: AppColors.primarySurface,
+                      color: AppColors.of(context).primaryMuted,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.info_outline, size: 16, color: AppColors.primary),
+                        Icon(Icons.info_outline, size: 16, color: AppColors.primary),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             l10n.enterReadingsInfo,
-                            style: const TextStyle(fontSize: 12, color: AppColors.primary, height: 1.3),
+                            style: TextStyle(fontSize: 12, color: AppColors.primary, height: 1.3),
                           ),
                         ),
                       ],
@@ -484,10 +485,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Text(
                         l10n.todaysReading,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimary,
+                          color: AppColors.of(context).text,
                         ),
                       ),
                       StatusBadge(text: l10n.required, color: AppColors.primary),
@@ -586,10 +587,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   // Add Note
                   Text(
                     l10n.howDoYouFeelToday,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
+                      color: AppColors.of(context).text,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -598,7 +599,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     maxLines: 2,
                     decoration: InputDecoration(
                       hintText: l10n.howFeelingHint,
-                      prefixIcon: const Icon(Icons.edit_note, size: 20),
+                      prefixIcon: Icon(Icons.edit_note, size: 20),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -613,9 +614,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: AppColors.white,
+                      color: AppColors.of(context).card,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.cardBorder),
+                      border: Border.all(color: AppColors.of(context).border),
                     ),
                     child: Row(
                       children: [
@@ -623,7 +624,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           Icons.bluetooth,
                           color: _bleService.isConnected
                               ? AppColors.primary
-                              : AppColors.textTertiary,
+                              : AppColors.of(context).textFaint,
                         ),
                         const SizedBox(width: 12),
                         Column(
@@ -631,17 +632,17 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             Text(
                               l10n.connectDevice,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary,
+                                color: AppColors.of(context).text,
                               ),
                             ),
                             Text(
                               l10n.importReadingsFromDevice,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12,
-                                color: AppColors.textSecondary,
+                                color: AppColors.of(context).textMuted,
                               ),
                             ),
                           ],
@@ -651,7 +652,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           Container(
                             width: 8,
                             height: 8,
-                            decoration: const BoxDecoration(
+                            decoration: BoxDecoration(
                               color: AppColors.success,
                               shape: BoxShape.circle,
                             ),
@@ -659,7 +660,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           const SizedBox(width: 4),
                           Text(
                             l10n.connected,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
                               color: AppColors.success,
                               fontWeight: FontWeight.w600,
@@ -667,7 +668,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ],
                         const SizedBox(width: 4),
-                        const Icon(Icons.chevron_right, color: AppColors.textTertiary),
+                        Icon(Icons.chevron_right, color: AppColors.of(context).textFaint),
                       ],
                     ),
                   ),
@@ -679,12 +680,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     height: 56,
                     child: ElevatedButton.icon(
                       onPressed: _isFormValid ? _submitReading : null,
-                      icon: const Icon(Icons.send, size: 20),
-                      label: Text(l10n.sendReadings, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+                      icon: Icon(Icons.send, size: 20),
+                      label: Text(l10n.sendReadings, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _isFormValid
-                            ? AppColors.primary
-                            : AppColors.primary.withValues(alpha: 0.5),
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
                       ),
                     ),
                   ),
@@ -692,10 +693,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   Center(
                     child: TextButton.icon(
                       onPressed: () => launchUrl(Uri.parse('tel:${AppConstants.supportShortCode}')),
-                      icon: const Icon(Icons.phone, color: AppColors.error),
+                      icon: Icon(Icons.phone, color: AppColors.error),
                       label: Text(
                         l10n.emergencyCallShort(AppConstants.supportShortCode),
-                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.error),
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.error),
                       ),
                     ),
                   ),
@@ -714,7 +715,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     margin: const EdgeInsets.all(40),
                     padding: const EdgeInsets.all(32),
                     decoration: BoxDecoration(
-                      color: AppColors.white,
+                      color: AppColors.of(context).card,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Column(
@@ -724,27 +725,27 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 20),
                         Text(
                           l10n.submittingReading,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
+                            color: AppColors.of(context).text,
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           l10n.dontCloseWhileSending,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                          style: TextStyle(fontSize: 13, color: AppColors.of(context).textMuted),
                         ),
                         const SizedBox(height: 12),
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.verified_user, size: 14, color: AppColors.success),
+                            Icon(Icons.verified_user, size: 14, color: AppColors.success),
                             const SizedBox(width: 4),
                             Text(
                               l10n.dataSecureProtected,
-                              style: const TextStyle(fontSize: 12, color: AppColors.success),
+                              style: TextStyle(fontSize: 12, color: AppColors.success),
                             ),
                           ],
                         ),
@@ -763,7 +764,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final lastReading = provider.readings.first;
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.of(context).scaffold,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -774,18 +775,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   CircleAvatar(
                     radius: 20,
-                    backgroundColor: AppColors.primaryLight,
+                    backgroundColor: AppColors.of(context).primarySoft,
                     child: Text(
                       provider.patient?.name.split(' ').where((n) => n.isNotEmpty).map((n) => n[0]).take(2).join() ?? '',
-                      style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.primary, fontSize: 12),
+                      style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.primary, fontSize: 12),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                  Text(_greeting(l10n), style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                      Text(provider.patient?.name ?? '', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                  Text(_greeting(l10n), style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted)),
+                      Text(provider.patient?.name ?? '', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                     ],
                   ),
                 ],
@@ -799,33 +800,33 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Container(
                   width: 72,
                   height: 72,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     color: AppColors.success,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.check, color: AppColors.white, size: 40),
+                  child: Icon(Icons.check, color: AppColors.white, size: 40),
                 ),
               ),
               const SizedBox(height: 20),
               Text(
                 l10n.allSet,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.of(context).text),
               ),
               const SizedBox(height: 8),
               Text(
                 l10n.readingSavedSent,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 14, color: AppColors.textSecondary, height: 1.5),
+                style: TextStyle(fontSize: 14, color: AppColors.of(context).textMuted, height: 1.5),
               ),
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.verified_user, size: 14, color: AppColors.success),
+                  Icon(Icons.verified_user, size: 14, color: AppColors.success),
                   const SizedBox(width: 4),
                   Text(
                     l10n.careTeamNotified,
-                    style: const TextStyle(fontSize: 12, color: AppColors.success),
+                    style: TextStyle(fontSize: 12, color: AppColors.success),
                   ),
                 ],
               ),
@@ -834,16 +835,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.white,
+                  color: AppColors.of(context).card,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.cardBorder),
+                  border: Border.all(color: AppColors.of(context).border),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       l10n.submissionSummary,
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 16),
                     _summaryRow(Icons.calendar_today, l10n.date, DateFormat('MMM dd, yyyy (EEEE)').format(lastReading.date)),
@@ -858,16 +859,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppColors.infoLight,
+                  color: AppColors.of(context).infoSoft,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.info_outline, size: 16, color: AppColors.info),
+                    Icon(Icons.info_outline, size: 16, color: AppColors.info),
                     const SizedBox(width: 8),
                     Text(
                       l10n.notifiedWhenReviewed,
-                      style: const TextStyle(fontSize: 12, color: AppColors.info),
+                      style: TextStyle(fontSize: 12, color: AppColors.info),
                     ),
                   ],
                 ),
@@ -878,7 +879,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 height: 56,
                 child: ElevatedButton.icon(
                   onPressed: _resetForm,
-                  icon: const Icon(Icons.home, size: 20),
+                  icon: Icon(Icons.home, size: 20),
                   label: Text(l10n.goToHome),
                 ),
               ),
@@ -889,9 +890,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: OutlinedButton.icon(
                   onPressed: () {
                     _resetForm();
-                    context.read<AppProvider>().setTab(2);
+                    openHealthHistoryTab(context);
                   },
-                  icon: const Icon(Icons.history, size: 18),
+                  icon: Icon(Icons.history, size: 18),
                   label: Text(l10n.viewHistory),
                 ),
               ),
@@ -909,16 +910,16 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 18, color: AppColors.textTertiary),
+          Icon(icon, size: 18, color: AppColors.of(context).textFaint),
           const SizedBox(width: 10),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textTertiary)),
+              Text(label, style: TextStyle(fontSize: 12, color: AppColors.of(context).textFaint)),
               const SizedBox(height: 2),
               Text(
                 value,
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.of(context).text),
               ),
             ],
           ),
@@ -946,15 +947,15 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: AppColors.of(context).text,
                   ),
                 ),
                 Text(
                   subtitle,
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted),
                 ),
               ],
             ),
@@ -981,7 +982,7 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.only(bottom: 6),
             child: Text(
               label,
-              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted),
             ),
           ),
         TextFormField(
@@ -1001,7 +1002,7 @@ class _HomeScreenState extends State<HomeScreen> {
             hintText: hint,
             contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
           ),
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
       ],
     );
@@ -1019,24 +1020,24 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: isSelected ? color.withValues(alpha: 0.1) : AppColors.white,
+          color: isSelected ? color.withValues(alpha: 0.1) : AppColors.of(context).card,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? color : AppColors.cardBorder,
+            color: isSelected ? color : AppColors.of(context).border,
             width: isSelected ? 2 : 1,
           ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 18, color: isSelected ? color : AppColors.textTertiary),
+            Icon(icon, size: 18, color: isSelected ? color : AppColors.of(context).textFaint),
             const SizedBox(width: 8),
             Text(
               label,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: isSelected ? color : AppColors.textSecondary,
+                color: isSelected ? color : AppColors.of(context).textMuted,
               ),
             ),
           ],

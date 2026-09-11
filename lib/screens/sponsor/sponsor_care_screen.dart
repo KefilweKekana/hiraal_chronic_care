@@ -115,7 +115,7 @@ class _SponsorCareScreenState extends State<SponsorCareScreen> with SingleTicker
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: error ? AppColors.error : AppColors.textSecondary,
+        backgroundColor: error ? AppColors.error : AppColors.of(context).textMuted,
       ),
     );
   }
@@ -124,17 +124,15 @@ class _SponsorCareScreenState extends State<SponsorCareScreen> with SingleTicker
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).scaffold,
       appBar: widget.showAppBar
           ? AppBar(
               title: Text(l10n.sponsorCareTitle),
-              backgroundColor: AppColors.white,
-              foregroundColor: AppColors.textPrimary,
               elevation: 0,
               bottom: TabBar(
                 controller: _controller,
                 labelColor: AppColors.primary,
-                unselectedLabelColor: AppColors.textSecondary,
+                unselectedLabelColor: AppColors.of(context).textMuted,
                 indicatorColor: AppColors.primary,
                 tabs: [
                   Tab(text: l10n.findPatientTab),
@@ -145,13 +143,11 @@ class _SponsorCareScreenState extends State<SponsorCareScreen> with SingleTicker
           : AppBar(
               title: Text(l10n.sponsorCareTitle),
               automaticallyImplyLeading: false,
-              backgroundColor: AppColors.white,
-              foregroundColor: AppColors.textPrimary,
               elevation: 0,
               bottom: TabBar(
                 controller: _controller,
                 labelColor: AppColors.primary,
-                unselectedLabelColor: AppColors.textSecondary,
+                unselectedLabelColor: AppColors.of(context).textMuted,
                 indicatorColor: AppColors.primary,
                 tabs: [
                   Tab(text: l10n.findPatientTab),
@@ -184,7 +180,7 @@ class _SponsorCareScreenState extends State<SponsorCareScreen> with SingleTicker
                             height: 18,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Icon(Icons.search),
+                        : Icon(Icons.search),
                     onPressed: _searching ? null : _search,
                   ),
                 ),
@@ -198,7 +194,7 @@ class _SponsorCareScreenState extends State<SponsorCareScreen> with SingleTicker
                 ),
               ),
               const SizedBox(height: 18),
-              Text(l10n.redeemInvitationCodeTitle, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+              Text(l10n.redeemInvitationCodeTitle, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
               const SizedBox(height: 8),
               TextField(
                 controller: _codeCtrl,
@@ -272,7 +268,7 @@ class _SponsorCareScreenState extends State<SponsorCareScreen> with SingleTicker
                 ],
               ),
               const SizedBox(height: 14),
-              Text(l10n.relationship, style: const TextStyle(fontWeight: FontWeight.w700)),
+              Text(l10n.relationship, style: TextStyle(fontWeight: FontWeight.w700)),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
@@ -325,9 +321,9 @@ class _InfoCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -335,7 +331,7 @@ class _InfoCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.primarySurface,
+              color: AppColors.of(context).primaryMuted,
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(icon, color: AppColors.primary),
@@ -345,9 +341,9 @@ class _InfoCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 4),
-                Text(body, style: const TextStyle(color: AppColors.textSecondary)),
+                Text(body, style: TextStyle(color: AppColors.of(context).textMuted)),
               ],
             ),
           ),
@@ -372,17 +368,17 @@ class _PatientMatchCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: AppColors.of(context).card,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.cardBorder),
+          border: Border.all(color: AppColors.of(context).border),
         ),
         child: Row(
           children: [
             CircleAvatar(
-              backgroundColor: AppColors.primaryLight,
+              backgroundColor: AppColors.of(context).primarySoft,
               child: Text(
                 match.patientName.isNotEmpty ? match.patientName[0] : 'P',
-                style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700),
+                style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700),
               ),
             ),
             const SizedBox(width: 12),
@@ -390,14 +386,14 @@ class _PatientMatchCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(match.patientName, style: const TextStyle(fontWeight: FontWeight.w700)),
+                  Text(match.patientName, style: TextStyle(fontWeight: FontWeight.w700)),
                   const SizedBox(height: 4),
-                  Text(l10n.memberId(match.patientId), style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                  Text(match.phone, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                  Text(l10n.memberId(match.patientId), style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted)),
+                  Text(match.phone, style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted)),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: AppColors.textTertiary),
+            Icon(Icons.chevron_right, color: AppColors.of(context).textFaint),
           ],
         ),
       ),
@@ -416,17 +412,17 @@ class _EmptyCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: Column(
         children: [
-          const Icon(Icons.search_off, size: 36, color: AppColors.textTertiary),
+          Icon(Icons.search_off, size: 36, color: AppColors.of(context).textFaint),
           const SizedBox(height: 8),
-          Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+          Text(title, style: TextStyle(fontWeight: FontWeight.w700)),
           const SizedBox(height: 4),
-          Text(subtitle, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textSecondary)),
+          Text(subtitle, textAlign: TextAlign.center, style: TextStyle(color: AppColors.of(context).textMuted)),
         ],
       ),
     );

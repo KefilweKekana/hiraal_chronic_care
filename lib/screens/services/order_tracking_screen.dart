@@ -120,7 +120,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.keepOrder)),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.cancelOrder, style: const TextStyle(color: AppColors.error)),
+            child: Text(l10n.cancelOrder, style: TextStyle(color: AppColors.error)),
           ),
         ],
       ),
@@ -136,7 +136,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
         await _load();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(AppLocalizations.of(context).cancelled), backgroundColor: AppColors.textSecondary),
+            SnackBar(content: Text(AppLocalizations.of(context).cancelled), backgroundColor: AppColors.of(context).textMuted),
           );
         }
       case Failure(message: final msg):
@@ -208,11 +208,9 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).scaffold,
       appBar: AppBar(
         title: Text(l10n.trackOrder),
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: _loading
@@ -235,7 +233,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
           children: [
             Text(
               _error ?? l10n.somethingWentWrong,
-              style: const TextStyle(color: AppColors.error),
+              style: TextStyle(color: AppColors.error),
             ),
             const SizedBox(height: 8),
             TextButton(onPressed: () { setState(() => _loading = true); _load(); }, child: Text(l10n.retry)),
@@ -251,16 +249,16 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: AppColors.of(context).card,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.cardBorder),
+          border: Border.all(color: AppColors.of(context).border),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Text(l10n.orderNumber(o.id), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                Text(l10n.orderNumber(o.id), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                 const Spacer(),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -279,7 +277,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
               const SizedBox(height: 4),
               Text(
                 l10n.placedAt(DateFormat('MMM dd, yyyy • HH:mm').format(o.createdAt!)),
-                style: const TextStyle(fontSize: 12, color: AppColors.textTertiary),
+                style: TextStyle(fontSize: 12, color: AppColors.of(context).textFaint),
               ),
             ],
           ],
@@ -299,16 +297,16 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
         Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: AppColors.white,
+            color: AppColors.of(context).card,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.cardBorder),
+            border: Border.all(color: AppColors.of(context).border),
           ),
           child: Row(
             children: [
-              const Icon(Icons.description_outlined, size: 20, color: AppColors.primary),
+              Icon(Icons.description_outlined, size: 20, color: AppColors.primary),
               const SizedBox(width: 10),
-              Expanded(child: Text(l10n.prescriptionAttached, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500))),
-              const Icon(Icons.check_circle, size: 18, color: AppColors.success),
+              Expanded(child: Text(l10n.prescriptionAttached, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500))),
+              Icon(Icons.check_circle, size: 18, color: AppColors.success),
             ],
           ),
         ),
@@ -319,7 +317,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
       _card(l10n.itemsCount(o.medicines.length), [
         if (o.medicines.isEmpty)
           Text(l10n.awaitingPharmacistReview,
-              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary))
+              style: TextStyle(fontSize: 13, color: AppColors.of(context).textMuted))
         else
           ...o.medicines.map((m) => Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6),
@@ -335,12 +333,12 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                         children: [
                           Text(
                             m.dosage != null && m.dosage!.isNotEmpty ? '${m.name} – ${m.dosage}' : m.name,
-                            style: const TextStyle(fontSize: 14),
+                            style: TextStyle(fontSize: 14),
                           ),
                           if ((m.frequency ?? '').isNotEmpty)
-                            Text(m.frequency!, style: const TextStyle(fontSize: 12, color: AppColors.textTertiary)),
+                            Text(m.frequency!, style: TextStyle(fontSize: 12, color: AppColors.of(context).textFaint)),
                           if (!m.inStock)
-                            Text(l10n.outOfStock, style: const TextStyle(fontSize: 12, color: AppColors.warning)),
+                            Text(l10n.outOfStock, style: TextStyle(fontSize: 12, color: AppColors.warning)),
                         ],
                       ),
                     ),
@@ -348,10 +346,10 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text('x${m.quantity}', style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                        Text('x${m.quantity}', style: TextStyle(fontSize: 13, color: AppColors.of(context).textMuted)),
                         if ((m.totalPrice ?? 0) > 0)
                           Text('$_currency${m.totalPrice!.toStringAsFixed(2)}',
-                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
                       ],
                     ),
                   ],
@@ -395,7 +393,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
           height: 54,
           child: ElevatedButton.icon(
             onPressed: _payNow,
-            icon: const Icon(Icons.payment, size: 20),
+            icon: Icon(Icons.payment, size: 20),
             label: Text(l10n.confirmAndPayAmount('$_currency${o.amountDue.toStringAsFixed(2)}')),
           ),
         ),
@@ -410,7 +408,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.success),
             icon: _confirming
                 ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.white))
-                : const Icon(Icons.check_circle_outline, size: 20),
+                : Icon(Icons.check_circle_outline, size: 20),
             label: Text(_confirming ? l10n.confirming : l10n.iReceivedMyOrder),
           ),
         ),
@@ -425,10 +423,10 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
             onPressed: _cancelling ? null : _confirmCancel,
             icon: _cancelling
                 ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                : const Icon(Icons.close, size: 18, color: AppColors.error),
+                : Icon(Icons.close, size: 18, color: AppColors.error),
             label: Text(_cancelling ? l10n.cancelling : l10n.cancelOrder,
-                style: const TextStyle(color: AppColors.error)),
-            style: OutlinedButton.styleFrom(side: const BorderSide(color: AppColors.error)),
+                style: TextStyle(color: AppColors.error)),
+            style: OutlinedButton.styleFrom(side: BorderSide(color: AppColors.error)),
           ),
         ),
       const SizedBox(height: 32),
@@ -444,13 +442,13 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                   style: TextStyle(
                       fontSize: bold ? 15 : 13,
                       fontWeight: bold ? FontWeight.w700 : FontWeight.w400,
-                      color: bold ? AppColors.textPrimary : AppColors.textSecondary)),
+                      color: bold ? AppColors.of(context).text : AppColors.of(context).textMuted)),
             ),
             Text('$_currency${(value ?? 0).toStringAsFixed(2)}',
                 style: TextStyle(
                     fontSize: bold ? 16 : 13,
                     fontWeight: bold ? FontWeight.w700 : FontWeight.w500,
-                    color: bold ? AppColors.primary : AppColors.textPrimary)),
+                    color: bold ? AppColors.primary : AppColors.of(context).text)),
           ],
         ),
       );
@@ -459,23 +457,23 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.errorLight,
+          color: AppColors.of(context).errorSoft,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [
-            const Icon(Icons.cancel, color: AppColors.error),
+            Icon(Icons.cancel, color: AppColors.error),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(l10n.orderWasCancelled,
-                      style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.error)),
+                      style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.error)),
                   if ((o.cancellationReason ?? '').isNotEmpty) ...[
                     const SizedBox(height: 2),
-                    Text(o.cancellationReason!, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                    Text(o.cancellationReason!, style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted)),
                   ],
                 ],
               ),
@@ -489,9 +487,9 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -534,7 +532,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
     required bool isLast,
   }) {
     final reached = done || active;
-    final color = active ? AppColors.primary : (done ? AppColors.success : AppColors.cardBorder);
+    final color = active ? AppColors.primary : (done ? AppColors.success : AppColors.of(context).border);
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -545,12 +543,12 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                 width: 22,
                 height: 22,
                 decoration: BoxDecoration(
-                  color: reached ? color : AppColors.white,
+                  color: reached ? color : AppColors.of(context).card,
                   shape: BoxShape.circle,
                   border: Border.all(color: color, width: 2),
                 ),
                 child: done
-                    ? const Icon(Icons.check, size: 13, color: AppColors.white)
+                    ? Icon(Icons.check, size: 13, color: AppColors.white)
                     : (active
                         ? const Center(
                             child: SizedBox(width: 7, height: 7, child: DecoratedBox(decoration: BoxDecoration(color: AppColors.white, shape: BoxShape.circle))))
@@ -558,7 +556,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
               ),
               if (!isLast)
                 Expanded(
-                  child: Container(width: 2, color: done ? AppColors.success : AppColors.cardBorder),
+                  child: Container(width: 2, color: done ? AppColors.success : AppColors.of(context).border),
                 ),
             ],
           ),
@@ -573,13 +571,13 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-                    color: reached ? AppColors.textPrimary : AppColors.textTertiary,
+                    color: reached ? AppColors.of(context).text : AppColors.of(context).textFaint,
                   ),
                 ),
                 if (time != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 2),
-                    child: Text(time, style: const TextStyle(fontSize: 12, color: AppColors.textTertiary)),
+                    child: Text(time, style: TextStyle(fontSize: 12, color: AppColors.of(context).textFaint)),
                   ),
               ],
             ),
@@ -593,14 +591,14 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: AppColors.of(context).card,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.cardBorder),
+          border: Border.all(color: AppColors.of(context).border),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             ...children,
           ],
@@ -612,8 +610,8 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(width: 96, child: Text(label, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary))),
-            Expanded(child: Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500))),
+            SizedBox(width: 96, child: Text(label, style: TextStyle(fontSize: 13, color: AppColors.of(context).textMuted))),
+            Expanded(child: Text(value, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500))),
           ],
         ),
       );

@@ -106,11 +106,9 @@ class _VideoVisitsScreenState extends State<VideoVisitsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).scaffold,
       appBar: AppBar(
         title: const Text('Video Visits'),
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -121,7 +119,7 @@ class _VideoVisitsScreenState extends State<VideoVisitsScreen> {
           _load();
         },
         backgroundColor: AppColors.primary,
-        icon: const Icon(Icons.video_call, color: AppColors.white),
+        icon: Icon(Icons.video_call, color: AppColors.white),
         label: const Text('Book Video Visit', style: TextStyle(color: AppColors.white)),
       ),
       body: _loading
@@ -146,7 +144,7 @@ class _VideoVisitsScreenState extends State<VideoVisitsScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(_error!, style: const TextStyle(color: AppColors.error)),
+            Text(_error!, style: TextStyle(color: AppColors.error)),
             const SizedBox(height: 8),
             TextButton(onPressed: _load, child: const Text('Retry')),
           ],
@@ -156,9 +154,9 @@ class _VideoVisitsScreenState extends State<VideoVisitsScreen> {
   Widget _emptyView() => RefreshIndicator(
         onRefresh: _load,
         child: ListView(
-          children: const [
-            SizedBox(height: 120),
-            Icon(Icons.video_camera_front_outlined, size: 56, color: AppColors.textTertiary),
+          children: [
+            const SizedBox(height: 120),
+            Icon(Icons.video_camera_front_outlined, size: 56, color: AppColors.of(context).textFaint),
             SizedBox(height: 12),
             Center(child: Text('No video visits yet', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600))),
             SizedBox(height: 4),
@@ -168,7 +166,7 @@ class _VideoVisitsScreenState extends State<VideoVisitsScreen> {
                 child: Text(
                   'Book an appointment and choose “Video Call” to set up a live consultation.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                  style: TextStyle(fontSize: 13, color: AppColors.of(context).textMuted),
                 ),
               ),
             ),
@@ -181,9 +179,9 @@ class _VideoVisitsScreenState extends State<VideoVisitsScreen> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,13 +202,13 @@ class _VideoVisitsScreenState extends State<VideoVisitsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(s.doctorLabel, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                    Text(s.doctorLabel, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 2),
                     Text(
                       s.startTime != null
                           ? DateFormat('MMM dd, yyyy • HH:mm').format(s.startTime!)
                           : 'Time to be confirmed',
-                      style: const TextStyle(fontSize: 12, color: AppColors.textTertiary),
+                      style: TextStyle(fontSize: 12, color: AppColors.of(context).textFaint),
                     ),
                   ],
                 ),
@@ -224,7 +222,7 @@ class _VideoVisitsScreenState extends State<VideoVisitsScreen> {
           ),
           if (s.isCompleted && s.durationMinutes != null) ...[
             const SizedBox(height: 8),
-            Text('Call duration: ${s.durationMinutes} min', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+            Text('Call duration: ${s.durationMinutes} min', style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted)),
           ],
           if (s.isJoinable) ...[
             const SizedBox(height: 12),
@@ -235,7 +233,7 @@ class _VideoVisitsScreenState extends State<VideoVisitsScreen> {
                 onPressed: _joiningId == s.id ? null : () => _join(s),
                 icon: _joiningId == s.id
                     ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.white))
-                    : const Icon(Icons.video_call, size: 20),
+                    : Icon(Icons.video_call, size: 20),
                 label: Text(_joiningId == s.id ? 'Connecting…' : 'Join Video Call'),
               ),
             ),
@@ -244,9 +242,9 @@ class _VideoVisitsScreenState extends State<VideoVisitsScreen> {
                 onPressed: _endingId == s.id ? null : () => _end(s),
                 icon: _endingId == s.id
                     ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Icon(Icons.call_end, size: 18, color: AppColors.error),
+                    : Icon(Icons.call_end, size: 18, color: AppColors.error),
                 label: Text(_endingId == s.id ? 'Ending…' : 'Mark visit as finished',
-                    style: const TextStyle(color: AppColors.error)),
+                    style: TextStyle(color: AppColors.error)),
               ),
           ],
         ],

@@ -308,6 +308,18 @@ abstract class AppLocalizations {
   /// **'Send Code'**
   String get sendCode;
 
+  /// No description provided for @waitCountdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Wait {countdown}'**
+  String waitCountdown(String countdown);
+
+  /// No description provided for @pleaseWaitBeforeAnotherCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Please wait {countdown} before requesting another code'**
+  String pleaseWaitBeforeAnotherCode(String countdown);
+
   /// No description provided for @infoSafeWithUs.
   ///
   /// In en, this message translates to:
@@ -437,7 +449,7 @@ abstract class AppLocalizations {
   /// No description provided for @navProfile.
   ///
   /// In en, this message translates to:
-  /// **'Profile'**
+  /// **'My Account'**
   String get navProfile;
 
   /// No description provided for @offlineBanner.
@@ -1295,7 +1307,7 @@ abstract class AppLocalizations {
   /// No description provided for @profileTitle.
   ///
   /// In en, this message translates to:
-  /// **'Profile'**
+  /// **'My Account'**
   String get profileTitle;
 
   /// No description provided for @memberId.
@@ -2975,7 +2987,7 @@ abstract class AppLocalizations {
   /// No description provided for @caregiversTitle.
   ///
   /// In en, this message translates to:
-  /// **'Caregivers'**
+  /// **'Caregiver & Family'**
   String get caregiversTitle;
 
   /// No description provided for @addCaregiver.
@@ -3605,7 +3617,7 @@ abstract class AppLocalizations {
   /// No description provided for @caregiverPortalAccount.
   ///
   /// In en, this message translates to:
-  /// **'Account'**
+  /// **'My Account'**
   String get caregiverPortalAccount;
 
   /// No description provided for @caregiverPortalWelcome.
@@ -3803,13 +3815,13 @@ abstract class AppLocalizations {
   /// No description provided for @plansAndPayments.
   ///
   /// In en, this message translates to:
-  /// **'Plans and Payments'**
+  /// **'Care Plans & Payments'**
   String get plansAndPayments;
 
   /// No description provided for @plansAndPaymentsHint.
   ///
   /// In en, this message translates to:
-  /// **'Their care plans, payments and receipts.'**
+  /// **'What they get, pay, receipts.'**
   String get plansAndPaymentsHint;
 
   /// No description provided for @familyAccess.
@@ -3833,7 +3845,7 @@ abstract class AppLocalizations {
   /// No description provided for @caregiverAccountHint.
   ///
   /// In en, this message translates to:
-  /// **'Manage your loved ones, plans, payments and settings.'**
+  /// **'Your loved ones, plans and settings'**
   String get caregiverAccountHint;
 
   /// No description provided for @caregiverServicesTitle.
@@ -3941,7 +3953,7 @@ abstract class AppLocalizations {
   /// No description provided for @darkTheme.
   ///
   /// In en, this message translates to:
-  /// **'Dark theme'**
+  /// **'Theme'**
   String get darkTheme;
 
   /// No description provided for @darkThemeSubtitle.
@@ -4346,6 +4358,18 @@ abstract class AppLocalizations {
   /// **'Sign in'**
   String get signInLink;
 
+  /// No description provided for @mobileAlreadyRegistered.
+  ///
+  /// In en, this message translates to:
+  /// **'This mobile number is already registered. Sign in instead.'**
+  String get mobileAlreadyRegistered;
+
+  /// No description provided for @couldNotCreateAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create your account'**
+  String get couldNotCreateAccount;
+
   /// No description provided for @selectADate.
   ///
   /// In en, this message translates to:
@@ -4459,6 +4483,300 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Complete Payment'**
   String get outOfPlanPaymentTitle;
+
+  /// No description provided for @healthPinTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Health PIN'**
+  String get healthPinTitle;
+
+  /// No description provided for @createHealthPinTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your health PIN'**
+  String get createHealthPinTitle;
+
+  /// No description provided for @createHealthPinHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a 4-digit PIN to protect lab results and medical records.'**
+  String get createHealthPinHint;
+
+  /// No description provided for @confirmHealthPinTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm your health PIN'**
+  String get confirmHealthPinTitle;
+
+  /// No description provided for @confirmHealthPinHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the same 4-digit PIN again.'**
+  String get confirmHealthPinHint;
+
+  /// No description provided for @enterHealthPinTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter health PIN'**
+  String get enterHealthPinTitle;
+
+  /// No description provided for @enterHealthPinHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This PIN protects lab results and medical records.'**
+  String get enterHealthPinHint;
+
+  /// No description provided for @healthPinMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'PINs do not match. Try again.'**
+  String get healthPinMismatch;
+
+  /// No description provided for @healthPinWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect PIN. Try again.'**
+  String get healthPinWrong;
+
+  /// No description provided for @healthPinLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many incorrect attempts. Please wait {countdown}.'**
+  String healthPinLocked(String countdown);
+
+  /// No description provided for @healthPinForgot.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot PIN?'**
+  String get healthPinForgot;
+
+  /// No description provided for @healthPinResetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset health PIN'**
+  String get healthPinResetTitle;
+
+  /// No description provided for @healthPinResetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'We will send a code to your phone so you can set a new PIN.'**
+  String get healthPinResetHint;
+
+  /// No description provided for @healthPinResetSendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send reset code'**
+  String get healthPinResetSendCode;
+
+  /// No description provided for @healthPinAskPatient.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask the patient for their health PIN'**
+  String get healthPinAskPatient;
+
+  /// No description provided for @healthPinAskPatientHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This person\'s lab results and records are locked with a PIN they created in the Hiraal app. Ask them for it, or ask them to create one if they have not yet.'**
+  String get healthPinAskPatientHint;
+
+  /// No description provided for @healthPinNoPinYet.
+  ///
+  /// In en, this message translates to:
+  /// **'This patient has not created a health PIN yet. Ask them to open the Hiraal app and create one.'**
+  String get healthPinNoPinYet;
+
+  /// No description provided for @healthPinSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save PIN'**
+  String get healthPinSave;
+
+  /// No description provided for @healthPinUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get healthPinUnlock;
+
+  /// No description provided for @healthPinRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your health PIN to view this information.'**
+  String get healthPinRequired;
+
+  /// No description provided for @healthPinChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change health PIN'**
+  String get healthPinChange;
+
+  /// No description provided for @healthPinChangeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Update the PIN that protects your records'**
+  String get healthPinChangeHint;
+
+  /// No description provided for @healthPinCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Your health PIN is ready.'**
+  String get healthPinCreated;
+
+  /// No description provided for @healthPinResetSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Your health PIN has been reset.'**
+  String get healthPinResetSuccess;
+
+  /// No description provided for @healthPinInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a 4-digit PIN.'**
+  String get healthPinInvalid;
+
+  /// No description provided for @healthPinProtects.
+  ///
+  /// In en, this message translates to:
+  /// **'Your PIN is never stored as plain text. Caregivers will need this PIN to view your labs and records.'**
+  String get healthPinProtects;
+
+  /// No description provided for @yourCarePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Your care plan'**
+  String get yourCarePlan;
+
+  /// No description provided for @planPriceAMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'{plan} · {price} a month'**
+  String planPriceAMonth(String plan, String price);
+
+  /// No description provided for @aMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'a month'**
+  String get aMonth;
+
+  /// No description provided for @paidUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid until {date}'**
+  String paidUntil(String date);
+
+  /// No description provided for @trialUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Trial until {date}'**
+  String trialUntil(String date);
+
+  /// No description provided for @paymentDueShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment due'**
+  String get paymentDueShort;
+
+  /// No description provided for @noCarePlanYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No care plan yet'**
+  String get noCarePlanYet;
+
+  /// No description provided for @personalInfoSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Name, phone, age, medical records.'**
+  String get personalInfoSubtitle;
+
+  /// No description provided for @myCarePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'My Care Plan'**
+  String get myCarePlan;
+
+  /// No description provided for @myCarePlanSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What you get, pay, receipts.'**
+  String get myCarePlanSubtitle;
+
+  /// No description provided for @caregiverAndFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Caregiver & Family'**
+  String get caregiverAndFamily;
+
+  /// No description provided for @caregiverFamilySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{active} active · {pending} pending.'**
+  String caregiverFamilySubtitle(int active, int pending);
+
+  /// No description provided for @settingsAccountSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Language ({language}), addresses, privacy.'**
+  String settingsAccountSubtitle(String language);
+
+  /// No description provided for @memberIdUnchangeable.
+  ///
+  /// In en, this message translates to:
+  /// **'Given by Hiraal. Cannot be changed.'**
+  String get memberIdUnchangeable;
+
+  /// No description provided for @phoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get phoneLabel;
+
+  /// No description provided for @medicalRecordsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Health summary and past records.'**
+  String get medicalRecordsHint;
+
+  /// No description provided for @otherSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Other settings'**
+  String get otherSettings;
+
+  /// No description provided for @privacyWhoCanSee.
+  ///
+  /// In en, this message translates to:
+  /// **'Who can see your information'**
+  String get privacyWhoCanSee;
+
+  /// No description provided for @addressesDeliveryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Used for medicine delivery and home lab visits.'**
+  String get addressesDeliveryHint;
+
+  /// No description provided for @myDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'My details'**
+  String get myDetails;
+
+  /// No description provided for @freePlanLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get freePlanLabel;
+
+  /// No description provided for @assignedNurseLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned nurse'**
+  String get assignedNurseLabel;
+
+  /// No description provided for @clinicLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Clinic'**
+  String get clinicLabel;
 }
 
 class _AppLocalizationsDelegate

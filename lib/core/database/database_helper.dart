@@ -10,7 +10,7 @@ class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._();
 
   static const _dbName = 'hiraal_chronic_care.db';
-  static const _dbVersion = 5;
+  static const _dbVersion = 6;
 
   Database? _database;
   Future<Database>? _dbFuture;
@@ -81,6 +81,7 @@ class DatabaseHelper {
         risk_level TEXT,
         device_assigned TEXT,
         sex TEXT,
+        dob TEXT,
         subscription_active INTEGER NOT NULL DEFAULT 0,
         updated_at TEXT NOT NULL DEFAULT (datetime('now'))
       )
@@ -178,6 +179,9 @@ class DatabaseHelper {
       await db.execute('ALTER TABLE patient ADD COLUMN sex TEXT');
       await db.execute(
           'ALTER TABLE patient ADD COLUMN subscription_active INTEGER NOT NULL DEFAULT 0');
+    }
+    if (oldVersion < 6) {
+      await db.execute('ALTER TABLE patient ADD COLUMN dob TEXT');
     }
   }
 

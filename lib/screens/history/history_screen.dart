@@ -54,7 +54,7 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
           }).toList();
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).scaffold,
       body: SafeArea(
         child: Column(
           children: [
@@ -66,10 +66,10 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
                   Expanded(
                     child: Text(
                       l10n.historyTitle,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                        color: AppColors.of(context).text,
                       ),
                     ),
                   ),
@@ -82,7 +82,7 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
                           tooltip: l10n.filterReadingsTooltip,
                           initialValue: _filterDays,
                           onSelected: (v) => setState(() => _filterDays = v),
-                          icon: const Icon(Icons.filter_list, color: AppColors.primary),
+                          icon: Icon(Icons.filter_list, color: AppColors.primary),
                           itemBuilder: (_) => filterOptions.entries
                               .map((e) => PopupMenuItem<int?>(value: e.key, child: Text(e.value)))
                               .toList(),
@@ -93,7 +93,7 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.end,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: AppColors.primary,
                               fontWeight: FontWeight.w600,
                               fontSize: 12,
@@ -111,22 +111,22 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: AppColors.white,
+                color: AppColors.of(context).card,
                 borderRadius: BorderRadius.circular(30),
-                border: Border.all(color: AppColors.cardBorder),
+                border: Border.all(color: AppColors.of(context).border),
               ),
               child: TabBar(
                 controller: _tabController,
                 indicatorSize: TabBarIndicatorSize.tab,
                 indicator: BoxDecoration(
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   borderRadius: BorderRadius.circular(30),
                 ),
                 labelColor: AppColors.white,
-                unselectedLabelColor: AppColors.textSecondary,
+                unselectedLabelColor: AppColors.of(context).textMuted,
                 labelPadding: const EdgeInsets.symmetric(horizontal: 8),
-                labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12, height: 1.1),
-                unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12, height: 1.1),
+                labelStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 12, height: 1.1),
+                unselectedLabelStyle: TextStyle(fontWeight: FontWeight.w500, fontSize: 12, height: 1.1),
                 tabs: [
                   Tab(child: Text(l10n.tabReadings, textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis)),
                   Tab(child: Text(l10n.tabNotes, textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis)),
@@ -142,9 +142,9 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.white,
+                  color: AppColors.of(context).card,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.cardBorder),
+                  border: Border.all(color: AppColors.of(context).border),
                 ),
                 child: Row(
                   children: [
@@ -156,7 +156,7 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
                         label: l10n.statSubmissionsTotal,
                       ),
                     ),
-                    Container(width: 1, height: 40, color: AppColors.divider),
+                    Container(width: 1, height: 40, color: AppColors.of(context).divider),
                     Expanded(
                       child: _StatItem(
                         icon: Icons.favorite,
@@ -165,7 +165,7 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
                         label: l10n.statAvgSystolic,
                       ),
                     ),
-                    Container(width: 1, height: 40, color: AppColors.divider),
+                    Container(width: 1, height: 40, color: AppColors.of(context).divider),
                     Expanded(
                       child: _StatItem(
                         icon: Icons.water_drop,
@@ -185,17 +185,17 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
               child: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppColors.infoLight,
+                  color: AppColors.of(context).infoSoft,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.info_outline, size: 16, color: AppColors.info),
+                    Icon(Icons.info_outline, size: 16, color: AppColors.info),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         l10n.historyInfoBanner,
-                        style: const TextStyle(fontSize: 12, color: AppColors.info),
+                        style: TextStyle(fontSize: 12, color: AppColors.info),
                       ),
                     ),
                   ],
@@ -220,17 +220,17 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
               child: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppColors.primarySurface,
+                  color: AppColors.of(context).primaryMuted,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.info_outline, size: 16, color: AppColors.primary),
+                    Icon(Icons.info_outline, size: 16, color: AppColors.primary),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         l10n.careTeamFeedbackFooter,
-                        style: const TextStyle(fontSize: 12, color: AppColors.primary),
+                        style: TextStyle(fontSize: 12, color: AppColors.primary),
                       ),
                     ),
                   ],
@@ -262,12 +262,12 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
                     ButtonSegment<bool>(
                       value: false,
                       label: Text(l10n.listView),
-                      icon: const Icon(Icons.list),
+                      icon: Icon(Icons.list),
                     ),
                     ButtonSegment<bool>(
                       value: true,
                       label: Text(l10n.chartView),
-                      icon: const Icon(Icons.show_chart),
+                      icon: Icon(Icons.show_chart),
                     ),
                   ],
                   selected: <bool>{_isChartView},
@@ -325,10 +325,10 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: Text(
                 dateLabel,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondary,
+                  color: AppColors.of(context).textMuted,
                 ),
               ),
             ),
@@ -343,7 +343,7 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
     final l10n = AppLocalizations.of(context);
     if (readings.length < 2) {
       return Center(
-        child: Text(l10n.notEnoughChartData, style: const TextStyle(color: AppColors.textSecondary)),
+        child: Text(l10n.notEnoughChartData, style: TextStyle(color: AppColors.of(context).textMuted)),
       );
     }
 
@@ -366,7 +366,7 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
     // e.g. weight-only readings: no chartable spots, and min/maxY would be unbounded.
     if (systolicSpots.isEmpty && diastolicSpots.isEmpty && sugarSpots.isEmpty) {
       return Center(
-        child: Text(l10n.notEnoughChartData, style: const TextStyle(color: AppColors.textSecondary)),
+        child: Text(l10n.notEnoughChartData, style: TextStyle(color: AppColors.of(context).textMuted)),
       );
     }
 
@@ -407,7 +407,7 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
                   show: true,
                   drawVerticalLine: false,
                   getDrawingHorizontalLine: (value) => FlLine(
-                    color: AppColors.divider,
+                    color: AppColors.of(context).divider,
                     strokeWidth: 1,
                   ),
                 ),
@@ -418,7 +418,7 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
                       reservedSize: 40,
                       getTitlesWidget: (value, meta) => Text(
                         value.toInt().toString(),
-                        style: const TextStyle(fontSize: 10, color: AppColors.textTertiary),
+                        style: TextStyle(fontSize: 10, color: AppColors.of(context).textFaint),
                       ),
                     ),
                   ),
@@ -434,7 +434,7 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
                           padding: const EdgeInsets.only(top: 4),
                           child: Text(
                             DateFormat('MM/dd').format(sorted[idx].date),
-                            style: const TextStyle(fontSize: 10, color: AppColors.textTertiary),
+                            style: TextStyle(fontSize: 10, color: AppColors.of(context).textFaint),
                           ),
                         );
                       },
@@ -454,7 +454,7 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
                 ],
                 lineTouchData: LineTouchData(
                   touchTooltipData: LineTouchTooltipData(
-                    getTooltipColor: (_) => AppColors.textPrimary,
+                    getTooltipColor: (_) => AppColors.of(context).text,
                     getTooltipItems: (touchedSpots) {
                       return touchedSpots.map((spot) {
                         String label;
@@ -467,7 +467,7 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
                         }
                         return LineTooltipItem(
                           '$label: ${spot.y.toStringAsFixed(0)}',
-                          const TextStyle(color: AppColors.white, fontSize: 12),
+                          TextStyle(color: AppColors.white, fontSize: 12),
                         );
                       }).toList();
                     },
@@ -522,7 +522,7 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
     final notes = readings.where((r) => r.note != null && r.note!.isNotEmpty).toList();
     if (notes.isEmpty) {
       return Center(
-        child: Text(l10n.noNotesYet, style: const TextStyle(color: AppColors.textSecondary)),
+        child: Text(l10n.noNotesYet, style: TextStyle(color: AppColors.of(context).textMuted)),
       );
     }
     return ListView.builder(
@@ -534,13 +534,13 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
           margin: const EdgeInsets.symmetric(vertical: 4),
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: AppColors.white,
+            color: AppColors.of(context).card,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.cardBorder),
+            border: Border.all(color: AppColors.of(context).border),
           ),
           child: Row(
             children: [
-              const Icon(Icons.note, size: 18, color: AppColors.primary),
+              Icon(Icons.note, size: 18, color: AppColors.primary),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
@@ -548,17 +548,17 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
                   children: [
                     Text(
                       DateFormat('h:mm a').format(r.date),
-                      style: const TextStyle(fontSize: 12, color: AppColors.textTertiary),
+                      style: TextStyle(fontSize: 12, color: AppColors.of(context).textFaint),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       r.note!,
-                      style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
+                      style: TextStyle(fontSize: 14, color: AppColors.of(context).text),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right, color: AppColors.textTertiary),
+              Icon(Icons.chevron_right, color: AppColors.of(context).textFaint),
             ],
           ),
         );
@@ -573,7 +573,7 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
     }).toList();
     if (alerts.isEmpty) {
       return Center(
-        child: Text(l10n.noAlerts, style: const TextStyle(color: AppColors.textSecondary)),
+        child: Text(l10n.noAlerts, style: TextStyle(color: AppColors.of(context).textMuted)),
       );
     }
     return ListView.builder(
@@ -585,13 +585,13 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
           margin: const EdgeInsets.symmetric(vertical: 4),
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: AppColors.errorLight,
+            color: AppColors.of(context).errorSoft,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
           ),
           child: Row(
             children: [
-              const Icon(Icons.warning_amber, size: 20, color: AppColors.error),
+              Icon(Icons.warning_amber, size: 20, color: AppColors.error),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
@@ -601,16 +601,16 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
                       r.systolic != null
                           ? 'High Reading - ${r.bpString} ${l10n.unitMmHg}'
                           : 'High Reading - ${r.sugarString} ${l10n.unitMgDl}',
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.error),
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.error),
                     ),
                     Text(
                       DateFormat('MMM dd, h:mm a').format(r.date),
-                      style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                      style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right, color: AppColors.error),
+              Icon(Icons.chevron_right, color: AppColors.error),
             ],
           ),
         );
@@ -632,7 +632,7 @@ class _ChartLegendItem extends StatelessWidget {
       children: [
         Container(width: 10, height: 10, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
         const SizedBox(width: 4),
-        Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+        Text(label, style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted)),
       ],
     );
   }
@@ -659,17 +659,17 @@ class _StatItem extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: AppColors.of(context).text,
           ),
         ),
         const SizedBox(height: 2),
         Text(
           label,
           textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 9, color: AppColors.textTertiary, height: 1.15),
+          style: TextStyle(fontSize: 9, color: AppColors.of(context).textFaint, height: 1.15),
         ),
       ],
     );
@@ -691,9 +691,9 @@ class _ReadingListItem extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 3),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: Row(
         children: [
@@ -705,20 +705,20 @@ class _ReadingListItem extends StatelessWidget {
               children: [
                 Text(
                   DateFormat('MMM dd, yyyy').format(reading.date),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: AppColors.of(context).text,
                   ),
                 ),
                 Text(
                   DateFormat('h:mm a').format(reading.date),
-                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                  style: TextStyle(fontSize: 11, color: AppColors.of(context).textMuted),
                 ),
                 if (reading.referenceId != null)
                   Text(
                     '${l10n.reference}: ${reading.referenceId}',
-                    style: const TextStyle(fontSize: 9, color: AppColors.textTertiary),
+                    style: TextStyle(fontSize: 9, color: AppColors.of(context).textFaint),
                     overflow: TextOverflow.ellipsis,
                   ),
               ],
@@ -729,7 +729,7 @@ class _ReadingListItem extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('BP', style: const TextStyle(fontSize: 10, color: AppColors.textTertiary)),
+              Text('BP', style: TextStyle(fontSize: 10, color: AppColors.of(context).textFaint)),
               Text(
                 reading.bpString,
                 style: TextStyle(
@@ -737,10 +737,10 @@ class _ReadingListItem extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                   color: reading.systolic != null && reading.systolic! >= 140
                       ? AppColors.error
-                      : AppColors.textPrimary,
+                      : AppColors.of(context).text,
                 ),
               ),
-              Text(l10n.unitMmHg, style: const TextStyle(fontSize: 9, color: AppColors.textTertiary)),
+              Text(l10n.unitMmHg, style: TextStyle(fontSize: 9, color: AppColors.of(context).textFaint)),
             ],
           ),
           const SizedBox(width: 16),
@@ -748,7 +748,7 @@ class _ReadingListItem extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(l10n.sugar, style: const TextStyle(fontSize: 10, color: AppColors.textTertiary)),
+              Text(l10n.sugar, style: TextStyle(fontSize: 10, color: AppColors.of(context).textFaint)),
               Text(
                 reading.sugarString,
                 style: TextStyle(
@@ -756,10 +756,10 @@ class _ReadingListItem extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                   color: (reading.bloodSugar ?? 0) >= 200
                       ? AppColors.error
-                      : AppColors.textPrimary,
+                      : AppColors.of(context).text,
                 ),
               ),
-              Text(l10n.unitMgDl, style: const TextStyle(fontSize: 9, color: AppColors.textTertiary)),
+              Text(l10n.unitMgDl, style: TextStyle(fontSize: 9, color: AppColors.of(context).textFaint)),
             ],
           ),
           const Spacer(),
@@ -769,7 +769,7 @@ class _ReadingListItem extends StatelessWidget {
             color: reading.status == 'Sent' ? AppColors.success : AppColors.warning,
           ),
           const SizedBox(width: 4),
-          const Icon(Icons.chevron_right, size: 20, color: AppColors.textTertiary),
+          Icon(Icons.chevron_right, size: 20, color: AppColors.of(context).textFaint),
         ],
       ),
     );

@@ -189,7 +189,7 @@ class _CaregiverHistoryScreenState extends State<CaregiverHistoryScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(item.title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                                    Text(item.title, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
                                     Text(item.subtitle, style: TextStyle(color: AppColors.textMuted(context))),
                                   ],
                                 ),
@@ -216,10 +216,10 @@ class _CaregiverHistoryScreenState extends State<CaregiverHistoryScreen> {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                   decoration: BoxDecoration(
-                                    color: AppColors.primaryLight,
+                                    color: AppColors.of(context).primarySoft,
                                     borderRadius: BorderRadius.circular(20),
                                   ),
-                                  child: Text(item.status, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                                  child: Text(item.status, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                                 ),
                             ],
                           ),
@@ -286,7 +286,7 @@ class _CaregiverHistoryScreenState extends State<CaregiverHistoryScreen> {
         children: [
           Text(label, style: TextStyle(fontSize: 11, color: AppColors.textMuted(context))),
           const SizedBox(height: 4),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
+          Text(value, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
         ],
       ),
     );

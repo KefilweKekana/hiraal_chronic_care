@@ -86,7 +86,7 @@ class _AddFamilyMemberScreenState extends State<AddFamilyMemberScreen> {
             decoration: InputDecoration(labelText: l10n.familyMemberName),
           ),
           const SizedBox(height: 16),
-          Text(l10n.relationship, style: const TextStyle(fontWeight: FontWeight.w700)),
+          Text(l10n.relationship, style: TextStyle(fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -101,7 +101,7 @@ class _AddFamilyMemberScreenState extends State<AddFamilyMemberScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          Text(l10n.genderLabel, style: const TextStyle(fontWeight: FontWeight.w700)),
+          Text(l10n.genderLabel, style: TextStyle(fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -145,7 +145,7 @@ class _AddFamilyMemberScreenState extends State<AddFamilyMemberScreen> {
           ),
           if (_error != null) ...[
             const SizedBox(height: 12),
-            Text(_error!, style: const TextStyle(color: AppColors.error)),
+            Text(_error!, style: TextStyle(color: AppColors.error)),
           ],
           const SizedBox(height: 24),
           SizedBox(

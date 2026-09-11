@@ -5,6 +5,8 @@ import '../../core/utils/result.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/caregiver_link.dart';
 import '../../services/service_locator.dart';
+import '../sponsor/my_sponsorship_screen.dart';
+import '../sponsor/sponsor_care_screen.dart';
 import 'add_caregiver_screen.dart';
 import 'caregiver_detail_screen.dart';
 
@@ -66,7 +68,7 @@ class _CaregiversScreenState extends State<CaregiversScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: error ? AppColors.error : AppColors.textSecondary,
+        backgroundColor: error ? AppColors.error : AppColors.of(context).textMuted,
       ),
     );
   }
@@ -75,11 +77,9 @@ class _CaregiversScreenState extends State<CaregiversScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).scaffold,
       appBar: AppBar(
         title: Text(l10n.caregiversTitle),
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -91,7 +91,7 @@ class _CaregiversScreenState extends State<CaregiversScreen> {
         },
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.white,
-        icon: const Icon(Icons.person_add_alt_1),
+        icon: Icon(Icons.person_add_alt_1),
         label: Text(l10n.addCaregiver),
       ),
       body: RefreshIndicator(
@@ -149,6 +149,27 @@ class _CaregiversScreenState extends State<CaregiversScreen> {
                     onReject: () => _respond(link, 'reject'),
                   ),
                 ),
+              const SizedBox(height: 24),
+              _SectionTitle(title: l10n.sponsorCareMenu),
+              const SizedBox(height: 10),
+              _LinkCard(
+                icon: Icons.volunteer_activism_outlined,
+                title: l10n.sponsorCareMenu,
+                subtitle: l10n.sponsorCareMenuSubtitle,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SponsorCareScreen()),
+                ),
+              ),
+              _LinkCard(
+                icon: Icons.favorite_border,
+                title: l10n.mySponsorshipMenu,
+                subtitle: l10n.mySponsorshipMenuSubtitle,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const MySponsorshipScreen()),
+                ),
+              ),
             ],
           ],
         ),
@@ -177,17 +198,17 @@ class _InfoBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.primarySurface,
+        color: AppColors.of(context).primaryMuted,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
         children: [
-          const Icon(Icons.shield_outlined, color: AppColors.primary),
+          Icon(Icons.shield_outlined, color: AppColors.primary),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(fontSize: 13, color: AppColors.primary),
+              style: TextStyle(fontSize: 13, color: AppColors.primary),
             ),
           ),
         ],
@@ -205,7 +226,69 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title,
-      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+    );
+  }
+}
+
+class _LinkCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _LinkCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = AppColors.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Material(
+        color: palette.card,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: palette.border),
+            ),
+            child: Row(
+              children: [
+                Icon(icon, color: AppColors.primary),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      Text(
+                        subtitle,
+                        style: TextStyle(fontSize: 13, color: palette.textMuted),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(Icons.chevron_right, color: palette.textFaint),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -230,17 +313,17 @@ class _CaregiverCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: AppColors.of(context).card,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.cardBorder),
+          border: Border.all(color: AppColors.of(context).border),
         ),
         child: Row(
           children: [
             CircleAvatar(
-              backgroundColor: AppColors.primaryLight,
+              backgroundColor: AppColors.of(context).primarySoft,
               child: Text(
                 link.displayName.isNotEmpty ? link.displayName[0] : 'C',
-                style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700),
+                style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700),
               ),
             ),
             const SizedBox(width: 12),
@@ -248,15 +331,15 @@ class _CaregiverCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(link.displayName, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                  Text(link.displayName, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 4),
                   Text(
                     '${link.relationship} • ${link.fullWhatsappNumber}',
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                    style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted),
                   ),
                   if (permissionSummary.isNotEmpty) ...[
                     const SizedBox(height: 4),
-                    Text(permissionSummary, style: const TextStyle(fontSize: 12, color: AppColors.textTertiary)),
+                    Text(permissionSummary, style: TextStyle(fontSize: 12, color: AppColors.of(context).textFaint)),
                   ],
                 ],
               ),
@@ -269,11 +352,11 @@ class _CaregiverCard extends StatelessWidget {
               ),
               child: Text(
                 l10n.caregiverActive,
-                style: const TextStyle(color: AppColors.success, fontWeight: FontWeight.w600, fontSize: 12),
+                style: TextStyle(color: AppColors.success, fontWeight: FontWeight.w600, fontSize: 12),
               ),
             ),
             const SizedBox(width: 6),
-            const Icon(Icons.chevron_right, color: AppColors.textTertiary),
+            Icon(Icons.chevron_right, color: AppColors.of(context).textFaint),
           ],
         ),
       ),
@@ -303,9 +386,9 @@ class _PendingCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -316,7 +399,7 @@ class _PendingCard extends StatelessWidget {
                 backgroundColor: AppColors.warning.withValues(alpha: 0.15),
                 child: Text(
                   link.displayName.isNotEmpty ? link.displayName[0] : 'P',
-                  style: const TextStyle(color: AppColors.warning, fontWeight: FontWeight.w700),
+                  style: TextStyle(color: AppColors.warning, fontWeight: FontWeight.w700),
                 ),
               ),
               const SizedBox(width: 12),
@@ -324,10 +407,10 @@ class _PendingCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(link.displayName, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                    Text(link.displayName, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
                     Text(
                       '${link.relationship} • ${link.fullWhatsappNumber}',
-                      style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                      style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted),
                     ),
                   ],
                 ),
@@ -340,14 +423,14 @@ class _PendingCard extends StatelessWidget {
                 ),
                 child: Text(
                   l10n.statusPending,
-                  style: const TextStyle(color: AppColors.warning, fontWeight: FontWeight.w600, fontSize: 12),
+                  style: TextStyle(color: AppColors.warning, fontWeight: FontWeight.w600, fontSize: 12),
                 ),
               ),
             ],
           ),
           if (permissionSummary.isNotEmpty) ...[
             const SizedBox(height: 10),
-            Text(permissionSummary, style: const TextStyle(fontSize: 12, color: AppColors.textTertiary)),
+            Text(permissionSummary, style: TextStyle(fontSize: 12, color: AppColors.of(context).textFaint)),
           ],
           const SizedBox(height: 14),
           Row(
@@ -390,20 +473,20 @@ class _EmptyCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: Column(
         children: [
-          const Icon(Icons.people_outline, size: 36, color: AppColors.textTertiary),
+          Icon(Icons.people_outline, size: 36, color: AppColors.of(context).textFaint),
           const SizedBox(height: 10),
-          Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+          Text(title, style: TextStyle(fontWeight: FontWeight.w700)),
           const SizedBox(height: 4),
           Text(
             subtitle,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: AppColors.textSecondary),
+            style: TextStyle(color: AppColors.of(context).textMuted),
           ),
         ],
       ),
@@ -423,13 +506,13 @@ class _ErrorState extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: Column(
         children: [
-          const Icon(Icons.error_outline, size: 36, color: AppColors.error),
+          Icon(Icons.error_outline, size: 36, color: AppColors.error),
           const SizedBox(height: 10),
           Text(message, textAlign: TextAlign.center),
           const SizedBox(height: 10),

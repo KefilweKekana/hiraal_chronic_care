@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/app_provider.dart';
-import '../profile/language_screen.dart';
+import '../notifications/notification_screen.dart';
 import '../profile/personal_info_screen.dart';
 import '../profile/settings_screen.dart';
 import 'family_access_screen.dart';
@@ -19,120 +19,195 @@ class CaregiverPortalAccountScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final provider = context.watch<AppProvider>();
     final patient = provider.patient;
+    final palette = AppColors.of(context);
+    final unread = provider.unreadNotificationCount;
     final hour = DateTime.now().hour;
     final greeting = hour < 12
         ? l10n.greetingMorning
         : hour < 17
             ? l10n.greetingAfternoon
             : l10n.greetingEvening;
+    final initials = patient?.initials ??
+        (patient?.name.isNotEmpty == true
+            ? patient!.name[0].toUpperCase()
+            : 'C');
 
     return Scaffold(
-      backgroundColor: AppColors.scaffold(context),
+      backgroundColor: palette.scaffold,
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
           children: [
-            Text(
-              l10n.caregiverAccountTitle,
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w800,
-                color: AppColors.text(context),
+            SizedBox(
+              height: 48,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Text(
+                    l10n.caregiverAccountTitle,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: palette.text,
+                    ),
+                  ),
+                  Positioned(
+                    right: 0,
+                    child: IconButton(
+                      tooltip: l10n.notifications,
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const NotificationScreen(),
+                        ),
+                      ),
+                      icon: unread > 0
+                          ? Badge.count(
+                              count: unread,
+                              backgroundColor: AppColors.error,
+                              textColor: AppColors.white,
+                              child: Icon(
+                                Icons.notifications_outlined,
+                                color: palette.text,
+                                size: 26,
+                              ),
+                            )
+                          : Icon(
+                              Icons.notifications_outlined,
+                              color: palette.text,
+                              size: 26,
+                            ),
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 4),
-            Text(l10n.caregiverAccountHint, style: TextStyle(color: AppColors.textMuted(context))),
+            Text(
+              l10n.caregiverAccountHint,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: palette.textMuted, fontSize: 14),
+            ),
             const SizedBox(height: 16),
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(16),
+                color: palette.card,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: palette.border),
               ),
               child: Row(
                 children: [
                   CircleAvatar(
-                    radius: 28,
-                    backgroundColor: AppColors.primaryLight,
+                    radius: 30,
+                    backgroundColor: palette.primarySoft,
                     child: Text(
-                      (patient?.name ?? 'C').substring(0, 1).toUpperCase(),
+                      initials,
                       style: const TextStyle(
-                        fontSize: 22,
+                        fontSize: 20,
                         fontWeight: FontWeight.w800,
                         color: AppColors.primary,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 14),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '$greeting ${patient?.name ?? ''}',
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                          '$greeting ${patient?.name ?? ''}'.trim(),
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            color: palette.text,
+                          ),
                         ),
-                        Text(patient?.phone ?? '', style: TextStyle(color: AppColors.textMuted(context))),
+                        if (patient?.phone.isNotEmpty == true)
+                          Text(
+                            patient!.phone,
+                            style: TextStyle(color: palette.textMuted),
+                          ),
                       ],
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
-            _RowTile(
-              icon: Icons.person_outline,
-              title: l10n.myAccountRow,
-              subtitle: l10n.myAccountRowHint,
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PersonalInfoScreen())),
-            ),
+            const SizedBox(height: 18),
             _RowTile(
               icon: Icons.favorite_outline,
+              iconColor: AppColors.success,
               title: l10n.peopleICareFor,
               subtitle: l10n.peopleICareForHint,
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PeopleICareForScreen())),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const PeopleICareForScreen()),
+              ),
             ),
             _RowTile(
               icon: Icons.receipt_long_outlined,
+              iconColor: AppColors.success,
               title: l10n.plansAndPayments,
               subtitle: l10n.plansAndPaymentsHint,
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PlansPaymentsScreen())),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const PlansPaymentsScreen()),
+              ),
+            ),
+            _RowTile(
+              icon: Icons.person_outline,
+              iconColor: AppColors.primary,
+              title: l10n.myDetails,
+              subtitle: [
+                if (patient?.name.isNotEmpty == true) patient!.name,
+                if (patient?.phone.isNotEmpty == true) patient!.phone,
+              ].join(' · '),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const PersonalInfoScreen()),
+              ),
             ),
             _RowTile(
               icon: Icons.group_add_outlined,
+              iconColor: AppColors.info,
               title: l10n.familyAccess,
               subtitle: l10n.familyAccessHint,
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FamilyAccessScreen())),
-            ),
-            _RowTile(
-              icon: Icons.language,
-              title: l10n.language,
-              subtitle: l10n.languageSubtitle,
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LanguageScreen())),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const FamilyAccessScreen()),
+              ),
             ),
             _RowTile(
               icon: Icons.settings_outlined,
+              iconColor: palette.textMuted,
               title: l10n.settings,
-              subtitle: l10n.settingsSubtitle,
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
+              subtitle: l10n.settingsAccountSubtitle(
+                provider.locale.languageCode == 'so'
+                    ? l10n.languageSomali
+                    : l10n.languageEnglish,
+              ),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SettingsScreen()),
+              ),
             ),
-            const SizedBox(height: 8),
             if (patient != null)
               _RowTile(
                 icon: Icons.monitor_heart_outlined,
+                iconColor: AppColors.primary,
                 title: l10n.roleChooserPatientTitle,
                 subtitle: l10n.roleChooserPatientHint,
                 onTap: () => provider.enterPatientApp(),
               ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: OutlinedButton(
-                onPressed: () => provider.logout(),
-                style: OutlinedButton.styleFrom(foregroundColor: AppColors.error),
-                child: Text(l10n.logOut, style: const TextStyle(color: AppColors.error, fontWeight: FontWeight.w700)),
-              ),
+            _RowTile(
+              icon: Icons.logout,
+              iconColor: AppColors.error,
+              title: l10n.logOut,
+              subtitle: '',
+              destructive: true,
+              onTap: () => provider.logout(),
             ),
           ],
         ),
@@ -143,32 +218,84 @@ class CaregiverPortalAccountScreen extends StatelessWidget {
 
 class _RowTile extends StatelessWidget {
   final IconData icon;
+  final Color iconColor;
   final String title;
   final String subtitle;
   final VoidCallback onTap;
+  final bool destructive;
+
   const _RowTile({
     required this.icon,
+    required this.iconColor,
     required this.title,
     required this.subtitle,
     required this.onTap,
+    this.destructive = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
-        color: AppColors.card(context),
+    final palette = AppColors.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Material(
+        color: destructive ? palette.errorSoft : palette.card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border(context)),
-      ),
-      child: ListTile(
-        minVerticalPadding: 16,
-        leading: Icon(icon, color: AppColors.primary, size: 28),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
-        subtitle: Text(subtitle),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: onTap,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: destructive
+                    ? AppColors.error.withValues(alpha: 0.22)
+                    : palette.border,
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: iconColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(icon, color: iconColor, size: 24),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                          color: destructive ? AppColors.error : palette.text,
+                        ),
+                      ),
+                      if (subtitle.isNotEmpty)
+                        Text(
+                          subtitle,
+                          style: TextStyle(fontSize: 14, color: palette.textMuted),
+                        ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right,
+                  color: destructive
+                      ? AppColors.error.withValues(alpha: 0.7)
+                      : palette.textFaint,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

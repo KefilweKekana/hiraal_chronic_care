@@ -128,7 +128,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(m),
-          backgroundColor: error ? AppColors.error : AppColors.textSecondary,
+          backgroundColor: error ? AppColors.error : AppColors.of(context).textMuted,
         ),
       );
 
@@ -141,10 +141,10 @@ class _PaywallScreenState extends State<PaywallScreen> {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: selected ? AppColors.primaryLight : AppColors.white,
+          color: selected ? AppColors.of(context).primarySoft : AppColors.of(context).card,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: selected ? AppColors.primary : AppColors.cardBorder,
+            color: selected ? AppColors.primary : AppColors.of(context).border,
             width: selected ? 2 : 1,
           ),
         ),
@@ -155,7 +155,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
               children: [
                 Icon(
                   selected ? Icons.radio_button_checked : Icons.radio_button_off,
-                  color: selected ? AppColors.primary : AppColors.textTertiary,
+                  color: selected ? AppColors.primary : AppColors.of(context).textFaint,
                   size: 20,
                 ),
                 const SizedBox(width: 10),
@@ -164,13 +164,13 @@ class _PaywallScreenState extends State<PaywallScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(plan.displayName,
-                          style: const TextStyle(
+                          style: TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.textPrimary)),
+                              color: AppColors.of(context).text)),
                       Text(plan.category,
-                          style: const TextStyle(
-                              fontSize: 12, color: AppColors.textTertiary)),
+                          style: TextStyle(
+                              fontSize: 12, color: AppColors.of(context).textFaint)),
                     ],
                   ),
                 ),
@@ -190,20 +190,20 @@ class _PaywallScreenState extends State<PaywallScreen> {
                             color: AppColors.primary)),
                   ),
                 Text('\$${plan.monthlyFee.toStringAsFixed(0)}',
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
                         color: AppColors.primary)),
-                const Text(' /mo',
+                Text(' /mo',
                     style:
-                        TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                        TextStyle(fontSize: 13, color: AppColors.of(context).textMuted)),
               ],
             ),
             if (plan.description.isNotEmpty) ...[
               const SizedBox(height: 8),
               Text(plan.description,
-                  style: const TextStyle(
-                      fontSize: 13, color: AppColors.textSecondary)),
+                  style: TextStyle(
+                      fontSize: 13, color: AppColors.of(context).textMuted)),
             ],
             if (plan.features.isNotEmpty) ...[
               const SizedBox(height: 12),
@@ -212,14 +212,14 @@ class _PaywallScreenState extends State<PaywallScreen> {
                     child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(Icons.check_circle,
+                          Icon(Icons.check_circle,
                               size: 16, color: AppColors.primary),
                           const SizedBox(width: 8),
                           Expanded(
                               child: Text(f,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                       fontSize: 13,
-                                      color: AppColors.textSecondary))),
+                                      color: AppColors.of(context).textMuted))),
                         ]),
                   )),
             ],
@@ -235,7 +235,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
     final provider = context.watch<AppProvider>();
     final plans = _filteredPlans;
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).scaffold,
       body: SafeArea(
         child: _loading
             ? const Center(child: CircularProgressIndicator())
@@ -247,19 +247,19 @@ class _PaywallScreenState extends State<PaywallScreen> {
                     const SizedBox(height: 16),
                     const Center(child: HiraalLogo(size: 52)),
                     const SizedBox(height: 20),
-                    const Text('Choose your plan',
+                    Text('Choose your plan',
                         style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimary)),
+                            color: AppColors.of(context).text)),
                     const SizedBox(height: 6),
                     Text(
                       _trial.enabled && _trial.eligible
                           ? 'Pick a category and plan. You can start a ${_trial.days}-day free trial when enabled for that plan.'
                           : 'Subscribe to a plan to start using Hiraal Lifecare – daily monitoring, nurse & doctor review, medicine delivery and more.',
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontSize: 14,
-                          color: AppColors.textSecondary,
+                          color: AppColors.of(context).textMuted,
                           height: 1.5),
                     ),
                     if (_categories.length > 1) ...[
@@ -301,7 +301,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                           Expanded(
                               child: Text(_error!,
                                   style:
-                                      const TextStyle(color: AppColors.error))),
+                                      TextStyle(color: AppColors.error))),
                           TextButton(
                               onPressed: _load, child: const Text('Retry')),
                         ]),
@@ -355,20 +355,20 @@ class _PaywallScreenState extends State<PaywallScreen> {
                     Center(
                       child: TextButton(
                         onPressed: () => context.read<AppProvider>().logout(),
-                        child: const Text('Sign out',
-                            style: TextStyle(color: AppColors.textSecondary)),
+                        child: Text('Sign out',
+                            style: TextStyle(color: AppColors.of(context).textMuted)),
                       ),
                     ),
                     const SizedBox(height: 12),
-                    const Row(
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.lock_outline,
-                            size: 14, color: AppColors.textTertiary),
-                        SizedBox(width: 4),
+                            size: 14, color: AppColors.of(context).textFaint),
+                        const SizedBox(width: 4),
                         Text('Secure mobile-money payment',
                             style: TextStyle(
-                                fontSize: 12, color: AppColors.textTertiary)),
+                                fontSize: 12, color: AppColors.of(context).textFaint)),
                       ],
                     ),
                     const SizedBox(height: 20),

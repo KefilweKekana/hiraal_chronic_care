@@ -9,6 +9,7 @@ import 'address_service.dart';
 import 'activity_service.dart';
 import 'caregiver_service.dart';
 import 'payment_service.dart';
+import 'health_pin_service.dart';
 import 'mock/mock_auth_service.dart';
 import 'mock/mock_readings_service.dart';
 import 'mock/mock_notification_service.dart';
@@ -18,6 +19,7 @@ import 'mock/mock_address_service.dart';
 import 'mock/mock_activity_service.dart';
 import 'mock/mock_caregiver_service.dart';
 import 'mock/mock_payment_service.dart';
+import 'mock/mock_health_pin_service.dart';
 import 'erpnext/erpnext_auth_service.dart';
 import 'erpnext/erpnext_readings_service.dart';
 import 'erpnext/erpnext_notification_service.dart';
@@ -27,6 +29,7 @@ import 'erpnext/erpnext_address_service.dart';
 import 'erpnext/erpnext_activity_service.dart';
 import 'erpnext/erpnext_caregiver_service.dart';
 import 'erpnext/erpnext_payment_service.dart';
+import 'erpnext/erpnext_health_pin_service.dart';
 
 /// Simple service locator.
 /// When [EnvConfig.useMock] is false, swap in ERPNext implementations.
@@ -44,6 +47,7 @@ class ServiceLocator {
   late final ActivityService activity;
   late final CaregiverService caregivers;
   late final PaymentService payments;
+  late final HealthPinService healthPin;
 
   ApiClient? _apiClient;
 
@@ -65,6 +69,7 @@ class ServiceLocator {
       activity = MockActivityService();
       caregivers = MockCaregiverService();
       payments = MockPaymentService();
+      healthPin = MockHealthPinService();
     } else {
       _apiClient = ApiClient();
       auth = ErpNextAuthService(_apiClient!);
@@ -76,6 +81,7 @@ class ServiceLocator {
       activity = ErpNextActivityService(_apiClient!);
       caregivers = ErpNextCaregiverService(_apiClient!);
       payments = ErpNextPaymentService(_apiClient!);
+      healthPin = ErpNextHealthPinService(_apiClient!);
     }
 
     _initialized = true;

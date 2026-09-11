@@ -15,11 +15,9 @@ class SponsorConnectionActiveScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).scaffold,
       appBar: AppBar(
         title: Text(l10n.connectionActiveTitle),
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: Center(
@@ -28,21 +26,21 @@ class SponsorConnectionActiveScreen extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: AppColors.white,
+              color: AppColors.of(context).card,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.cardBorder),
+              border: Border.all(color: AppColors.of(context).border),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.check_circle, size: 60, color: AppColors.success),
+                Icon(Icons.check_circle, size: 60, color: AppColors.success),
                 const SizedBox(height: 16),
-                Text(l10n.connectionActiveHeadline, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+                Text(l10n.connectionActiveHeadline, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 8),
                 Text(
                   l10n.connectionActiveBody(link.displayName),
                   textAlign: TextAlign.center,
-                  style: const TextStyle(color: AppColors.textSecondary),
+                  style: TextStyle(color: AppColors.of(context).textMuted),
                 ),
                 const SizedBox(height: 18),
                 SizedBox(

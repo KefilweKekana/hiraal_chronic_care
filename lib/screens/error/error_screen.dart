@@ -10,8 +10,8 @@ class ErrorScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
-      appBar: AppBar(title: const Text('Error'), leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context))),
+      backgroundColor: AppColors.of(context).scaffold,
+      appBar: AppBar(title: const Text('Error'), leading: IconButton(icon: Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context))),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -19,24 +19,24 @@ class ErrorScreen extends StatelessWidget {
             const SizedBox(height: 40),
             Container(
               width: 72, height: 72,
-              decoration: BoxDecoration(color: AppColors.errorLight, borderRadius: BorderRadius.circular(20)),
-              child: const Icon(Icons.cloud_off, color: AppColors.error, size: 36),
+              decoration: BoxDecoration(color: AppColors.of(context).errorSoft, borderRadius: BorderRadius.circular(20)),
+              child: Icon(Icons.cloud_off, color: AppColors.error, size: 36),
             ),
             const SizedBox(height: 20),
             const Text("We couldn't send your data", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
-            const Text('There was a problem connecting to the server.\nYour data is safe and saved on this phone.', textAlign: TextAlign.center, style: TextStyle(color: AppColors.textSecondary, height: 1.5)),
+            Text('There was a problem connecting to the server.\nYour data is safe and saved on this phone.', textAlign: TextAlign.center, style: TextStyle(color: AppColors.of(context).textMuted, height: 1.5)),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(color: AppColors.inputBackground, borderRadius: BorderRadius.circular(10)),
-              child: const Row(
+              decoration: BoxDecoration(color: AppColors.of(context).inputFill, borderRadius: BorderRadius.circular(10)),
+              child: Row(
                 children: [
-                  Icon(Icons.info_outline, size: 16, color: AppColors.textSecondary),
-                  SizedBox(width: 8),
+                  Icon(Icons.info_outline, size: 16, color: AppColors.of(context).textMuted),
+                  const SizedBox(width: 8),
                   Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Text('What happened?', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-                    Text('No internet connection or the server is not\nresponding. Please try again.', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                    Text('No internet connection or the server is not\nresponding. Please try again.', style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted)),
                   ])),
                 ],
               ),
@@ -52,7 +52,7 @@ class ErrorScreen extends StatelessWidget {
               width: double.infinity, height: 56,
               child: ElevatedButton.icon(
                 onPressed: onRetry ?? () => Navigator.pop(context),
-                icon: const Icon(Icons.refresh, size: 18),
+                icon: Icon(Icons.refresh, size: 18),
                 label: const Text('Retry Now'),
               ),
             ),
@@ -61,7 +61,7 @@ class ErrorScreen extends StatelessWidget {
               width: double.infinity, height: 48,
               child: OutlinedButton.icon(
                 onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.schedule, size: 18),
+                icon: Icon(Icons.schedule, size: 18),
                 label: const Text('Send Later'),
               ),
             ),
@@ -93,16 +93,16 @@ class _ActionItem extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 3),
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.cardBorder)),
+      decoration: BoxDecoration(color: AppColors.of(context).card, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.of(context).border)),
       child: Row(
         children: [
           Icon(icon, size: 20, color: AppColors.primary),
           const SizedBox(width: 12),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-            Text(subtitle, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+            Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+            Text(subtitle, style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted)),
           ])),
-          const Icon(Icons.chevron_right, color: AppColors.textTertiary, size: 18),
+          Icon(Icons.chevron_right, color: AppColors.of(context).textFaint, size: 18),
         ],
       ),
     );
@@ -144,7 +144,7 @@ class SessionExpiredScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.of(context).scaffold,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(32),
@@ -153,17 +153,17 @@ class SessionExpiredScreen extends StatelessWidget {
             children: [
               Container(
                 width: 72, height: 72,
-                decoration: BoxDecoration(color: AppColors.errorLight, borderRadius: BorderRadius.circular(20)),
-                child: const Icon(Icons.lock_clock, color: AppColors.error, size: 36),
+                decoration: BoxDecoration(color: AppColors.of(context).errorSoft, borderRadius: BorderRadius.circular(20)),
+                child: Icon(Icons.lock_clock, color: AppColors.error, size: 36),
               ),
               const SizedBox(height: 24),
               const Text('Session Expired', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700)),
               const SizedBox(height: 8),
-              const Text('For your security, you have been\nlogged out.', textAlign: TextAlign.center, style: TextStyle(color: AppColors.textSecondary, height: 1.5)),
+              Text('For your security, you have been\nlogged out.', textAlign: TextAlign.center, style: TextStyle(color: AppColors.of(context).textMuted, height: 1.5)),
               const SizedBox(height: 20),
               Container(
                 padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(color: AppColors.successLight, borderRadius: BorderRadius.circular(12)),
+                decoration: BoxDecoration(color: AppColors.of(context).successSoft, borderRadius: BorderRadius.circular(12)),
                 child: const Row(
                   children: [
                     Icon(Icons.check_circle, size: 18, color: AppColors.success),
@@ -178,7 +178,7 @@ class SessionExpiredScreen extends StatelessWidget {
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(color: AppColors.warningLight, borderRadius: BorderRadius.circular(12)),
+                decoration: BoxDecoration(color: AppColors.of(context).warningSoft, borderRadius: BorderRadius.circular(12)),
                 child: const Row(
                   children: [
                     Icon(Icons.info, size: 18, color: AppColors.warning),
@@ -195,7 +195,7 @@ class SessionExpiredScreen extends StatelessWidget {
                 width: double.infinity, height: 56,
                 child: ElevatedButton.icon(
                   onPressed: () => _handleLogin(context),
-                  icon: const Icon(Icons.fingerprint, size: 20),
+                  icon: Icon(Icons.fingerprint, size: 20),
                   label: const Text('Log In Again'),
                   style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
                 ),
@@ -205,7 +205,7 @@ class SessionExpiredScreen extends StatelessWidget {
                 width: double.infinity, height: 48,
                 child: OutlinedButton.icon(
                   onPressed: onBack,
-                  icon: const Icon(Icons.home, size: 18),
+                  icon: Icon(Icons.home, size: 18),
                   label: const Text('Back to Welcome'),
                 ),
               ),

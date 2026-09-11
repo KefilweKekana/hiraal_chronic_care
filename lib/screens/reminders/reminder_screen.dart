@@ -9,10 +9,10 @@ class ReminderScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.of(context).scaffold,
       appBar: AppBar(
         title: const Text('Reminder'),
-        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
+        leading: IconButton(icon: Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(24),
@@ -22,18 +22,18 @@ class ReminderScreen extends StatelessWidget {
             Container(
               width: 64, height: 64,
               decoration: BoxDecoration(
-                color: AppColors.warningLight,
+                color: AppColors.of(context).warningSoft,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: const Icon(Icons.waving_hand, color: AppColors.warning, size: 32),
+              child: Icon(Icons.waving_hand, color: AppColors.warning, size: 32),
             ),
             const SizedBox(height: 20),
             const Text('No Data Logged Today', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Keeping your health data up to date\nhelps your care team support you better.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: AppColors.textSecondary, height: 1.5),
+              style: TextStyle(fontSize: 14, color: AppColors.of(context).textMuted, height: 1.5),
             ),
             const SizedBox(height: 24),
             const Text("You haven't logged your:", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
@@ -52,7 +52,7 @@ class ReminderScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppColors.infoLight,
+                color: AppColors.of(context).infoSoft,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Row(
@@ -77,13 +77,13 @@ class ReminderScreen extends StatelessWidget {
             _ReasonRow(icon: Icons.verified, text: 'Keeps your care plan on track'),
             const Spacer(),
             Row(
-              children: const [
+              children: [
                 Icon(Icons.favorite, size: 14, color: AppColors.error),
-                SizedBox(width: 4),
-                Text('Try to log your data daily.', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                const SizedBox(width: 4),
+                Text('Try to log your data daily.', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.of(context).text)),
               ],
             ),
-            const Text('It only takes a minute and makes a big difference.', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+            Text('It only takes a minute and makes a big difference.', style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted)),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity, height: 56,
@@ -92,14 +92,14 @@ class ReminderScreen extends StatelessWidget {
                   Navigator.pop(context);
                   onLogNow();
                 },
-                icon: const Icon(Icons.edit, size: 18),
+                icon: Icon(Icons.edit, size: 18),
                 label: const Text('Log My Data Now'),
               ),
             ),
             const SizedBox(height: 12),
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Remind Me Later', style: TextStyle(color: AppColors.textSecondary)),
+              child: Text('Remind Me Later', style: TextStyle(color: AppColors.of(context).textMuted)),
             ),
           ],
         ),
@@ -124,7 +124,7 @@ class _MissingItem extends StatelessWidget {
           child: Icon(icon, color: color, size: 24),
         ),
         const SizedBox(height: 6),
-        Text(label, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+        Text(label, style: TextStyle(fontSize: 11, color: AppColors.of(context).textMuted)),
       ],
     );
   }
@@ -143,7 +143,7 @@ class _ReasonRow extends StatelessWidget {
         children: [
           Icon(icon, size: 18, color: AppColors.success),
           const SizedBox(width: 10),
-          Text(text, style: const TextStyle(fontSize: 14, color: AppColors.textPrimary)),
+          Text(text, style: TextStyle(fontSize: 14, color: AppColors.of(context).text)),
         ],
       ),
     );

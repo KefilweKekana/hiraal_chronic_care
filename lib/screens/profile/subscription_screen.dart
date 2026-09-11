@@ -97,11 +97,9 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).scaffold,
       appBar: AppBar(
         title: const Text('Subscription'),
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: _loading
@@ -122,7 +120,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(_error ?? 'Something went wrong', style: const TextStyle(color: AppColors.error)),
+            Text(_error ?? 'Something went wrong', style: TextStyle(color: AppColors.error)),
             const SizedBox(height: 8),
             TextButton(onPressed: _load, child: const Text('Retry')),
           ],
@@ -146,7 +144,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
           trial.enabled && trial.eligible
               ? 'Pick a category. Free trial (${trial.days} days) is available on eligible plans.'
               : 'Subscribe to keep your care team monitoring your health.',
-          style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+          style: TextStyle(fontSize: 13, color: AppColors.of(context).textMuted),
         ),
         if (info.categories.length > 1) ...[
           const SizedBox(height: 12),
@@ -190,7 +188,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     if (s.isActive) return AppColors.success;
     if (s.isAwaitingFirstPayment || s.status == 'Overdue' || s.status == 'Past Due') return AppColors.warning;
     if (s.status == 'Suspended' || s.status == 'Cancelled') return AppColors.error;
-    return AppColors.textTertiary;
+    return AppColors.of(context).textFaint;
   }
 
   Widget _statusCard(Subscription s) {
@@ -200,9 +198,9 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -211,7 +209,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
             children: [
               Expanded(
                 child: Text(s.plan ?? 'Care subscription',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -223,7 +221,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
           const SizedBox(height: 6),
           if (_catalogFee(s.plan) > 0)
             Text('$_cur${_catalogFee(s.plan).toStringAsFixed(2)} / month',
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.primary)),
           const SizedBox(height: 14),
           if (s.isOnTrial && s.trialEndDate != null)
             _row(Icons.hourglass_bottom, 'Trial ends', DateFormat('MMM dd, yyyy').format(s.trialEndDate!)),
@@ -254,7 +252,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                         }
                         _subscribe(SubscriptionPlan(name: planName, monthlyFee: 0));
                       },
-                icon: const Icon(Icons.payment, size: 20),
+                icon: Icon(Icons.payment, size: 20),
                 label: Text(needsPay ? 'Complete payment' : 'Pay / renew now'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: needsPay ? AppColors.warning : AppColors.primary,
@@ -263,11 +261,11 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
               ),
             ),
           ] else
-            const Padding(
-              padding: EdgeInsets.only(top: 12),
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
               child: Text(
                 'Enjoy your free trial – payment will be due when it ends.',
-                style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 13, color: AppColors.of(context).textMuted),
               ),
             ),
         ],
@@ -279,11 +277,11 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         padding: const EdgeInsets.symmetric(vertical: 5),
         child: Row(
           children: [
-            Icon(icon, size: 16, color: AppColors.textTertiary),
+            Icon(icon, size: 16, color: AppColors.of(context).textFaint),
             const SizedBox(width: 10),
-            Text(label, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+            Text(label, style: TextStyle(fontSize: 13, color: AppColors.of(context).textMuted)),
             const Spacer(),
-            Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+            Text(value, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
           ],
         ),
       );
@@ -296,9 +294,9 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -310,16 +308,16 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(plan.displayName, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-                    Text(plan.category, style: const TextStyle(fontSize: 12, color: AppColors.textTertiary)),
+                    Text(plan.displayName, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                    Text(plan.category, style: TextStyle(fontSize: 12, color: AppColors.of(context).textFaint)),
                   ],
                 ),
               ),
               Text('$_cur${plan.monthlyFee.toStringAsFixed(0)}',
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.primary)),
-              const Padding(
-                padding: EdgeInsets.only(top: 4, left: 2),
-                child: Text('/mo', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.primary)),
+              Padding(
+                padding: const EdgeInsets.only(top: 4, left: 2),
+                child: Text('/mo', style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted)),
               ),
             ],
           ),
@@ -328,9 +326,9 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 3),
                 child: Row(
                   children: [
-                    const Icon(Icons.check, size: 16, color: AppColors.success),
+                    Icon(Icons.check, size: 16, color: AppColors.success),
                     const SizedBox(width: 8),
-                    Expanded(child: Text(f, style: const TextStyle(fontSize: 13))),
+                    Expanded(child: Text(f, style: TextStyle(fontSize: 13))),
                   ],
                 ),
               )),
@@ -368,9 +366,9 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: Row(
         children: [
@@ -382,13 +380,13 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('$_cur${p.amount.toStringAsFixed(2)}',
-                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                 Text(
                   [
                     if (p.date != null) DateFormat('MMM dd, yyyy').format(p.date!),
                     if ((p.method ?? '').isNotEmpty) p.method,
                   ].whereType<String>().join(' • '),
-                  style: const TextStyle(fontSize: 12, color: AppColors.textTertiary),
+                  style: TextStyle(fontSize: 12, color: AppColors.of(context).textFaint),
                 ),
               ],
             ),

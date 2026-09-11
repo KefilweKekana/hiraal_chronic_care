@@ -10,6 +10,7 @@ import '../home/home_screen.dart';
 import '../services/services_screen.dart';
 import '../history/history_screen.dart';
 import '../profile/profile_screen.dart';
+import '../../widgets/health_pin_gate.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -66,7 +67,7 @@ class _AppShellState extends State<AppShell> {
     final screens = [
       const HomeScreen(),
       const ServicesScreen(),
-      const HistoryScreen(),
+      const HealthPinLockedPane(child: HistoryScreen()),
       const ProfileScreen(),
     ];
 
@@ -89,7 +90,7 @@ class _AppShellState extends State<AppShell> {
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: AppColors.of(context).card,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.08),
@@ -100,28 +101,34 @@ class _AppShellState extends State<AppShell> {
         ),
         child: BottomNavigationBar(
           currentIndex: provider.currentTab,
-          onTap: (index) => provider.setTab(index),
+          onTap: (index) async {
+            if (index == 2) {
+              final ok = await ensureHealthPinUnlocked(context);
+              if (!ok || !context.mounted) return;
+            }
+            provider.setTab(index);
+          },
           selectedFontSize: 11,
           unselectedFontSize: 10,
           items: [
             BottomNavigationBarItem(
-              icon: const Icon(Icons.home_outlined),
-              activeIcon: const Icon(Icons.home),
+              icon: Icon(Icons.home_outlined),
+              activeIcon: Icon(Icons.home),
               label: l10n.navHome,
             ),
             BottomNavigationBarItem(
-              icon: const Icon(Icons.medical_services_outlined),
-              activeIcon: const Icon(Icons.medical_services),
+              icon: Icon(Icons.medical_services_outlined),
+              activeIcon: Icon(Icons.medical_services),
               label: l10n.navServices,
             ),
             BottomNavigationBarItem(
-              icon: const Icon(Icons.history_outlined),
-              activeIcon: const Icon(Icons.history),
+              icon: Icon(Icons.history_outlined),
+              activeIcon: Icon(Icons.history),
               label: l10n.navHistory,
             ),
             BottomNavigationBarItem(
-              icon: const Icon(Icons.person_outline),
-              activeIcon: const Icon(Icons.person),
+              icon: Icon(Icons.person_outline),
+              activeIcon: Icon(Icons.person),
               label: l10n.navProfile,
             ),
           ],
@@ -140,7 +147,7 @@ class _OfflineBanner extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     return Container(
       width: double.infinity,
-      color: AppColors.warningLight,
+      color: AppColors.of(context).warningSoft,
       child: SafeArea(
         bottom: false,
         child: Padding(
@@ -148,12 +155,12 @@ class _OfflineBanner extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.wifi_off, size: 14, color: AppColors.warning),
+              Icon(Icons.wifi_off, size: 14, color: AppColors.warning),
               const SizedBox(width: 6),
               Flexible(
                 child: Text(
                   l10n.offlineBanner,
-                  style: const TextStyle(fontSize: 12, color: AppColors.warning),
+                  style: TextStyle(fontSize: 12, color: AppColors.warning),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),

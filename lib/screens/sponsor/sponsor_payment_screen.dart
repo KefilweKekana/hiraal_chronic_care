@@ -146,11 +146,9 @@ class _SponsorPaymentScreenState extends State<SponsorPaymentScreen> {
     final l10n = AppLocalizations.of(context);
     final amountText = '${AppConstants.currencySymbol}${widget.plan.monthlyFee.toStringAsFixed(2)}';
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).scaffold,
       appBar: AppBar(
         title: Text(l10n.sponsorPaymentTitle),
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: Center(
@@ -204,18 +202,18 @@ class _LoadingCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           const CircularProgressIndicator(),
           const SizedBox(height: 16),
-          Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+          Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
-          Text(subtitle, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textSecondary)),
+          Text(subtitle, textAlign: TextAlign.center, style: TextStyle(color: AppColors.of(context).textMuted)),
         ],
       ),
     );
@@ -247,23 +245,23 @@ class _WaitingCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           const CircularProgressIndicator(),
           const SizedBox(height: 16),
-          Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+          Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
           Text(l10n.approvePayWith(amount, method), textAlign: TextAlign.center),
           const SizedBox(height: 4),
-          Text(l10n.requestSentTo(phone), style: const TextStyle(color: AppColors.textSecondary)),
+          Text(l10n.requestSentTo(phone), style: TextStyle(color: AppColors.of(context).textMuted)),
           if (message != null) ...[
             const SizedBox(height: 12),
-            Text(message!, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textSecondary)),
+            Text(message!, textAlign: TextAlign.center, style: TextStyle(color: AppColors.of(context).textMuted)),
           ],
           const SizedBox(height: 18),
           SizedBox(
@@ -305,9 +303,9 @@ class _ResultCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -318,9 +316,9 @@ class _ResultCard extends StatelessWidget {
             color: success ? AppColors.success : AppColors.error,
           ),
           const SizedBox(height: 16),
-          Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+          Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
-          Text(subtitle, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textSecondary)),
+          Text(subtitle, textAlign: TextAlign.center, style: TextStyle(color: AppColors.of(context).textMuted)),
           const SizedBox(height: 18),
           SizedBox(
             width: double.infinity,

@@ -7,7 +7,7 @@ class HealthTipsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).scaffold,
       appBar: AppBar(title: const Text('Health Tips')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -33,7 +33,7 @@ class HealthTipsScreen extends StatelessWidget {
                       color: AppColors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.tips_and_updates, color: AppColors.white, size: 28),
+                    child: Icon(Icons.tips_and_updates, color: AppColors.white, size: 28),
                   ),
                   const SizedBox(width: 14),
                   const Column(
@@ -57,29 +57,29 @@ class HealthTipsScreen extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.white,
+                color: AppColors.of(context).card,
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: AppColors.cardBorder),
+                border: Border.all(color: AppColors.of(context).border),
               ),
               child: Row(
                 children: [
                   Container(
                     width: 44, height: 44,
                     decoration: BoxDecoration(
-                      color: AppColors.errorLight,
+                      color: AppColors.of(context).errorSoft,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.favorite, color: AppColors.error, size: 22),
+                    child: Icon(Icons.favorite, color: AppColors.error, size: 22),
                   ),
                   const SizedBox(width: 14),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('Keep Your Blood Pressure in Check', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                        SizedBox(height: 4),
-                        Text('Take your medicine as prescribed, avoid\ntoo much salt, and try to relax.', style: TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.4)),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
+                        Text('Take your medicine as prescribed, avoid\ntoo much salt, and try to relax.', style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted, height: 1.4)),
+                        const SizedBox(height: 4),
                         Text('Your health, your future.', style: TextStyle(fontSize: 12, color: AppColors.primary, fontStyle: FontStyle.italic)),
                       ],
                     ),
@@ -102,7 +102,7 @@ class HealthTipsScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppColors.infoLight,
+                color: AppColors.of(context).infoSoft,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Row(
@@ -135,9 +135,9 @@ class _TipItem extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: Row(
         children: [
@@ -151,12 +151,12 @@ class _TipItem extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                Text(subtitle, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                Text(subtitle, style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted)),
               ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: AppColors.textTertiary, size: 18),
+          Icon(Icons.chevron_right, color: AppColors.of(context).textFaint, size: 18),
         ],
       ),
     );

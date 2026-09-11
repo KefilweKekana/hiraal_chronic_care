@@ -59,7 +59,7 @@ class RoleChooserScreen extends StatelessWidget {
                   onPressed: provider.isLoading ? null : () => provider.logout(),
                   child: Text(
                     l10n.logOut,
-                    style: const TextStyle(color: AppColors.textSecondary),
+                    style: TextStyle(color: AppColors.of(context).textMuted),
                   ),
                 ),
               ),

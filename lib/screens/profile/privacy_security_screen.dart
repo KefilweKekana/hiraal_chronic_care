@@ -8,6 +8,12 @@ import '../../core/theme/app_colors.dart';
 import '../../core/utils/result.dart';
 import '../../services/biometric_service.dart';
 import '../../services/service_locator.dart';
+import '../../l10n/app_localizations.dart';
+import '../../widgets/health_pin_gate.dart';
+import '../auth/create_health_pin_screen.dart';
+import '../auth/health_pin_unlock.dart';
+import '../../providers/app_provider.dart';
+import 'package:provider/provider.dart';
 
 class PrivacySecurityScreen extends StatefulWidget {
   const PrivacySecurityScreen({super.key});
@@ -44,6 +50,26 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
     await prefs.setBool(key, value);
   }
 
+  Future<void> _openChangePin() async {
+    if (!mounted) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const CreateHealthPinScreen(
+          allowBack: true,
+          changingExisting: true,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openResetPin() async {
+    final id = context.read<AppProvider>().patient?.id ?? '';
+    if (id.isEmpty || !mounted) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => ForgotHealthPinScreen(patientId: id)),
+    );
+  }
+
   /// Fetch the patient's full data from the server, write it to a readable
   /// text file, and open the system share sheet so they can save or send it.
   Future<void> _exportMyData() async {
@@ -52,6 +78,9 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
       _toast('Data export is only available when signed in online.');
       return;
     }
+    final unlocked = await ensureHealthPinUnlocked(context);
+    if (!unlocked || !mounted) return;
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -201,11 +230,9 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
     if (!_loaded) return const Scaffold(body: Center(child: CircularProgressIndicator()));
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.of(context).scaffold,
       appBar: AppBar(
         title: const Text('Privacy & Security'),
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: ListView(
@@ -230,7 +257,22 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
             onChanged: (v) { setState(() => _dataSharing = v); _setBool('pref_data_sharing', v); },
           ),
           const SizedBox(height: 16),
-          const Text('Data Management', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+          Text(AppLocalizations.of(context).healthPinTitle, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.of(context).textMuted)),
+          const SizedBox(height: 8),
+          _ActionTile(
+            title: AppLocalizations.of(context).healthPinChange,
+            subtitle: AppLocalizations.of(context).healthPinChangeHint,
+            icon: Icons.pin,
+            onTap: _openChangePin,
+          ),
+          _ActionTile(
+            title: AppLocalizations.of(context).healthPinForgot,
+            subtitle: AppLocalizations.of(context).healthPinResetHint,
+            icon: Icons.refresh,
+            onTap: _openResetPin,
+          ),
+          const SizedBox(height: 16),
+          Text('Data Management', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.of(context).textMuted)),
           const SizedBox(height: 8),
           _ActionTile(
             title: 'Export My Data',
@@ -258,9 +300,9 @@ class _ToggleTile extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.of(context).card,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.of(context).border),
       ),
       child: Row(
         children: [
@@ -268,9 +310,9 @@ class _ToggleTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 2),
-                Text(subtitle, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                Text(subtitle, style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted)),
               ],
             ),
           ),
@@ -302,9 +344,9 @@ class _ActionTile extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 4),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: AppColors.of(context).card,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.cardBorder),
+          border: Border.all(color: AppColors.of(context).border),
         ),
         child: Row(
           children: [
@@ -323,7 +365,7 @@ class _ActionTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: c)),
-                  Text(subtitle, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                  Text(subtitle, style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted)),
                 ],
               ),
             ),

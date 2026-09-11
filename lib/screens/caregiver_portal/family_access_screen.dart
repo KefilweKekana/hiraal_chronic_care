@@ -109,7 +109,7 @@ class _FamilyAccessScreenState extends State<FamilyAccessScreen> {
           ),
           if (_message != null) ...[
             const SizedBox(height: 12),
-            Text(_message!, style: const TextStyle(fontSize: 15)),
+            Text(_message!, style: TextStyle(fontSize: 15)),
           ],
           const SizedBox(height: 16),
           OutlinedButton(

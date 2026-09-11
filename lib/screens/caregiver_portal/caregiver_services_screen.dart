@@ -13,6 +13,7 @@ import '../services/book_doctor_screen.dart';
 import '../services/lab_test_screen.dart';
 import '../services/medicine_order_screen.dart';
 import '../summary/weekly_summary_screen.dart';
+import '../../widgets/health_pin_gate.dart';
 
 class CaregiverServicesScreen extends StatefulWidget {
   const CaregiverServicesScreen({super.key});
@@ -90,11 +91,11 @@ class _CaregiverServicesScreenState extends State<CaregiverServicesScreen> {
                       children: [
                         Text(
                           plan.isEmpty ? l10n.currentPlan : plan,
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                         ),
                         Text(
                           fee > 0 ? '\$${fee.toStringAsFixed(0)} / Month' : l10n.caregiverActive,
-                          style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
+                          style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
                         ),
                       ],
                     ),
@@ -110,7 +111,7 @@ class _CaregiverServicesScreenState extends State<CaregiverServicesScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            Text(l10n.whatsDue, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+            Text(l10n.whatsDue, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
             _DueRow(
               title: l10n.filterMedicines,
@@ -165,10 +166,7 @@ class _CaregiverServicesScreenState extends State<CaregiverServicesScreen> {
               color: AppColors.chartPurple,
               icon: Icons.folder_shared_outlined,
               title: l10n.healthRecordsCard,
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const WeeklySummaryScreen()),
-              ),
+              onTap: () => pushAfterHealthPin(context, const WeeklySummaryScreen()),
             ),
             _ServiceTile(
               color: AppColors.primary,
@@ -210,7 +208,7 @@ class _DueRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                 if (subtitle != null)
                   Text(subtitle!, style: TextStyle(fontSize: 13, color: AppColors.textMuted(context))),
               ],

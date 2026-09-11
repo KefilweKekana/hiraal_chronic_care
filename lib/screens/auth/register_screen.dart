@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
+import '../../core/network/api_client.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/otp_wait.dart';
 import '../../core/utils/phone_number.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/app_provider.dart';
@@ -132,10 +134,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: selected ? AppColors.primaryLight : AppColors.white,
+          color: selected ? AppColors.of(context).primarySoft : AppColors.of(context).card,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: selected ? AppColors.primary : AppColors.inputBorder,
+            color: selected ? Theme.of(context).colorScheme.primary : AppColors.of(context).inputBorder,
             width: selected ? 2 : 1,
           ),
         ),
@@ -144,12 +146,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
           children: [
             Row(
               children: [
-                Icon(icon, size: 20, color: selected ? AppColors.primary : AppColors.textSecondary),
+                Icon(icon, size: 20, color: selected ? Theme.of(context).colorScheme.primary : AppColors.of(context).textMuted),
                 const Spacer(),
                 Icon(
                   selected ? Icons.radio_button_checked : Icons.radio_button_off,
                   size: 18,
-                  color: selected ? AppColors.primary : AppColors.textTertiary,
+                  color: selected ? Theme.of(context).colorScheme.primary : AppColors.of(context).textFaint,
                 ),
               ],
             ),
@@ -159,11 +161,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: selected ? AppColors.primary : AppColors.textPrimary,
+                color: selected ? Theme.of(context).colorScheme.primary : AppColors.of(context).text,
               ),
             ),
             const SizedBox(height: 2),
-            Text(sublabel, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+            Text(sublabel, style: TextStyle(fontSize: 11, color: AppColors.of(context).textMuted)),
           ],
         ),
       ),
@@ -182,7 +184,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         semanticsLabel: '${country['name']} flag',
       );
     }
-    return Text(country['flag']!, style: const TextStyle(fontSize: 18));
+    return Text(country['flag']!, style: TextStyle(fontSize: 18));
   }
 
   @override
@@ -190,7 +192,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final l10n = AppLocalizations.of(context);
     final isCaregiver = context.watch<AppProvider>().isCaregiverMode;
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.of(context).scaffold,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -203,7 +205,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   children: [
                     IconButton(
                       onPressed: widget.onBack,
-                      icon: const Icon(Icons.arrow_back_ios, size: 20),
+                      icon: Icon(Icons.arrow_back_ios, size: 20),
                     ),
                     const Spacer(),
                   ],
@@ -214,10 +216,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Center(
                   child: Text(
                     isCaregiver ? l10n.caregiverSignInTitle : l10n.letsGetStarted,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
+                      color: AppColors.of(context).text,
                     ),
                   ),
                 ),
@@ -228,9 +230,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ? l10n.enterMobileCaregiver
                         : l10n.enterMobileLinkedToRecord,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
-                      color: AppColors.textSecondary,
+                      color: AppColors.of(context).textMuted,
                       height: 1.5,
                     ),
                   ),
@@ -238,10 +240,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 32),
                 Text(
                   _channel == 'email' ? l10n.emailAddress : l10n.mobileNumber,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: AppColors.of(context).text,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -249,8 +251,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.inputBorder),
-                      color: AppColors.inputBackground,
+                      border: Border.all(color: AppColors.of(context).inputBorder),
+                      color: AppColors.of(context).inputFill,
                     ),
                     child: TextField(
                       controller: _emailController,
@@ -258,22 +260,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       onChanged: (_) => _recompute(),
                       decoration: InputDecoration(
                         hintText: l10n.enterEmailHint,
-                        prefixIcon: const Icon(Icons.email_outlined, size: 20, color: AppColors.textSecondary),
+                        prefixIcon: Icon(Icons.email_outlined, size: 20, color: AppColors.of(context).textMuted),
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,
                         focusedBorder: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
                         filled: false,
                       ),
-                      style: const TextStyle(fontSize: 16, color: AppColors.textPrimary),
+                      style: TextStyle(fontSize: 16, color: AppColors.of(context).text),
                     ),
                   )
                 else
                   Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.inputBorder),
-                    color: AppColors.inputBackground,
+                    border: Border.all(color: AppColors.of(context).inputBorder),
+                    color: AppColors.of(context).inputFill,
                   ),
                   child: Row(
                     children: [
@@ -284,10 +286,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             value: _countryCodes.indexWhere((c) =>
                                 c['code'] == _selectedCountryCode &&
                                 c['flag'] == _selectedFlag),
-                            icon: const Icon(
+                            icon: Icon(
                               Icons.keyboard_arrow_down,
                               size: 20,
-                              color: AppColors.textSecondary,
+                              color: AppColors.of(context).textMuted,
                             ),
                             isDense: true,
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -303,10 +305,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     const SizedBox(width: 6),
                                     Text(
                                       country['code']!,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.w500,
-                                        color: AppColors.textPrimary,
+                                        color: AppColors.of(context).text,
                                       ),
                                     ),
                                   ],
@@ -324,7 +326,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     const SizedBox(width: 8),
                                     Text(
                                       country['code']!,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -333,9 +335,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     Expanded(
                                       child: Text(
                                         country['name']!,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 13,
-                                          color: AppColors.textSecondary,
+                                          color: AppColors.of(context).textMuted,
                                         ),
                                         overflow: TextOverflow.ellipsis,
                                       ),
@@ -358,7 +360,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       Container(
                         width: 1,
                         height: 30,
-                        color: AppColors.inputBorder,
+                        color: AppColors.of(context).inputBorder,
                       ),
                       Expanded(
                         child: TextField(
@@ -377,9 +379,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                             filled: false,
                           ),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
-                            color: AppColors.textPrimary,
+                            color: AppColors.of(context).text,
                           ),
                         ),
                       ),
@@ -400,7 +402,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         _channel == 'email'
                             ? l10n.otpWillEmailCode
                             : l10n.lookupRecordInHospital,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
                           color: AppColors.primary,
                         ),
@@ -411,10 +413,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 28),
                 Text(
                   l10n.sendMyCodeVia,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: AppColors.of(context).text,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -442,24 +444,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 28),
                 Consumer<AppProvider>(
                   builder: (context, provider, _) {
-                    if (provider.errorMessage != null) {
+                    final cooldown = provider.otpCooldownSeconds;
+                    final waitBanner = cooldown > 0
+                        ? l10n.pleaseWaitBeforeAnotherCode(formatOtpCountdown(cooldown))
+                        : (provider.errorMessage == null
+                            ? null
+                            : displayRegistrationError(
+                                provider.errorMessage!,
+                                alreadyRegistered: l10n.mobileAlreadyRegistered,
+                              ));
+                    if (waitBanner != null) {
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 16),
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.red.shade50,
+                            color: AppColors.of(context).errorSoft,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.red.shade200),
+                            border: Border.all(color: AppColors.error.withValues(alpha: 0.45)),
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.error_outline, color: Colors.red.shade700, size: 20),
+                              Icon(Icons.error_outline, color: AppColors.of(context).errorFg, size: 20),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
-                                  provider.errorMessage!,
-                                  style: TextStyle(fontSize: 13, color: Colors.red.shade700),
+                                  waitBanner,
+                                  style: TextStyle(fontSize: 13, color: AppColors.of(context).errorFg),
                                 ),
                               ),
                             ],
@@ -476,8 +487,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: Consumer<AppProvider>(
                     builder: (context, provider, _) {
                       final isLoading = provider.isLoading;
+                      final cooldown = provider.otpCooldownSeconds;
+                      final canSend = _isValid && !isLoading && cooldown <= 0;
                       return ElevatedButton(
-                        onPressed: _isValid && !isLoading
+                        onPressed: canSend
                             ? () => widget.onSendCode(
                                 _channel == 'email'
                                     ? _emailController.text.trim()
@@ -488,9 +501,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 _channel)
                             : null,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: _isValid && !isLoading
-                              ? AppColors.primary
-                              : AppColors.primary.withValues(alpha: 0.5),
+                          backgroundColor: canSend
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
                         ),
                         child: isLoading
                             ? const SizedBox(
@@ -501,7 +514,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   color: Colors.white,
                                 ),
                               )
-                            : Text(l10n.sendCode),
+                            : Text(
+                                cooldown > 0
+                                    ? l10n.waitCountdown(formatOtpCountdown(cooldown))
+                                    : l10n.sendCode,
+                              ),
                       );
                     },
                   ),
@@ -510,14 +527,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.lock_outline, size: 14, color: AppColors.textTertiary),
+                    Icon(Icons.lock_outline, size: 14, color: AppColors.of(context).textFaint),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
                         l10n.infoSafeWithUs,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.textTertiary,
+                          color: AppColors.of(context).textFaint,
                           height: 1.4,
                         ),
                       ),
@@ -527,7 +544,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 20),
                 if (!isCaregiver)
                 Material(
-                  color: AppColors.primarySurface,
+                  color: AppColors.of(context).primaryMuted,
                   borderRadius: BorderRadius.circular(16),
                   child: InkWell(
                     onTap: widget.onSupportLovedOne,
@@ -545,10 +562,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             width: 44,
                             height: 44,
                             decoration: BoxDecoration(
-                              color: AppColors.white,
+                              color: AppColors.of(context).card,
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.favorite_outline,
                               color: AppColors.primary,
                               size: 22,
@@ -561,19 +578,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               children: [
                                 Text(
                                   l10n.supportLovedOneTitle,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w700,
-                                    color: AppColors.navy,
+                                    color: AppColors.of(context).brandMark,
                                   ),
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
                                   l10n.supportLovedOneSubtitle,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 12,
                                     height: 1.3,
-                                    color: AppColors.textSecondary,
+                                    color: AppColors.of(context).textMuted,
                                   ),
                                 ),
                               ],
@@ -597,11 +614,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: RichText(
                       text: TextSpan(
                         text: '${l10n.newToHiraal}  ',
-                        style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                        style: TextStyle(fontSize: 14, color: AppColors.of(context).textMuted),
                         children: [
                           TextSpan(
                             text: l10n.createAnAccount,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
                               color: AppColors.primary,

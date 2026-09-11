@@ -1,30 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+
+import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/result.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/patient.dart';
 import '../../models/subscription.dart';
 import '../../providers/app_provider.dart';
-import '../../services/activity_service.dart';
 import '../../services/service_locator.dart';
-import '../../widgets/shared_widgets.dart';
-import 'personal_info_screen.dart';
-import 'health_info_screen.dart';
-import 'medical_history_screen.dart';
-import 'addresses_screen.dart';
-import 'privacy_security_screen.dart';
-import 'settings_screen.dart';
-import 'language_screen.dart';
-import 'subscription_screen.dart';
-import 'payment_history_screen.dart';
-import '../services/appointments_screen.dart';
-import '../services/lab_tests_screen.dart';
-import '../services/my_orders_screen.dart';
 import '../caregivers/caregivers_screen.dart';
-import '../sponsor/sponsor_care_screen.dart';
-import '../sponsor/my_sponsorship_screen.dart';
+import 'personal_info_screen.dart';
+import 'settings_screen.dart';
+import 'subscription_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -34,32 +23,32 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  ActivityCounts? _counts;
   SubscriptionInfo? _subscriptionInfo;
+  int _activeCaregivers = 0;
+  int _pendingCaregivers = 0;
   bool _loggingOut = false;
 
   @override
   void initState() {
     super.initState();
-    _loadCounts();
-    _loadSubscription();
+    _load();
   }
 
-  Future<void> _loadCounts() async {
-    final result = await ServiceLocator.instance.activity.getCounts('');
-    if (mounted) {
-      setState(() {
-        if (result case Success(data: final data)) _counts = data;
-      });
-    }
-  }
-
-  Future<void> _loadSubscription() async {
-    final result = await ServiceLocator.instance.payments.getSubscription();
+  Future<void> _load() async {
+    final payments = ServiceLocator.instance.payments.getSubscription();
+    final caregivers = ServiceLocator.instance.caregivers.listMyCaregivers();
+    final payResult = await payments;
+    final careResult = await caregivers;
     if (!mounted) return;
-    if (result case Success(data: final info)) {
-      setState(() => _subscriptionInfo = info);
-    }
+    setState(() {
+      if (payResult case Success(data: final info)) {
+        _subscriptionInfo = info;
+      }
+      if (careResult case Success(data: final data)) {
+        _activeCaregivers = data.caregivers.length;
+        _pendingCaregivers = data.pending.length;
+      }
+    });
   }
 
   Future<void> _logout(AppProvider provider) async {
@@ -79,371 +68,517 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  void _open(Widget screen) {
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
+  }
+
+  String _languageName(AppLocalizations l10n, String code) {
+    return code == 'so' ? l10n.languageSomali : l10n.languageEnglish;
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<AppProvider>();
     final patient = provider.patient;
     final l10n = AppLocalizations.of(context);
+    final palette = AppColors.of(context);
+    final unread = provider.unreadNotificationCount;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: palette.scaffold,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        child: RefreshIndicator(
+          onRefresh: _load,
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
             children: [
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(l10n.profileTitle, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700)),
-                  GestureDetector(
-                    onTap: () => Navigator.pushNamed(context, '/notifications'),
-                    child: Stack(
-                      children: [
-                        const Icon(Icons.notifications_outlined),
-                        if (provider.unreadNotificationCount > 0)
-                          Positioned(
-                            right: 0, top: 0,
-                            child: Container(width: 14, height: 14, decoration: const BoxDecoration(color: AppColors.error, shape: BoxShape.circle),
-                              child: Center(child: Text('${provider.unreadNotificationCount}', style: const TextStyle(color: AppColors.white, fontSize: 8, fontWeight: FontWeight.w700))),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              // Patient info card
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.cardBorder),
-                ),
-                child: Row(
+              SizedBox(
+                height: 48,
+                child: Stack(
+                  alignment: Alignment.center,
                   children: [
-                    CircleAvatar(
-                      radius: 30,
-                      backgroundColor: AppColors.primaryLight,
-                      child: Text(
-                        patient?.name.split(' ').where((n) => n.isNotEmpty).map((n) => n[0]).take(2).join() ?? 'AA',
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.primary),
+                    Text(
+                      l10n.profileTitle,
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: palette.text,
                       ),
                     ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(patient?.name ?? l10n.patientFallback, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-                          Text(
-                            l10n.memberId((patient != null && patient.patientId.isNotEmpty) ? patient.patientId : '–'),
-                            style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
-                          ),
-                          Text(patient?.phone ?? '', style: const TextStyle(fontSize: 12, color: AppColors.textTertiary)),
-                        ],
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const PersonalInfoScreen()),
-                        );
-                      },
-                      child: Row(
-                        children: [
-                          const Icon(Icons.edit, size: 14, color: AppColors.primary),
-                          const SizedBox(width: 4),
-                          Text(l10n.edit, style: const TextStyle(color: AppColors.primary)),
-                        ],
+                    Positioned(
+                      right: 0,
+                      child: IconButton(
+                        tooltip: l10n.notifications,
+                        onPressed: () =>
+                            Navigator.pushNamed(context, '/notifications'),
+                        icon: unread > 0
+                            ? Badge.count(
+                                count: unread,
+                                backgroundColor: AppColors.error,
+                                textColor: AppColors.white,
+                                child: Icon(
+                                  Icons.notifications_outlined,
+                                  color: palette.text,
+                                  size: 26,
+                                ),
+                              )
+                            : Icon(
+                                Icons.notifications_outlined,
+                                color: palette.text,
+                                size: 26,
+                              ),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 12),
-              // Program
-              _ProgramCard(
+              const SizedBox(height: 16),
+              _ProfileHeroCard(
                 patient: patient,
+                fallbackName: l10n.patientFallback,
+                memberIdLabel: l10n.memberId(
+                  (patient != null && patient.patientId.isNotEmpty)
+                      ? patient.patientId
+                      : '–',
+                ),
+                editLabel: l10n.edit,
                 subscription: _subscriptionInfo?.subscription,
                 catalogPlans: _subscriptionInfo?.plans ?? const [],
                 l10n: l10n,
+                onEdit: () => _open(const PersonalInfoScreen()),
+                onCarePlan: () => _open(const SubscriptionScreen()),
               ),
               const SizedBox(height: 20),
-              // My Information
-              Text(l10n.myInformation, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-              const SizedBox(height: 10),
-              _buildNavMenuItem(context, Icons.person, l10n.personalInformation, l10n.updatePersonalDetails, const PersonalInfoScreen()),
-              _buildNavMenuItem(context, Icons.health_and_safety, l10n.healthInformation, l10n.viewHealthSummary, const HealthInfoScreen()),
-              _buildNavMenuItem(context, Icons.medical_information, l10n.medicalHistory, l10n.viewPastRecords, const MedicalHistoryScreen()),
-              _buildNavMenuItem(context, Icons.location_on, l10n.addresses, l10n.manageAddresses, const AddressesScreen()),
-              const SizedBox(height: 20),
-              // My Activity
-              Text(l10n.myActivity, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(child: _ActivityCard(icon: Icons.calendar_today, value: l10n.countUpcoming('${_counts?.upcomingAppointments ?? '–'}'), label: l10n.appointments, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AppointmentsScreen())))),
-                  const SizedBox(width: 8),
-                  Expanded(child: _ActivityCard(icon: Icons.science, value: l10n.countScheduled('${_counts?.scheduledLabTests ?? '–'}'), label: l10n.labTests, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MyLabTestsScreen())))),
-                  const SizedBox(width: 8),
-                  Expanded(child: _ActivityCard(icon: Icons.shopping_bag, value: l10n.countActive('${_counts?.activeOrders ?? '–'}'), label: l10n.orders, onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MyOrdersScreen())))),
-                ],
+              _AccountRow(
+                icon: Icons.person_outline,
+                iconColor: AppColors.primary,
+                title: l10n.personalInformation,
+                subtitle: l10n.personalInfoSubtitle,
+                onTap: () => _open(const PersonalInfoScreen()),
               ),
-              const SizedBox(height: 20),
-              // Account
-              Text(l10n.account, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-              const SizedBox(height: 10),
-              _buildNavMenuItem(context, Icons.card_membership, l10n.subscription, l10n.subscriptionSubtitle, const SubscriptionScreen()),
-              if (provider.isDualRoleUser)
-                GestureDetector(
-                  onTap: () => provider.enterCaregiverPortal(),
-                  child: _ProfileMenuItem(
-                    icon: Icons.favorite_outline,
-                    title: l10n.switchToFamilyCare,
-                    subtitle: l10n.switchToFamilyCareHint,
-                  ),
+              _AccountRow(
+                icon: Icons.favorite_outline,
+                iconColor: AppColors.success,
+                title: l10n.myCarePlan,
+                subtitle: l10n.myCarePlanSubtitle,
+                onTap: () => _open(const SubscriptionScreen()),
+              ),
+              _AccountRow(
+                icon: Icons.groups_outlined,
+                iconColor: AppColors.info,
+                title: l10n.caregiverAndFamily,
+                subtitle: l10n.caregiverFamilySubtitle(
+                  _activeCaregivers,
+                  _pendingCaregivers,
                 ),
-              _buildNavMenuItem(context, Icons.people_outline, l10n.caregiversMenu, l10n.caregiversMenuSubtitle, const CaregiversScreen()),
-              _buildNavMenuItem(context, Icons.volunteer_activism_outlined, l10n.sponsorCareMenu, l10n.sponsorCareMenuSubtitle, const SponsorCareScreen()),
-              _buildNavMenuItem(context, Icons.favorite_border, l10n.mySponsorshipMenu, l10n.mySponsorshipMenuSubtitle, const MySponsorshipScreen()),
-              _buildNavMenuItem(context, Icons.receipt_long, l10n.payments, l10n.paymentsSubtitle, const PaymentHistoryScreen()),
-              _buildNavMenuItem(context, Icons.lock, l10n.privacyAndSecurity, l10n.manageAccountSecurity, const PrivacySecurityScreen()),
-              _buildNavMenuItem(context, Icons.language, l10n.language, l10n.languageSubtitle, const LanguageScreen()),
-              _buildNavMenuItem(context, Icons.settings, l10n.settings, l10n.settingsSubtitle, const SettingsScreen()),
-              GestureDetector(
-                onTap: _loggingOut ? null : () => _logout(provider),
-                child: _ProfileMenuItem(icon: Icons.logout, title: l10n.logOut, subtitle: '', iconColor: AppColors.error),
+                onTap: () => _open(const CaregiversScreen()),
               ),
-              const SizedBox(height: 24),
+              _AccountRow(
+                icon: Icons.settings_outlined,
+                iconColor: palette.textMuted,
+                title: l10n.settings,
+                subtitle: l10n.settingsAccountSubtitle(
+                  _languageName(l10n, provider.locale.languageCode),
+                ),
+                onTap: () => _open(const SettingsScreen()),
+              ),
+              if (provider.isDualRoleUser)
+                _AccountRow(
+                  icon: Icons.favorite_outline,
+                  iconColor: AppColors.primary,
+                  title: l10n.switchToFamilyCare,
+                  subtitle: l10n.switchToFamilyCareHint,
+                  onTap: () => provider.enterCaregiverPortal(),
+                ),
+              _AccountRow(
+                icon: Icons.logout,
+                iconColor: AppColors.error,
+                title: l10n.logOut,
+                subtitle: '',
+                destructive: true,
+                showChevron: !_loggingOut,
+                trailing: _loggingOut
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : null,
+                onTap: _loggingOut ? null : () => _logout(provider),
+              ),
             ],
           ),
         ),
       ),
     );
   }
-  Widget _buildNavMenuItem(BuildContext context, IconData icon, String title, String subtitle, Widget screen) {
-    return GestureDetector(
-      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => screen)),
-      child: _ProfileMenuItem(icon: icon, title: title, subtitle: subtitle),
-    );
-  }
 }
 
-class _ProfileMenuItem extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final Color? iconColor;
-
-  const _ProfileMenuItem({required this.icon, required this.title, required this.subtitle, this.iconColor});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 3),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.cardBorder),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 36, height: 36,
-            decoration: BoxDecoration(
-              color: (iconColor ?? AppColors.primary).withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, size: 18, color: iconColor ?? AppColors.primary),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: iconColor ?? AppColors.textPrimary)),
-                if (subtitle.isNotEmpty) Text(subtitle, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-              ],
-            ),
-          ),
-          const Icon(Icons.chevron_right, color: AppColors.textTertiary, size: 20),
-        ],
-      ),
-    );
-  }
-}
-
-class _ActivityCard extends StatelessWidget {
-  final IconData icon;
-  final String value;
-  final String label;
-  final VoidCallback onTap;
-
-  const _ActivityCard({required this.icon, required this.value, required this.label, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.cardBorder),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, size: 20, color: AppColors.primary),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              Flexible(
-                child: Text(
-                  value,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              Flexible(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 10, color: AppColors.textTertiary),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    ),
-    );
-  }
-}
-
-class _ProgramCard extends StatelessWidget {
+class _ProfileHeroCard extends StatelessWidget {
   final Patient? patient;
+  final String fallbackName;
+  final String memberIdLabel;
+  final String editLabel;
   final Subscription? subscription;
   final List<SubscriptionPlan> catalogPlans;
   final AppLocalizations l10n;
+  final VoidCallback onEdit;
+  final VoidCallback onCarePlan;
 
-  const _ProgramCard({
+  const _ProfileHeroCard({
     required this.patient,
+    required this.fallbackName,
+    required this.memberIdLabel,
+    required this.editLabel,
     required this.subscription,
     required this.catalogPlans,
     required this.l10n,
+    required this.onEdit,
+    required this.onCarePlan,
   });
 
-  String _programName() {
+  String? _planName() {
     final plan = subscription?.plan;
-    if (plan != null && plan.isNotEmpty) {
-      for (final p in catalogPlans) {
-        if (p.name == plan || p.planName == plan) return p.displayName;
-      }
-      return plan;
+    if (plan == null || plan.isEmpty) return null;
+    for (final p in catalogPlans) {
+      if (p.name == plan || p.planName == plan) return p.displayName;
     }
-    final carePlan = patient?.carePlan ?? '';
-    if (carePlan.isNotEmpty) return carePlan;
-    final conditions = patient?.conditions ?? const <String>[];
-    if (conditions.isNotEmpty) return conditions.first;
-    return l10n.yourProgram;
+    return plan;
   }
 
-  String _memberSince() {
-    final start = subscription?.startDate;
-    if (start == null) return '';
-    return 'Member since ${DateFormat('MMM yyyy').format(start)}';
-  }
-
-  ({String text, Color color, IconData icon}) _status() {
+  double _monthlyFee() {
     final sub = subscription;
-    if (sub != null) {
-      if (sub.isOnTrial) {
-        return (text: sub.statusLabel, color: AppColors.primary, icon: Icons.hourglass_bottom);
-      }
-      if (sub.isActive) {
-        return (text: l10n.statusActive, color: AppColors.success, icon: Icons.check_circle);
-      }
-      return (text: sub.statusLabel, color: AppColors.warning, icon: Icons.schedule);
+    if (sub == null) return 0;
+    if (sub.monthlyFee > 0) return sub.monthlyFee;
+    final plan = sub.plan;
+    if (plan == null || plan.isEmpty) return 0;
+    for (final p in catalogPlans) {
+      if (p.name == plan || p.planName == plan) return p.monthlyFee;
     }
-    if (patient?.subscriptionActive == true) {
-      return (text: l10n.statusActive, color: AppColors.success, icon: Icons.check_circle);
+    return 0;
+  }
+
+  String _money(double fee) {
+    final symbol = AppConstants.currencySymbol;
+    if (fee == fee.roundToDouble()) return '$symbol${fee.toInt()}';
+    return '$symbol${fee.toStringAsFixed(2)}';
+  }
+
+  String _shortDate(BuildContext context, DateTime date) {
+    return DateFormat('d MMM', Localizations.localeOf(context).toString())
+        .format(date);
+  }
+
+  ({String text, Color fg, Color bg}) _statusChip(BuildContext context) {
+    final palette = AppColors.of(context);
+    final sub = subscription;
+    if (sub == null) {
+      return (text: '', fg: palette.textFaint, bg: palette.card);
     }
-    final raw = patient?.subscriptionStatus ?? '';
+    if (sub.isOnTrial) {
+      final end = sub.trialEndDate;
+      final text = end != null
+          ? l10n.trialUntil(_shortDate(context, end))
+          : sub.statusLabel;
+      return (text: text, fg: AppColors.primary, bg: palette.primaryMuted);
+    }
+    if (sub.isAwaitingFirstPayment ||
+        sub.status == 'Overdue' ||
+        sub.status == 'Past Due') {
+      return (
+        text: l10n.paymentDueShort,
+        fg: AppColors.error,
+        bg: palette.errorSoft,
+      );
+    }
+    final until = sub.nextBillingDate;
+    if (until != null) {
+      final today = DateTime.now();
+      final endDay = DateTime(until.year, until.month, until.day);
+      final startDay = DateTime(today.year, today.month, today.day);
+      final days = endDay.difference(startDay).inDays;
+      if (days < 0) {
+        return (
+          text: l10n.paymentDueShort,
+          fg: AppColors.error,
+          bg: palette.errorSoft,
+        );
+      }
+      if (days <= 3) {
+        return (
+          text: l10n.dueInDays(days),
+          fg: AppColors.warning,
+          bg: palette.warningSoft,
+        );
+      }
+      return (
+        text: l10n.paidUntil(_shortDate(context, until)),
+        fg: AppColors.success,
+        bg: palette.successSoft,
+      );
+    }
+    if (sub.isActive || patient?.subscriptionActive == true) {
+      return (
+        text: l10n.statusActive,
+        fg: AppColors.success,
+        bg: palette.successSoft,
+      );
+    }
+    final raw = sub.statusLabel;
     if (raw.isNotEmpty) {
-      return (text: raw, color: AppColors.textSecondary, icon: Icons.info_outline);
+      return (text: raw, fg: palette.textMuted, bg: palette.primaryMuted);
     }
-    return (text: '–', color: AppColors.textTertiary, icon: Icons.info_outline);
+    return (text: '', fg: palette.textFaint, bg: palette.card);
   }
 
   @override
   Widget build(BuildContext context) {
-    final status = _status();
-    final since = _memberSince();
+    final palette = AppColors.of(context);
+    final planName = _planName();
+    final fee = _monthlyFee();
+    final chip = _statusChip(context);
+    final planLine = planName == null
+        ? l10n.noCarePlanYet
+        : fee <= 0
+            ? '$planName · ${l10n.freePlanLabel}'
+            : l10n.planPriceAMonth(planName, _money(fee));
+
     return Container(
       width: double.infinity,
-      clipBehavior: Clip.antiAlias,
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.fromLTRB(18, 18, 14, 16),
       decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.cardBorder),
+        color: palette.card,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: palette.border),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(l10n.yourProgram, style: const TextStyle(fontSize: 12, color: AppColors.textTertiary)),
-                const SizedBox(height: 2),
-                Text(
-                  _programName(),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                ),
-                if (since.isNotEmpty)
-                  Text(
-                    since,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CircleAvatar(
+                radius: 32,
+                backgroundColor: palette.primarySoft,
+                child: Text(
+                  patient?.initials ?? '?',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primary,
                   ),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      patient?.name.isNotEmpty == true
+                          ? patient!.name
+                          : fallbackName,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: palette.text,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      memberIdLabel,
+                      style: TextStyle(fontSize: 14, color: palette.textMuted),
+                    ),
+                    if (patient?.phone.isNotEmpty == true)
+                      Text(
+                        patient!.phone,
+                        style: TextStyle(fontSize: 14, color: palette.textFaint),
+                      ),
+                  ],
+                ),
+              ),
+              TextButton(
+                onPressed: onEdit,
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  minimumSize: const Size(0, 40),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.edit_outlined, size: 18),
+                    const SizedBox(width: 4),
+                    Text(
+                      editLabel,
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Divider(height: 1, color: palette.divider),
+          const SizedBox(height: 14),
+          InkWell(
+            onTap: onCarePlan,
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.yourCarePlan,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: palette.textFaint,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          planLine,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: palette.text,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (chip.text.isNotEmpty) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: chip.bg,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        chip.text,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: chip.fg,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AccountRow extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String title;
+  final String subtitle;
+  final VoidCallback? onTap;
+  final bool destructive;
+  final bool showChevron;
+  final Widget? trailing;
+
+  const _AccountRow({
+    required this.icon,
+    required this.iconColor,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+    this.destructive = false,
+    this.showChevron = true,
+    this.trailing,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = AppColors.of(context);
+    final titleColor = destructive ? AppColors.error : palette.text;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Material(
+        color: destructive ? palette.errorSoft : palette.card,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: destructive
+                    ? AppColors.error.withValues(alpha: 0.22)
+                    : palette.border,
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: iconColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(icon, color: iconColor, size: 24),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                          color: titleColor,
+                        ),
+                      ),
+                      if (subtitle.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          subtitle,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: palette.textMuted,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                trailing ??
+                    (showChevron
+                        ? Icon(
+                            Icons.chevron_right,
+                            color: destructive
+                                ? AppColors.error.withValues(alpha: 0.7)
+                                : palette.textFaint,
+                            size: 24,
+                          )
+                        : const SizedBox.shrink()),
               ],
             ),
           ),
-          const SizedBox(width: 8),
-          Flexible(
-            child: StatusBadge(text: status.text, color: status.color, icon: status.icon),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: status.color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(Icons.favorite, color: status.color, size: 20),
-          ),
-        ],
+        ),
       ),
     );
   }

@@ -69,9 +69,10 @@ class ErpNextAuthService implements AuthService {
       return Success(Patient.fromJson(data));
     } on DioException catch (e) {
       log.e('lookupPatient failed', error: e);
-      final msg = e.response?.data?['message']?.toString() ??
-          'Could not find your record. Please try again.';
-      return Failure(msg, statusCode: e.response?.statusCode);
+      return Failure(
+        dioErrorMessage(e, 'Could not find your record. Please try again.'),
+        statusCode: e.response?.statusCode,
+      );
     } catch (e) {
       return Failure(e.toString());
     }

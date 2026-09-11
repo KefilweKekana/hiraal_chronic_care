@@ -10,6 +10,22 @@ import '../../models/otp_delivery.dart';
 
 typedef UnauthorizedCallback = Future<void> Function();
 
+/// Server copy for a duplicate patient mobile (must match hiraal_emr.api.self_register).
+const kMobileAlreadyRegisteredEn =
+    'This mobile number is already registered. Sign in instead.';
+
+/// Prefer localized duplicate-mobile copy when the API sent that error.
+String displayRegistrationError(
+  String message, {
+  required String alreadyRegistered,
+}) {
+  final lower = message.toLowerCase();
+  if (lower.contains('already registered')) {
+    return alreadyRegistered;
+  }
+  return message;
+}
+
 /// Human-readable message from a Frappe/Dio failure (not just the fallback).
 String dioErrorMessage(DioException e, String fallback) {
   final data = e.response?.data;
@@ -51,8 +67,11 @@ String dioErrorMessage(DioException e, String fallback) {
   }
   if (e.type == DioExceptionType.connectionError ||
       e.type == DioExceptionType.unknown) {
-    return 'Cannot reach the server. Open the app at http://localhost:8090 '
-        '(local proxy), not the UAT site directly.';
+    if (kIsWeb) {
+      return "Can't connect to the server. Open ${EnvConfig.baseUrl} "
+          '(the local proxy), not the UAT site in the browser.';
+    }
+    return "Can't connect to the server. Check your internet connection and try again.";
   }
   final network = e.message?.trim();
   if (network != null && network.isNotEmpty) return network;
@@ -267,9 +286,32 @@ class ApiClient {
           if (email != null && email.isNotEmpty) 'email': email,
         },
       );
-      final data = response.data?['message'] as Map<String, dynamic>?;
+      final payload = response.data;
+      if (payload is Map &&
+          (payload['_server_messages'] != null || payload['exception'] != null)) {
+        return Failure(
+          dioErrorMessage(
+            DioException(
+              requestOptions: response.requestOptions,
+              response: response,
+              type: DioExceptionType.badResponse,
+            ),
+            'Registration failed',
+          ),
+        );
+      }
+      final data = payload is Map ? _asStringKeyMap(payload['message']) : null;
       if (data == null || data['success'] != true) {
-        return const Failure('Registration failed');
+        final nested = payload is Map ? payload['message']?.toString() : null;
+        return Failure(
+          (nested != null && nested.trim().isNotEmpty && nested != 'null')
+              ? nested
+              : 'Registration failed',
+        );
+      }
+      // Old backends signed the existing patient in; refuse that as a duplicate.
+      if (data['already_registered'] == true) {
+        return const Failure(kMobileAlreadyRegisteredEn);
       }
       return Success(<String, String>{
         'api_key': data['api_key']?.toString() ?? '',

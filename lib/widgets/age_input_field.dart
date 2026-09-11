@@ -54,7 +54,7 @@ class AgeInputField extends StatelessWidget {
             ),
       style: TextStyle(
         fontSize: 16,
-        color: boxed ? AppColors.textPrimary : AppColors.text(context),
+        color: boxed ? AppColors.of(context).text : AppColors.text(context),
       ),
     );
 
@@ -67,10 +67,10 @@ class AgeInputField extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 8, top: 18),
           child: Text(
             l10n.age,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: AppColors.of(context).text,
             ),
           ),
         ),
@@ -78,9 +78,9 @@ class AgeInputField extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: error != null ? AppColors.error : AppColors.inputBorder,
+              color: error != null ? AppColors.error : AppColors.of(context).inputBorder,
             ),
-            color: AppColors.inputBackground,
+            color: AppColors.of(context).inputFill,
           ),
           child: field,
         ),
@@ -89,7 +89,7 @@ class AgeInputField extends StatelessWidget {
             padding: const EdgeInsets.only(top: 6),
             child: Text(
               error,
-              style: const TextStyle(fontSize: 12, color: AppColors.error),
+              style: TextStyle(fontSize: 12, color: AppColors.error),
             ),
           ),
       ],
