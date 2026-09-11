@@ -2,17 +2,21 @@ import frappe
 
 
 def execute():
-    """Point Patient Health PIN at Hiraal EMR, not Frappe Core.
+    """PIN storage must not use the Core-registered Patient Health PIN DocType.
 
-    A site that created this DocType as custom stored module=Core, so
-    insert tried to import frappe.core.doctype.patient_health_pin.
+    Keep the DocType pointed at Hiraal EMR, and add hidden hash/salt fields
+    on Patient that set_health_pin actually writes.
     """
-    if not frappe.db.exists("DocType", "Patient Health PIN"):
-        return
-    frappe.db.set_value(
-        "DocType",
-        "Patient Health PIN",
-        {"module": "Hiraal EMR", "custom": 0},
-        update_modified=False,
-    )
-    frappe.clear_cache(doctype="Patient Health PIN")
+    if frappe.db.exists("DocType", "Patient Health PIN"):
+        frappe.db.set_value(
+            "DocType",
+            "Patient Health PIN",
+            {"module": "Hiraal EMR", "custom": 0},
+            update_modified=False,
+        )
+        frappe.clear_cache(doctype="Patient Health PIN")
+
+    from hiraal_emr.services.health_pin_service import _ensure_patient_pin_columns
+
+    _ensure_patient_pin_columns()
+    frappe.db.commit()
