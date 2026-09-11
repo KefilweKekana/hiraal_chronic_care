@@ -74,6 +74,13 @@ def patient_has_pin(patient: str) -> bool:
     if not patient:
         return False
     try:
+        if frappe.db.has_column("Patient", "custom_health_pin_hash"):
+            stored = frappe.db.get_value("Patient", patient, "custom_health_pin_hash")
+            if stored:
+                return True
+    except Exception:
+        pass
+    try:
         return bool(frappe.db.exists(DOCTYPE, {"patient": patient}))
     except Exception:
         return False
@@ -169,63 +176,70 @@ def _issue_token(patient: str) -> str:
 
 
 def _load_row(patient: str):
-    name = frappe.db.exists(DOCTYPE, {"patient": patient})
-    if not name:
+    """Prefer Patient custom columns. Never instantiate Patient Health PIN
+    (UAT registered that DocType under Core and its controller import fails)."""
+    try:
+        if frappe.db.has_column("Patient", "custom_health_pin_hash"):
+            row = frappe.db.get_value(
+                "Patient",
+                patient,
+                ["custom_health_pin_hash", "custom_health_pin_salt"],
+                as_dict=True,
+            )
+            if row and row.get("custom_health_pin_hash") and row.get("custom_health_pin_salt"):
+                return frappe._dict(
+                    name=patient,
+                    pin_hash=row.custom_health_pin_hash,
+                    pin_salt=row.custom_health_pin_salt,
+                )
+    except Exception:
+        pass
+    try:
+        name = frappe.db.exists(DOCTYPE, {"patient": patient})
+        if not name:
+            return None
+        return frappe.db.get_value(DOCTYPE, name, ["name", "pin_hash", "pin_salt"], as_dict=True)
+    except Exception:
         return None
-    return frappe.db.get_value(DOCTYPE, name, ["name", "pin_hash", "pin_salt"], as_dict=True)
 
 
-def _repair_doctype_module():
-    """UAT registered this DocType under Core; the controller is in hiraal_emr."""
-    if not frappe.db.exists("DocType", DOCTYPE):
-        return
-    module = frappe.db.get_value("DocType", DOCTYPE, "module")
-    custom = frappe.db.get_value("DocType", DOCTYPE, "custom")
-    if module == "Hiraal EMR" and not custom:
-        return
-    frappe.db.set_value(
-        "DocType",
-        DOCTYPE,
-        {"module": "Hiraal EMR", "custom": 0},
-        update_modified=False,
-    )
-    frappe.clear_cache(doctype=DOCTYPE)
+def _ensure_patient_pin_columns():
+    """Hidden hash/salt columns on Patient so Save PIN never loads a DocType controller."""
+    for fieldname, label in (
+        ("custom_health_pin_hash", "Health PIN Hash"),
+        ("custom_health_pin_salt", "Health PIN Salt"),
+    ):
+        if frappe.db.exists("Custom Field", {"dt": "Patient", "fieldname": fieldname}):
+            continue
+        frappe.get_doc(
+            {
+                "doctype": "Custom Field",
+                "dt": "Patient",
+                "fieldname": fieldname,
+                "label": label,
+                "fieldtype": "Data",
+                "hidden": 1,
+                "read_only": 1,
+                "no_copy": 1,
+                "insert_after": "mobile",
+            }
+        ).insert(ignore_permissions=True)
+    frappe.clear_cache(doctype="Patient")
 
 
 def _write_pin(patient: str, pin: str):
-    _repair_doctype_module()
+    _ensure_patient_pin_columns()
     salt = new_salt()
     digest = hash_pin(pin, salt)
-    existing = frappe.db.exists(DOCTYPE, {"patient": patient})
-    now = frappe.utils.now()
-    user = frappe.session.user or "Administrator"
-    table = f"`tab{DOCTYPE}`"
-    try:
-        if existing:
-            doc = frappe.get_doc(DOCTYPE, existing)
-            doc.pin_hash = digest
-            doc.pin_salt = salt
-            doc.save(ignore_permissions=True)
-        else:
-            doc = frappe.new_doc(DOCTYPE)
-            doc.patient = patient
-            doc.pin_hash = digest
-            doc.pin_salt = salt
-            doc.insert(ignore_permissions=True)
-    except ModuleNotFoundError:
-        # DocType row still pointed at Core; write the table directly.
-        if existing:
-            frappe.db.sql(
-                f"UPDATE {table} SET pin_hash=%s, pin_salt=%s, modified=%s, modified_by=%s WHERE name=%s",
-                (digest, salt, now, user, existing),
-            )
-        else:
-            frappe.db.sql(
-                f"""INSERT INTO {table}
-                (name, creation, modified, modified_by, owner, docstatus, idx, patient, pin_hash, pin_salt)
-                VALUES (%s, %s, %s, %s, %s, 0, 0, %s, %s, %s)""",
-                (patient, now, now, user, user, patient, digest, salt),
-            )
+    frappe.db.set_value(
+        "Patient",
+        patient,
+        {
+            "custom_health_pin_hash": digest,
+            "custom_health_pin_salt": salt,
+        },
+        update_modified=False,
+    )
     frappe.db.commit()
     _clear_fails(patient)
 
