@@ -175,21 +175,57 @@ def _load_row(patient: str):
     return frappe.db.get_value(DOCTYPE, name, ["name", "pin_hash", "pin_salt"], as_dict=True)
 
 
+def _repair_doctype_module():
+    """UAT registered this DocType under Core; the controller is in hiraal_emr."""
+    if not frappe.db.exists("DocType", DOCTYPE):
+        return
+    module = frappe.db.get_value("DocType", DOCTYPE, "module")
+    custom = frappe.db.get_value("DocType", DOCTYPE, "custom")
+    if module == "Hiraal EMR" and not custom:
+        return
+    frappe.db.set_value(
+        "DocType",
+        DOCTYPE,
+        {"module": "Hiraal EMR", "custom": 0},
+        update_modified=False,
+    )
+    frappe.clear_cache(doctype=DOCTYPE)
+
+
 def _write_pin(patient: str, pin: str):
+    _repair_doctype_module()
     salt = new_salt()
     digest = hash_pin(pin, salt)
     existing = frappe.db.exists(DOCTYPE, {"patient": patient})
-    if existing:
-        doc = frappe.get_doc(DOCTYPE, existing)
-        doc.pin_hash = digest
-        doc.pin_salt = salt
-        doc.save(ignore_permissions=True)
-    else:
-        doc = frappe.new_doc(DOCTYPE)
-        doc.patient = patient
-        doc.pin_hash = digest
-        doc.pin_salt = salt
-        doc.insert(ignore_permissions=True)
+    now = frappe.utils.now()
+    user = frappe.session.user or "Administrator"
+    table = f"`tab{DOCTYPE}`"
+    try:
+        if existing:
+            doc = frappe.get_doc(DOCTYPE, existing)
+            doc.pin_hash = digest
+            doc.pin_salt = salt
+            doc.save(ignore_permissions=True)
+        else:
+            doc = frappe.new_doc(DOCTYPE)
+            doc.patient = patient
+            doc.pin_hash = digest
+            doc.pin_salt = salt
+            doc.insert(ignore_permissions=True)
+    except ModuleNotFoundError:
+        # DocType row still pointed at Core; write the table directly.
+        if existing:
+            frappe.db.sql(
+                f"UPDATE {table} SET pin_hash=%s, pin_salt=%s, modified=%s, modified_by=%s WHERE name=%s",
+                (digest, salt, now, user, existing),
+            )
+        else:
+            frappe.db.sql(
+                f"""INSERT INTO {table}
+                (name, creation, modified, modified_by, owner, docstatus, idx, patient, pin_hash, pin_salt)
+                VALUES (%s, %s, %s, %s, %s, 0, 0, %s, %s, %s)""",
+                (patient, now, now, user, user, patient, digest, salt),
+            )
     frappe.db.commit()
     _clear_fails(patient)
 

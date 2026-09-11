@@ -2,3 +2,4 @@
 
 [post_model_sync]
 hiraal_emr.patches.v1_0.seed_subscription_plans
+hiraal_emr.patches.v1_0.fix_patient_health_pin_module
