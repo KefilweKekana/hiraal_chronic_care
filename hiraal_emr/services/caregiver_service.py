@@ -129,11 +129,10 @@ def _apply_permissions(doc, permissions: dict):
 
 
 def _patient_by_phone(phone: str):
+    from hiraal_emr.api import _mobile_candidates
+
     normalized = normalize_phone("", phone)
-    digits = re.sub(r"\D", "", normalized)
-    candidates = {normalized, digits, f"+{digits}"}
-    if len(digits) > 9:
-        candidates.add(digits[-9:])
+    candidates = set(_mobile_candidates(phone)) | set(_mobile_candidates(normalized))
     rows = frappe.get_all(
         "Patient",
         filters={"mobile": ["in", list(candidates)]},

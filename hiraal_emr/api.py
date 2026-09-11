@@ -788,7 +788,11 @@ def _normalize_otp_mobile(mobile):
 
 def _mobile_candidates(mobile):
     """Common stored formats for a phone number, so patient lookup matches
-    whether it was saved as +252…, 252…, 0…, or the bare national number."""
+    whether it was saved as +252…, 252…, 0…, or the bare national number.
+
+    Somali 061… / 063… / 9-digit 6… all collapse to the same 252… MSISDN, so
+    ``0634063505`` and ``252634063505`` are treated as one number.
+    """
     raw = str(mobile or "").strip()
     digits = "".join(c for c in raw if c.isdigit())
     nsn = digits[3:] if digits.startswith("252") else digits
@@ -797,6 +801,35 @@ def _mobile_candidates(mobile):
     if nsn:
         cands.update({nsn, "0" + nsn, "252" + nsn, "+252" + nsn})
     return [c for c in cands if c]
+
+
+def _find_patient_by_mobile(mobile):
+    """Any Patient (any status) whose mobile or linked User matches [mobile].
+
+    A caregiver-only User (no Patient) is not a match — that number may still
+    be used to self-register as a patient. A User that *is* linked to a Patient
+    is treated as the same person even if Patient.mobile is stored differently.
+    """
+    candidates = _mobile_candidates(mobile)
+    if not candidates:
+        return None
+    existing = frappe.db.get_value(
+        "Patient",
+        {"mobile": ["in", candidates]},
+        ["name", "patient_name", "status"],
+        as_dict=True,
+    )
+    if existing:
+        return existing
+    user = frappe.db.get_value("User", {"mobile_no": ["in", candidates]}, "name")
+    if not user:
+        return None
+    return frappe.db.get_value(
+        "Patient",
+        {"user_id": user},
+        ["name", "patient_name", "status"],
+        as_dict=True,
+    )
 
 
 def _provision_patient_user(patient_name, patient_label, mobile):
@@ -915,13 +948,14 @@ def self_register(full_name=None, mobile=None, otp=None, email=None,
     """Create a new patient account from the app after verifying phone ownership
     by OTP (SMS channel).
 
-    The account is created **Active** so the patient can sign in immediately,
-    but it has no subscription — the app gates features until the patient
-    subscribes to a plan and pays. Returns API credentials just like verify_otp,
-    so the app logs the new patient straight in.
+    Duplicate mobiles are refused (any Patient status, including the same
+    number stored as 063… vs 252…). The account is created **Active** so the
+    patient can sign in immediately, but it has no subscription — the app gates
+    features until the patient subscribes to a plan and pays. Returns API
+    credentials just like verify_otp, so the app logs the new patient straight in.
     """
     full_name = (full_name or "").strip()
-    mobile = str(mobile or "").strip()
+    mobile = _normalize_otp_mobile(str(mobile or "").strip())
     otp = str(otp or "").strip()
     email = ((email or "").strip().lower()) or None
     sex = (sex or "").strip() or None
@@ -930,7 +964,7 @@ def self_register(full_name=None, mobile=None, otp=None, email=None,
     # ── validate ──
     if len(full_name) < 2:
         frappe.throw(_("Please enter your full name"))
-    if len(mobile) < 6:
+    if not mobile or len(mobile) < 6:
         frappe.throw(_("A valid phone number is required"))
     if not sex:
         frappe.throw(_("Please select your gender"))
@@ -938,6 +972,8 @@ def self_register(full_name=None, mobile=None, otp=None, email=None,
         frappe.throw(_("Your date of birth is required"))
 
     # ── verify phone ownership (do not share the OTP *send* quota) ──
+    # OTP first: a duplicate check before verify would reveal that the number
+    # is already registered without proving ownership of the phone.
     if not otp_verify(mobile, otp):
         frappe.throw(_("Invalid or expired code"), frappe.AuthenticationError)
 
@@ -945,22 +981,11 @@ def self_register(full_name=None, mobile=None, otp=None, email=None,
     if not frappe.db.exists("Gender", sex):
         frappe.throw(_("Please select a valid gender"))
 
-    # ── already registered? make it idempotent, don't create a duplicate ──
-    existing = frappe.db.get_value(
-        "Patient", {"mobile": ["in", _mobile_candidates(mobile)]},
-        ["name", "patient_name", "status"], as_dict=True,
-    )
-    if not existing and email:
-        existing = frappe.db.get_value(
-            "Patient", {"email": email}, ["name", "patient_name", "status"], as_dict=True,
-        )
-    if existing:
-        if existing.status == "Active":
-            # Their number is already an account — just sign them in.
-            result = _issue_login(existing, contact_mobile=mobile)
-            result["already_registered"] = True
-            return result
-        frappe.throw(_("This number is already registered. Please contact the clinic."))
+    # ── already a Patient? refuse — do not reuse / sign them in ──
+    if _find_patient_by_mobile(mobile):
+        frappe.throw(_("This mobile number is already registered. Sign in instead."))
+    if email and frappe.db.get_value("Patient", {"email": email}, "name"):
+        frappe.throw(_("This email is already registered. Sign in instead."))
 
     # ── create the patient ──
     patient = frappe.new_doc("Patient")
