@@ -45,21 +45,58 @@ def generate_otp(mobile: str, length: int = OTP_LENGTH) -> str:
 
 
 def verify_otp(mobile: str, otp: str) -> bool:
-    """Verify an OTP against the cached value and invalidate it on success."""
-    cache_key = _cache_key(mobile)
-    fail_key = f"hiraal_otp_fail:{cache_key}"
+    """Verify an OTP against the cached value and invalidate it on success.
+
+    Tries every normalised form of [mobile] (063… vs 252…) so request and
+    verify still match when the app and Patient.mobile use different formats.
+    """
+    code = str(otp or "").strip()
+    if not code:
+        return False
+
+    candidates = _otp_mobile_candidates(mobile)
+    fail_key = f"hiraal_otp_fail:{_cache_key(candidates[0] if candidates else mobile)}"
     fails = int(frappe.cache().get_value(fail_key) or 0)
     if fails >= OTP_FAIL_LIMIT:
         return False
 
-    cached_otp = frappe.cache().get_value(cache_key)
-    if cached_otp is not None and str(cached_otp).strip() == str(otp).strip():
-        frappe.cache().delete_value(cache_key)
-        frappe.cache().delete_value(fail_key)
-        return True
+    for cand in candidates:
+        cache_key = _cache_key(cand)
+        cached_otp = frappe.cache().get_value(cache_key)
+        if cached_otp is not None and str(cached_otp).strip() == code:
+            frappe.cache().delete_value(cache_key)
+            frappe.cache().delete_value(fail_key)
+            # Clear sibling keys so a second format cannot be reused.
+            for other in candidates:
+                if other != cand:
+                    frappe.cache().delete_value(_cache_key(other))
+            return True
 
     frappe.cache().set_value(fail_key, fails + 1, expires_in_sec=OTP_FAIL_WINDOW_SEC)
     return False
+
+
+def _otp_mobile_candidates(mobile: str) -> list[str]:
+    """Unique phone forms to look up a cached OTP."""
+    raw = str(mobile or "").strip()
+    out: list[str] = []
+    seen: set[str] = set()
+    try:
+        from hiraal_emr.api import _mobile_candidates, _normalize_otp_mobile
+
+        for m in (raw, _normalize_otp_mobile(raw)):
+            if not m:
+                continue
+            for c in _mobile_candidates(m):
+                if c and c not in seen:
+                    seen.add(c)
+                    out.append(c)
+    except Exception:
+        if raw and raw not in seen:
+            out.append(raw)
+    if raw and raw not in seen:
+        out.insert(0, raw)
+    return out or ([raw] if raw else [])
 
 
 def otp_wait_message(retry_after: int) -> str:

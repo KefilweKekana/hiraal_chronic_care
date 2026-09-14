@@ -6,7 +6,7 @@ no Practitioner Schedule, return an empty-state payload the app can render.
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time as dt_time
 
 import frappe
 from frappe.utils import add_days, get_datetime, getdate, now_datetime, today
@@ -58,12 +58,21 @@ def _slots_from_healthcare_payload(payload) -> list[dict]:
     for block in slot_details or []:
         if not isinstance(block, dict):
             continue
-        avail = block.get("avail_slot") or block.get("available_slots") or block.get("slots") or []
-        booked = {
-            str(s.get("from_time") or s.get("appointment_time") or s)
-            for s in (block.get("appointments") or block.get("booked") or [])
-            if s
-        }
+        avail = (
+            block.get("avail_slot")
+            or block.get("available_slots")
+            or block.get("slots")
+            or block.get("slot")
+            or []
+        )
+        booked = set()
+        for s in block.get("appointments") or block.get("booked") or []:
+            if not s:
+                continue
+            if isinstance(s, dict):
+                booked.add(_as_time_str(s.get("from_time") or s.get("appointment_time") or s))
+            else:
+                booked.add(_as_time_str(s))
         for slot in avail:
             if isinstance(slot, dict):
                 start = slot.get("from_time") or slot.get("start") or slot.get("time")
@@ -74,6 +83,8 @@ def _slots_from_healthcare_payload(payload) -> list[dict]:
             if not start:
                 continue
             time_str = _as_time_str(start)
+            if not time_str:
+                continue
             is_free = bool(available) and time_str not in booked
             slots.append({
                 "time": time_str,
@@ -84,12 +95,32 @@ def _slots_from_healthcare_payload(payload) -> list[dict]:
 
 
 def _as_time_str(value) -> str:
-    raw = str(value)
+    """Normalise MySQL TIME / timedelta / datetime / string to HH:MM:SS."""
+    if value is None:
+        return ""
+    if isinstance(value, timedelta):
+        total = int(value.total_seconds()) % (24 * 3600)
+        hours, rem = divmod(total, 3600)
+        minutes, seconds = divmod(rem, 60)
+        return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+    if isinstance(value, dt_time):
+        return value.strftime("%H:%M:%S")
+    if isinstance(value, datetime):
+        return value.strftime("%H:%M:%S")
+    raw = str(value).strip()
+    if not raw:
+        return ""
     if " " in raw:
         raw = raw.split(" ")[-1]
+    # "9:00:00" / "09:00" / "9:00"
     parts = raw.split(":")
-    if len(parts) >= 2:
-        return f"{int(parts[0]):02d}:{int(parts[1]):02d}:00"
+    try:
+        if len(parts) >= 2:
+            h, m = int(parts[0]), int(parts[1])
+            s = int(float(parts[2])) if len(parts) > 2 else 0
+            return f"{h:02d}:{m:02d}:{s:02d}"
+    except Exception:
+        return raw
     return raw
 
 
@@ -101,20 +132,72 @@ def _pretty_time(time_str: str) -> str:
         return time_str
 
 
+def _schedule_names_for_practitioner(practitioner: str) -> list[str]:
+    """Collect Practitioner Schedule names linked to this doctor."""
+    names: list[str] = []
+    seen: set[str] = set()
+
+    def _add(name):
+        if name and name not in seen and frappe.db.exists("Practitioner Schedule", name):
+            seen.add(name)
+            names.append(name)
+
+    try:
+        pract = frappe.get_doc("Healthcare Practitioner", practitioner)
+        # Any child table that links a schedule (name varies by Healthcare version).
+        for tf in pract.meta.get_table_fields() or []:
+            for row in pract.get(tf.fieldname) or []:
+                for key in ("schedule", "practitioner_schedule", "practitioner_schedules"):
+                    _add(row.get(key) if hasattr(row, "get") else getattr(row, key, None))
+        for key in ("default_schedule", "schedule"):
+            _add(pract.get(key))
+    except Exception:
+        frappe.logger("hiraal_slots").exception("load practitioner schedules failed")
+
+    # Standalone child DocType used by some Healthcare versions.
+    for dt in (
+        "Practitioner Service Unit Schedule",
+        "Practitioner Schedule Detail",
+    ):
+        if not frappe.db.exists("DocType", dt):
+            continue
+        try:
+            meta = frappe.get_meta(dt)
+            fields = {f.fieldname for f in meta.fields}
+            parent_field = "parent" if "parent" in fields or True else None
+            schedule_field = next(
+                (f for f in ("schedule", "practitioner_schedule") if f in fields),
+                None,
+            )
+            if not schedule_field:
+                continue
+            filters = {}
+            if "parent" in fields:
+                filters["parent"] = practitioner
+            elif "practitioner" in fields:
+                filters["practitioner"] = practitioner
+            else:
+                continue
+            rows = frappe.get_all(
+                dt,
+                filters=filters,
+                fields=[schedule_field],
+                ignore_permissions=True,
+            )
+            for r in rows:
+                _add(r.get(schedule_field))
+        except Exception:
+            frappe.logger("hiraal_slots").exception("scan %s for schedules failed", dt)
+
+    return names
+
+
 def _slots_from_practitioner_schedule(practitioner: str, date) -> list[dict]:
     """Read Practitioner Schedule child table when Healthcare helper is unavailable."""
     if not frappe.db.exists("DocType", "Practitioner Schedule"):
         return []
-    weekday = getdate(date).strftime("%A")
-    schedules = []
-    try:
-        pract = frappe.get_doc("Healthcare Practitioner", practitioner)
-        for row in pract.get("practitioner_schedules") or []:
-            if row.get("schedule"):
-                schedules.append(row.get("schedule"))
-    except Exception:
-        frappe.logger("hiraal_slots").exception("load practitioner schedules failed")
-
+    weekday = getdate(date).strftime("%A")  # English Monday…Sunday
+    schedules = _schedule_names_for_practitioner(practitioner)
     if not schedules:
         return []
 
@@ -125,16 +208,23 @@ def _slots_from_practitioner_schedule(practitioner: str, date) -> list[dict]:
             sch = frappe.get_doc("Practitioner Schedule", sch_name)
         except Exception:
             continue
+        if sch.get("disabled"):
+            continue
         for time_slot in sch.get("time_slots") or []:
             day = (time_slot.get("day") or "").strip()
             if day and day.lower() != weekday.lower():
                 continue
             start = _as_time_str(time_slot.get("from_time"))
             end = _as_time_str(time_slot.get("to_time"))
-            duration = int(time_slot.get("duration") or sch.get("duration") or 30)
+            duration = int(
+                time_slot.get("duration")
+                or sch.get("time_slot_duration")
+                or sch.get("duration")
+                or 30
+            )
             cursor = _parse_time(start)
             end_t = _parse_time(end)
-            if not cursor or not end_t:
+            if not cursor or not end_t or duration <= 0:
                 continue
             while cursor + timedelta(minutes=duration) <= end_t + timedelta(seconds=1):
                 time_str = cursor.strftime("%H:%M:%S")
@@ -153,7 +243,7 @@ def _slots_from_practitioner_schedule(practitioner: str, date) -> list[dict]:
 
 def _parse_time(time_str: str):
     try:
-        return datetime.strptime(time_str[:8], "%H:%M:%S")
+        return datetime.strptime(_as_time_str(time_str)[:8], "%H:%M:%S")
     except Exception:
         return None
 
@@ -199,6 +289,7 @@ def get_available_slots(practitioner: str, days: int = 14, visit_type: str | Non
             "message": "No schedule found for this doctor.",
         }
 
+    schedule_names = _schedule_names_for_practitioner(practitioner)
     out_days = []
     start = getdate(today())
     now = now_datetime()
@@ -209,8 +300,6 @@ def get_available_slots(practitioner: str, days: int = 14, visit_type: str | Non
         slots = _slots_from_healthcare_payload(payload)
         if not slots:
             slots = _slots_from_practitioner_schedule(practitioner, d)
-        # Drop times that have already passed today; keep them disabled rather
-        # than hidden when they are in the past on the same day.
         normalised = []
         for s in slots:
             time_str = s["time"]
@@ -238,16 +327,25 @@ def get_available_slots(practitioner: str, days: int = 14, visit_type: str | Non
         })
 
     empty = not any_slot
+    if empty and not schedule_names:
+        message = (
+            "No schedule is linked to this doctor. "
+            "Open Healthcare Practitioner and add a Practitioner Schedule."
+        )
+    elif empty:
+        message = (
+            "No available times yet. Check that the Practitioner Schedule "
+            "has time slots for the coming days."
+        )
+    else:
+        message = None
     return {
         "success": True,
         "practitioner": practitioner,
+        "schedules": schedule_names,
         "days": out_days,
         "empty": empty,
-        "message": (
-            "No available times yet. Ask the clinic to set a Practitioner Schedule."
-            if empty
-            else None
-        ),
+        "message": message,
     }
 
 
@@ -264,7 +362,6 @@ def slot_is_bookable(practitioner: str, appointment_date, appointment_time) -> b
     if not slots:
         slots = _slots_from_practitioner_schedule(practitioner, appointment_date)
     if not slots:
-        # No schedule published for this day.
         return False
     for s in slots:
         if s.get("time") == time_str:

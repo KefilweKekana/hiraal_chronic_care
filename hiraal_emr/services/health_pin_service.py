@@ -347,12 +347,14 @@ def reset_health_pin(otp=None, new_pin=None, mobile=None):
         frappe.throw(_("A verification code is required"))
 
     own = _own_patient()
+    client_mobile = (mobile or "").strip()
     if own:
-        # Always OTP the number on the patient record, not a caller-supplied one.
-        target_mobile = frappe.db.get_value("Patient", own, "mobile")
+        # Prefer the number on the patient record; also try the number the app
+        # used to request the OTP (formats often differ: 063… vs 252…).
+        target_mobile = frappe.db.get_value("Patient", own, "mobile") or client_mobile
         patient = own
     else:
-        target_mobile = (mobile or "").strip()
+        target_mobile = client_mobile
         if not target_mobile:
             frappe.throw(_("A valid phone number is required"))
         from hiraal_emr.api import _mobile_candidates
@@ -365,7 +367,8 @@ def reset_health_pin(otp=None, new_pin=None, mobile=None):
         if not patient:
             frappe.throw(_("Patient not found"), frappe.AuthenticationError)
 
-    if not otp_verify(target_mobile, code):
+    # verify_otp tries every normalised form of the mobile.
+    if not (otp_verify(target_mobile, code) or (client_mobile and otp_verify(client_mobile, code))):
         frappe.throw(_("Invalid or expired code"), frappe.AuthenticationError)
 
     _write_pin(patient, pin)
