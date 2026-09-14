@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
@@ -73,6 +74,10 @@ Future<void> main() async {
 }
 
 Future<void> _initAndRun() async {
+  // Keep calendar formatting on English. Somali UI copy still comes from
+  // AppLocalizations; intl has no Somali date symbols and would blank screens.
+  Intl.defaultLocale = 'en';
+
   // Initialize service locator (mock or ERPNext).
   ServiceLocator.instance.init();
 

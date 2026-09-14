@@ -265,8 +265,12 @@ class _ProfileHeroCard extends StatelessWidget {
   }
 
   String _shortDate(BuildContext context, DateTime date) {
-    return DateFormat('d MMM', Localizations.localeOf(context).toString())
-        .format(date);
+    // Somali has no intl date symbols — always format dates in English.
+    try {
+      return DateFormat('d MMM', 'en').format(date);
+    } catch (_) {
+      return '${date.day}/${date.month}/${date.year}';
+    }
   }
 
   ({String text, Color fg, Color bg}) _statusChip(BuildContext context) {

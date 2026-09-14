@@ -315,7 +315,17 @@ class _ForgotHealthPinScreenState extends State<ForgotHealthPinScreen> {
 
   String get _phone {
     final p = context.read<AppProvider>();
-    return p.phoneNumber.isNotEmpty ? p.phoneNumber : (p.patient?.phone ?? '');
+    final fromPatient = p.patient?.phone.trim() ?? '';
+    if (fromPatient.isNotEmpty) return fromPatient;
+    return p.phoneNumber.trim();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && !_codeSent && !_busy) _sendCode();
+    });
   }
 
   void _tickResend(int seconds) {
