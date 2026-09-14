@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import '../../core/theme/app_colors.dart';
-import '../../services/biometric_service.dart';
+import '../../l10n/app_localizations.dart';
+import '../../providers/app_provider.dart';
+import '../../providers/health_pin_controller.dart';
+import '../auth/health_pin_unlock.dart';
 
 class ErrorScreen extends StatelessWidget {
   final VoidCallback? onRetry;
@@ -116,33 +121,34 @@ class SessionExpiredScreen extends StatelessWidget {
   const SessionExpiredScreen({super.key, required this.onLogin, required this.onBack});
 
   Future<void> _handleLogin(BuildContext context) async {
-    final biometric = BiometricService.instance;
-    final canCheck = await biometric.canCheckBiometrics;
-    final isSupported = await biometric.isDeviceSupported;
-    if (canCheck && isSupported) {
-      final didAuth = await biometric.authenticate();
-      if (didAuth) {
-        onLogin();
-        return;
+    final l10n = AppLocalizations.of(context);
+    final provider = context.read<AppProvider>();
+    final authOk = await provider.attachPersistedApiAuth();
+    final patient = await provider.peekPersistedPatient();
+    if (authOk && patient != null && context.mounted) {
+      final ok = await Navigator.of(context).push<bool>(
+        MaterialPageRoute(
+          builder: (_) => HealthPinUnlockPage(patientId: patient.id),
+        ),
+      );
+      if (ok == true && context.mounted) {
+        context.read<HealthPinController>().markUnlocked(patient.id);
+        final restored = await provider.tryRestoreSession();
+        if (restored) return;
       }
-      // Biometric failed — stay on this screen; only a successful scan logs in.
-      if (context.mounted) {
+      if (context.mounted && ok != true) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Biometric authentication failed. Please try again.'),
-            backgroundColor: AppColors.warning,
-          ),
+          SnackBar(content: Text(l10n.healthPinWrong)),
         );
       }
-      return;
+      if (ok == true) return;
     }
-    // No biometrics on this device — fall back to the normal OTP login
-    // instead of stranding the user here.
     onLogin();
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: AppColors.of(context).scaffold,
       body: SafeArea(
@@ -195,8 +201,8 @@ class SessionExpiredScreen extends StatelessWidget {
                 width: double.infinity, height: 56,
                 child: ElevatedButton.icon(
                   onPressed: () => _handleLogin(context),
-                  icon: Icon(Icons.fingerprint, size: 20),
-                  label: const Text('Log In Again'),
+                  icon: const Icon(Icons.lock_outline, size: 20),
+                  label: Text(l10n.logInWithHealthPin),
                   style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
                 ),
               ),

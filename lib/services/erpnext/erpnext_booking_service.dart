@@ -319,6 +319,77 @@ class ErpNextBookingService implements BookingService {
   }
 
   @override
+  Future<Result<MedicalRecordsBundle>> getMyMedicalRecords() async {
+    try {
+      final response =
+          await _api.dio.post('/method/hiraal_emr.api.get_my_medical_records');
+      final msg = response.data?['message'];
+      final map = msg is Map ? Map<String, dynamic>.from(msg) : <String, dynamic>{};
+      return Success(MedicalRecordsBundle.fromJson(map));
+    } on DioException catch (e) {
+      log.e('getMyMedicalRecords failed', error: e);
+      return Failure(
+        _parseServerError(e.response?.data, 'Failed to load medical records'),
+        statusCode: e.response?.statusCode,
+      );
+    } catch (e) {
+      return Failure(e.toString());
+    }
+  }
+
+  @override
+  Future<Result<LabTestDetail>> getMyLabTestDetail(String labTestId) async {
+    try {
+      final response = await _api.dio.post(
+        '/method/hiraal_emr.api.get_my_lab_test_detail',
+        data: {'name': labTestId},
+      );
+      final msg = response.data?['message'];
+      final map = msg is Map ? Map<String, dynamic>.from(msg) : <String, dynamic>{};
+      return Success(LabTestDetail.fromJson(map));
+    } on DioException catch (e) {
+      log.e('getMyLabTestDetail failed', error: e);
+      return Failure(
+        _parseServerError(e.response?.data, 'Failed to load lab result'),
+        statusCode: e.response?.statusCode,
+      );
+    } catch (e) {
+      return Failure(e.toString());
+    }
+  }
+
+  @override
+  Future<Result<Map<String, dynamic>>> updateMyProfile({
+    String? fullName,
+    String? sex,
+    int? age,
+    String? mobile,
+  }) async {
+    try {
+      final response = await _api.dio.post(
+        '/method/hiraal_emr.api.update_my_profile',
+        data: {
+          if (fullName != null) 'patient_name': fullName,
+          if (sex != null) 'sex': sex,
+          if (age != null) 'age': age,
+          if (mobile != null) 'mobile': mobile,
+        },
+      );
+      final msg = response.data?['message'];
+      final map = msg is Map ? Map<String, dynamic>.from(msg) : <String, dynamic>{};
+      return Success(map);
+    } on DioException catch (e) {
+      log.e('updateMyProfile failed', error: e);
+      return Failure(
+        _parseServerError(e.response?.data, 'Could not save your changes'),
+        statusCode: e.response?.statusCode,
+      );
+    } catch (e) {
+      return Failure(e.toString());
+    }
+  }
+
+  @override
   Future<Result<void>> cancelMyLabTest(String labTestId) async {
     try {
       await _api.dio.post(

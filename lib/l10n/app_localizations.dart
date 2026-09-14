@@ -212,6 +212,18 @@ abstract class AppLocalizations {
   /// **'Log in with {bioLabel}'**
   String logInWithBio(String bioLabel);
 
+  /// No description provided for @unlockWithHealthPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your 4-digit health PIN to continue'**
+  String get unlockWithHealthPin;
+
+  /// No description provided for @logInWithHealthPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock with PIN'**
+  String get logInWithHealthPin;
+
   /// No description provided for @signInAnotherWay.
   ///
   /// In en, this message translates to:
@@ -4777,6 +4789,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Clinic'**
   String get clinicLabel;
+
+  /// No description provided for @saveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get saveChanges;
+
+  /// No description provided for @changesSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes saved'**
+  String get changesSaved;
+
+  /// No description provided for @enterValidAge.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid age between 1 and 120'**
+  String get enterValidAge;
+
+  /// No description provided for @otherLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get otherLabel;
+
+  /// No description provided for @medicalRecordsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Medical Records'**
+  String get medicalRecordsTitle;
+
+  /// No description provided for @labResultsAndNurseNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Lab results & nurse notes'**
+  String get labResultsAndNurseNotes;
+
+  /// No description provided for @medicalRecordsCardSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} lab results · PIN protected'**
+  String medicalRecordsCardSubtitle(int count);
+
+  /// No description provided for @medicalRecordsUnlockedBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocked with your PIN. Locks again when you leave.'**
+  String get medicalRecordsUnlockedBanner;
+
+  /// No description provided for @labResultsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Lab results'**
+  String get labResultsSection;
+
+  /// No description provided for @nurseNotesSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Nurse notes'**
+  String get nurseNotesSection;
+
+  /// No description provided for @noLabResultsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No lab results yet'**
+  String get noLabResultsYet;
+
+  /// No description provided for @noNurseNotesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No nurse notes yet'**
+  String get noNurseNotesYet;
+
+  /// No description provided for @toWatchCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} to watch'**
+  String toWatchCount(int count);
+
+  /// No description provided for @labResultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lab Result'**
+  String get labResultTitle;
+
+  /// No description provided for @whatYourDoctorSays.
+  ///
+  /// In en, this message translates to:
+  /// **'What your doctor says'**
+  String get whatYourDoctorSays;
+
+  /// No description provided for @viewAsPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'View as PDF'**
+  String get viewAsPdf;
+
+  /// No description provided for @forwardToDoctorOrFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Forward to doctor or family'**
+  String get forwardToDoctorOrFamily;
+
+  /// No description provided for @sendSummaryOnWhatsApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Send summary on WhatsApp'**
+  String get sendSummaryOnWhatsApp;
+
+  /// No description provided for @reviewedByPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviewed by'**
+  String get reviewedByPrefix;
+
+  /// No description provided for @normalRangeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get normalRangeLabel;
+
+  /// No description provided for @statusNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get statusNormal;
+
+  /// No description provided for @statusWatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch'**
+  String get statusWatch;
+
+  /// No description provided for @labResultsPendingDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Results are not ready yet. Check again after the lab finishes.'**
+  String get labResultsPendingDetail;
+
+  /// No description provided for @couldNotCreatePdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create the PDF'**
+  String get couldNotCreatePdf;
+
+  /// No description provided for @couldNotOpenWhatsApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open WhatsApp'**
+  String get couldNotOpenWhatsApp;
+
+  /// No description provided for @labResultPdfShareText.
+  ///
+  /// In en, this message translates to:
+  /// **'Hiraal lab result: {title}'**
+  String labResultPdfShareText(String title);
 }
 
 class _AppLocalizationsDelegate

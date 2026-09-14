@@ -22,6 +22,13 @@ class SubscriptionPlan {
 
   String get displayName => planName.isNotEmpty ? planName : name;
 
+  /// Named like Free but still priced — hide from pickers until the server is fixed.
+  bool get isContradictoryFree {
+    final label = displayName.trim().toLowerCase();
+    const freeLabels = {'free', 'free care', 'free plan', 'free tier'};
+    return freeLabels.contains(label) && monthlyFee > 0;
+  }
+
   factory SubscriptionPlan.fromJson(Map<String, dynamic> j) => SubscriptionPlan(
         name: (j['name'] ?? j['plan_name'] ?? '').toString(),
         planName: (j['plan_name'] ?? j['name'] ?? '').toString(),
@@ -228,6 +235,7 @@ class SubscriptionInfo {
     final plans = ((j['plans'] as List?) ?? const [])
         .whereType<Map>()
         .map((e) => SubscriptionPlan.fromJson(Map<String, dynamic>.from(e)))
+        .where((p) => !p.isContradictoryFree)
         .toList();
     final derivedCats = cats.isNotEmpty
         ? cats

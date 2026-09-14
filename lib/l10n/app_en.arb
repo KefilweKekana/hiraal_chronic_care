@@ -50,6 +50,8 @@
       "bioLabel": {"type": "String"}
     }
   },
+  "unlockWithHealthPin": "Enter your 4-digit health PIN to continue",
+  "logInWithHealthPin": "Unlock with PIN",
   "signInAnotherWay": "Sign in another way",
   "biometricFingerprint": "Fingerprint",
 
@@ -1079,5 +1081,46 @@
   "myDetails": "My details",
   "freePlanLabel": "Free",
   "assignedNurseLabel": "Assigned nurse",
-  "clinicLabel": "Clinic"
+  "clinicLabel": "Clinic",
+  "saveChanges": "Save changes",
+  "changesSaved": "Changes saved",
+  "enterValidAge": "Enter a valid age between 1 and 120",
+  "otherLabel": "Other",
+  "medicalRecordsTitle": "Medical Records",
+  "labResultsAndNurseNotes": "Lab results & nurse notes",
+  "medicalRecordsCardSubtitle": "{count} lab results · PIN protected",
+  "@medicalRecordsCardSubtitle": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "medicalRecordsUnlockedBanner": "Unlocked with your PIN. Locks again when you leave.",
+  "labResultsSection": "Lab results",
+  "nurseNotesSection": "Nurse notes",
+  "noLabResultsYet": "No lab results yet",
+  "noNurseNotesYet": "No nurse notes yet",
+  "toWatchCount": "{count} to watch",
+  "@toWatchCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "labResultTitle": "Lab Result",
+  "whatYourDoctorSays": "What your doctor says",
+  "viewAsPdf": "View as PDF",
+  "forwardToDoctorOrFamily": "Forward to doctor or family",
+  "sendSummaryOnWhatsApp": "Send summary on WhatsApp",
+  "reviewedByPrefix": "Reviewed by",
+  "normalRangeLabel": "Normal",
+  "statusNormal": "Normal",
+  "statusWatch": "Watch",
+  "labResultsPendingDetail": "Results are not ready yet. Check again after the lab finishes.",
+  "couldNotCreatePdf": "Could not create the PDF",
+  "couldNotOpenWhatsApp": "Could not open WhatsApp",
+  "labResultPdfShareText": "Hiraal lab result: {title}",
+  "@labResultPdfShareText": {
+    "placeholders": {
+      "title": {"type": "String"}
+    }
+  }
 }

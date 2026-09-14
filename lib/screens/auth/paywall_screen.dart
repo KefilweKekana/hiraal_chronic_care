@@ -189,14 +189,18 @@ class _PaywallScreenState extends State<PaywallScreen> {
                             fontWeight: FontWeight.w700,
                             color: AppColors.primary)),
                   ),
-                Text('\$${plan.monthlyFee.toStringAsFixed(0)}',
+                Text(
+                    plan.monthlyFee <= 0
+                        ? 'Free'
+                        : '\$${plan.monthlyFee.toStringAsFixed(0)}',
                     style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
                         color: AppColors.primary)),
-                Text(' /mo',
-                    style:
-                        TextStyle(fontSize: 13, color: AppColors.of(context).textMuted)),
+                if (plan.monthlyFee > 0)
+                  Text(' /mo',
+                      style:
+                          TextStyle(fontSize: 13, color: AppColors.of(context).textMuted)),
               ],
             ),
             if (plan.description.isNotEmpty) ...[

@@ -82,6 +82,13 @@ class AppLocalizationsSo extends AppLocalizations {
   }
 
   @override
+  String get unlockWithHealthPin =>
+      'Geli PIN-kaaga caafimaad ee 4-lambar ah si aad u sii wadato';
+
+  @override
+  String get logInWithHealthPin => 'Fur PIN-ka';
+
+  @override
   String get signInAnotherWay => 'Si kale u gal';
 
   @override
@@ -2580,4 +2587,91 @@ class AppLocalizationsSo extends AppLocalizations {
 
   @override
   String get clinicLabel => 'Kiliniko';
+
+  @override
+  String get saveChanges => 'Kaydi isbeddellada';
+
+  @override
+  String get changesSaved => 'Isbeddellada waa la kaydiyey';
+
+  @override
+  String get enterValidAge => 'Geli da\' sax ah inta u dhaxaysa 1 iyo 120';
+
+  @override
+  String get otherLabel => 'Kan kale';
+
+  @override
+  String get medicalRecordsTitle => 'Diiwaanka Caafimaadka';
+
+  @override
+  String get labResultsAndNurseNotes =>
+      'Natiijooyinka shaybaarka & qoraalada kalkaaliyaha';
+
+  @override
+  String medicalRecordsCardSubtitle(int count) {
+    return '$count natiijo shaybaar · PIN ayaa ilaaliya';
+  }
+
+  @override
+  String get medicalRecordsUnlockedBanner =>
+      'Waxaa lagu furay PIN-kaaga. Wuu xirmanayaa markaad ka baxdo.';
+
+  @override
+  String get labResultsSection => 'Natiijooyinka shaybaarka';
+
+  @override
+  String get nurseNotesSection => 'Qoraalada kalkaaliyaha';
+
+  @override
+  String get noLabResultsYet => 'Weli ma jiraan natiijooyin shaybaar';
+
+  @override
+  String get noNurseNotesYet => 'Weli ma jiraan qoraalo kalkaaliye';
+
+  @override
+  String toWatchCount(int count) {
+    return '$count la ilaalinayo';
+  }
+
+  @override
+  String get labResultTitle => 'Natiijada Shaybaarka';
+
+  @override
+  String get whatYourDoctorSays => 'Waxa dhakhtarkaagu leeyahay';
+
+  @override
+  String get viewAsPdf => 'U eeg PDF ahaan';
+
+  @override
+  String get forwardToDoctorOrFamily => 'U gudbi dhakhtarka ama qoyska';
+
+  @override
+  String get sendSummaryOnWhatsApp => 'U dir soo koobidda WhatsApp';
+
+  @override
+  String get reviewedByPrefix => 'Waxaa dib u eegay';
+
+  @override
+  String get normalRangeLabel => 'Caadi';
+
+  @override
+  String get statusNormal => 'Caadi';
+
+  @override
+  String get statusWatch => 'Ilaali';
+
+  @override
+  String get labResultsPendingDetail =>
+      'Natiijooyinku weli diyaar ma aha. Dib u eeg marka shaybaarku dhameeyo.';
+
+  @override
+  String get couldNotCreatePdf => 'PDF lama abuuri karin';
+
+  @override
+  String get couldNotOpenWhatsApp => 'WhatsApp lama furi karin';
+
+  @override
+  String labResultPdfShareText(String title) {
+    return 'Natiijada shaybaarka Hiraal: $title';
+  }
 }

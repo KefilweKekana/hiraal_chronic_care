@@ -97,6 +97,42 @@ class Patient {
           json['subscription_active'] == true,
     );
   }
+
+  Patient copyWith({
+    String? name,
+    String? phone,
+    String? sex,
+    String? dob,
+    String? clinic,
+    String? carePlan,
+    String? nextCheckIn,
+    String? assignedNurse,
+    String? subscriptionStatus,
+    String? riskLevel,
+    String? deviceAssigned,
+    String? photoUrl,
+    List<String>? conditions,
+    bool? subscriptionActive,
+  }) {
+    return Patient(
+      id: id,
+      name: name ?? this.name,
+      patientId: patientId,
+      phone: phone ?? this.phone,
+      photoUrl: photoUrl ?? this.photoUrl,
+      conditions: conditions ?? this.conditions,
+      clinic: clinic ?? this.clinic,
+      carePlan: carePlan ?? this.carePlan,
+      nextCheckIn: nextCheckIn ?? this.nextCheckIn,
+      assignedNurse: assignedNurse ?? this.assignedNurse,
+      subscriptionStatus: subscriptionStatus ?? this.subscriptionStatus,
+      riskLevel: riskLevel ?? this.riskLevel,
+      deviceAssigned: deviceAssigned ?? this.deviceAssigned,
+      sex: sex ?? this.sex,
+      dob: dob ?? this.dob,
+      subscriptionActive: subscriptionActive ?? this.subscriptionActive,
+    );
+  }
 }
 
 String _asString(Object? value) {

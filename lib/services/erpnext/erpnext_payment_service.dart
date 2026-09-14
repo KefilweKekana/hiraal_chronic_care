@@ -245,6 +245,7 @@ class ErpNextPaymentService implements PaymentService {
     return list
         .whereType<Map>()
         .map((e) => SubscriptionPlan.fromJson(Map<String, dynamic>.from(e)))
+        .where((p) => !p.isContradictoryFree)
         .toList();
   }
 

@@ -163,6 +163,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         ],
         const SizedBox(height: 14),
         ...info.plans
+            .where((p) => !p.isContradictoryFree)
             .where((p) => _categoryFilter == null || p.category == _categoryFilter)
             .map((p) => _planCard(p, trial)),
         const SizedBox(height: 12),
@@ -313,12 +314,17 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                   ],
                 ),
               ),
-              Text('$_cur${plan.monthlyFee.toStringAsFixed(0)}',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.primary)),
-              Padding(
-                padding: const EdgeInsets.only(top: 4, left: 2),
-                child: Text('/mo', style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted)),
+              Text(
+                plan.monthlyFee <= 0
+                    ? 'Free'
+                    : '$_cur${plan.monthlyFee.toStringAsFixed(0)}',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.primary),
               ),
+              if (plan.monthlyFee > 0)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4, left: 2),
+                  child: Text('/mo', style: TextStyle(fontSize: 12, color: AppColors.of(context).textMuted)),
+                ),
             ],
           ),
           const SizedBox(height: 10),

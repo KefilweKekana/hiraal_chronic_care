@@ -240,7 +240,7 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
         children: [
           _ToggleTile(
             title: 'Biometric Login',
-            subtitle: 'Use fingerprint or face ID to log in',
+            subtitle: 'Off by default. App unlock uses your health PIN.',
             value: _biometric,
             onChanged: _onBiometricToggle,
           ),

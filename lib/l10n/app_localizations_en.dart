@@ -79,6 +79,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get unlockWithHealthPin => 'Enter your 4-digit health PIN to continue';
+
+  @override
+  String get logInWithHealthPin => 'Unlock with PIN';
+
+  @override
   String get signInAnotherWay => 'Sign in another way';
 
   @override
@@ -2548,4 +2554,90 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get clinicLabel => 'Clinic';
+
+  @override
+  String get saveChanges => 'Save changes';
+
+  @override
+  String get changesSaved => 'Changes saved';
+
+  @override
+  String get enterValidAge => 'Enter a valid age between 1 and 120';
+
+  @override
+  String get otherLabel => 'Other';
+
+  @override
+  String get medicalRecordsTitle => 'Medical Records';
+
+  @override
+  String get labResultsAndNurseNotes => 'Lab results & nurse notes';
+
+  @override
+  String medicalRecordsCardSubtitle(int count) {
+    return '$count lab results · PIN protected';
+  }
+
+  @override
+  String get medicalRecordsUnlockedBanner =>
+      'Unlocked with your PIN. Locks again when you leave.';
+
+  @override
+  String get labResultsSection => 'Lab results';
+
+  @override
+  String get nurseNotesSection => 'Nurse notes';
+
+  @override
+  String get noLabResultsYet => 'No lab results yet';
+
+  @override
+  String get noNurseNotesYet => 'No nurse notes yet';
+
+  @override
+  String toWatchCount(int count) {
+    return '$count to watch';
+  }
+
+  @override
+  String get labResultTitle => 'Lab Result';
+
+  @override
+  String get whatYourDoctorSays => 'What your doctor says';
+
+  @override
+  String get viewAsPdf => 'View as PDF';
+
+  @override
+  String get forwardToDoctorOrFamily => 'Forward to doctor or family';
+
+  @override
+  String get sendSummaryOnWhatsApp => 'Send summary on WhatsApp';
+
+  @override
+  String get reviewedByPrefix => 'Reviewed by';
+
+  @override
+  String get normalRangeLabel => 'Normal';
+
+  @override
+  String get statusNormal => 'Normal';
+
+  @override
+  String get statusWatch => 'Watch';
+
+  @override
+  String get labResultsPendingDetail =>
+      'Results are not ready yet. Check again after the lab finishes.';
+
+  @override
+  String get couldNotCreatePdf => 'Could not create the PDF';
+
+  @override
+  String get couldNotOpenWhatsApp => 'Could not open WhatsApp';
+
+  @override
+  String labResultPdfShareText(String title) {
+    return 'Hiraal lab result: $title';
+  }
 }

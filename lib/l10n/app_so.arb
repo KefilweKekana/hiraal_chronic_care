@@ -19,6 +19,8 @@
   "welcomeBack": "Ku soo dhawoow",
   "unlockWithBio": "Fur {bioLabel} si aad u sii wadato",
   "logInWithBio": "Gal {bioLabel}",
+  "unlockWithHealthPin": "Geli PIN-kaaga caafimaad ee 4-lambar ah si aad u sii wadato",
+  "logInWithHealthPin": "Fur PIN-ka",
   "signInAnotherWay": "Si kale u gal",
   "biometricFingerprint": "Faraha",
   "letsGetStarted": "Aan bilowno",
@@ -825,5 +827,46 @@
   "myDetails": "Faahfaahintayda",
   "freePlanLabel": "Bilaash",
   "assignedNurseLabel": "Kalkaaliyaha laguu xilsaaray",
-  "clinicLabel": "Kiliniko"
+  "clinicLabel": "Kiliniko",
+  "saveChanges": "Kaydi isbeddellada",
+  "changesSaved": "Isbeddellada waa la kaydiyey",
+  "enterValidAge": "Geli da' sax ah inta u dhaxaysa 1 iyo 120",
+  "otherLabel": "Kan kale",
+  "medicalRecordsTitle": "Diiwaanka Caafimaadka",
+  "labResultsAndNurseNotes": "Natiijooyinka shaybaarka & qoraalada kalkaaliyaha",
+  "medicalRecordsCardSubtitle": "{count} natiijo shaybaar · PIN ayaa ilaaliya",
+  "@medicalRecordsCardSubtitle": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "medicalRecordsUnlockedBanner": "Waxaa lagu furay PIN-kaaga. Wuu xirmanayaa markaad ka baxdo.",
+  "labResultsSection": "Natiijooyinka shaybaarka",
+  "nurseNotesSection": "Qoraalada kalkaaliyaha",
+  "noLabResultsYet": "Weli ma jiraan natiijooyin shaybaar",
+  "noNurseNotesYet": "Weli ma jiraan qoraalo kalkaaliye",
+  "toWatchCount": "{count} la ilaalinayo",
+  "@toWatchCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "labResultTitle": "Natiijada Shaybaarka",
+  "whatYourDoctorSays": "Waxa dhakhtarkaagu leeyahay",
+  "viewAsPdf": "U eeg PDF ahaan",
+  "forwardToDoctorOrFamily": "U gudbi dhakhtarka ama qoyska",
+  "sendSummaryOnWhatsApp": "U dir soo koobidda WhatsApp",
+  "reviewedByPrefix": "Waxaa dib u eegay",
+  "normalRangeLabel": "Caadi",
+  "statusNormal": "Caadi",
+  "statusWatch": "Ilaali",
+  "labResultsPendingDetail": "Natiijooyinku weli diyaar ma aha. Dib u eeg marka shaybaarku dhameeyo.",
+  "couldNotCreatePdf": "PDF lama abuuri karin",
+  "couldNotOpenWhatsApp": "WhatsApp lama furi karin",
+  "labResultPdfShareText": "Natiijada shaybaarka Hiraal: {title}",
+  "@labResultPdfShareText": {
+    "placeholders": {
+      "title": {"type": "String"}
+    }
+  }
 }

@@ -256,18 +256,115 @@ class MockBookingService implements BookingService {
     return Success([
       LabTestInfo(
         id: 'MOCK-LAB-001',
-        template: 'HBA1C',
+        template: 'Blood pressure tests',
         status: 'Completed',
-        created: DateTime.now().subtract(const Duration(days: 3)),
-        resultDate: DateTime.now().subtract(const Duration(days: 2)),
+        created: DateTime(2026, 8, 8),
+        resultDate: DateTime(2026, 8, 8),
+        watchCount: 2,
       ),
       LabTestInfo(
         id: 'MOCK-LAB-002',
-        template: 'Lipid Profile',
-        status: 'Approved',
-        created: DateTime.now().subtract(const Duration(hours: 6)),
+        template: 'Sugar tests',
+        status: 'Completed',
+        created: DateTime(2026, 6, 9),
+        resultDate: DateTime(2026, 6, 9),
+        watchCount: 2,
       ),
     ]);
+  }
+
+  @override
+  Future<Result<MedicalRecordsBundle>> getMyMedicalRecords() async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    final labs = (await getMyLabTests()).dataOrNull ?? const <LabTestInfo>[];
+    return Success(
+      MedicalRecordsBundle(
+        labs: labs,
+        nurseNotes: [
+          NurseNoteInfo(
+            id: 'NT-1',
+            note:
+                'Blood pressure well controlled this month (average 128/82). Continue Amlodipine 5mg every evening. Remember to drink water and walk daily.',
+            completedAt: DateTime(2026, 8, 25),
+            nurseName: 'Nurse Hodan Warsame',
+          ),
+          NurseNoteInfo(
+            id: 'NT-2',
+            note:
+                'Started home monitoring with Hiraal BP device. Taught patient and daughter how to take readings.',
+            completedAt: DateTime(2026, 7, 26),
+            nurseName: 'Nurse Hodan Warsame',
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Future<Result<LabTestDetail>> getMyLabTestDetail(String labTestId) async {
+    await Future.delayed(const Duration(milliseconds: 250));
+    return Success(
+      LabTestDetail(
+        id: labTestId,
+        template: labTestId == 'MOCK-LAB-002' ? 'Sugar tests' : 'Blood pressure tests',
+        status: 'Completed',
+        created: DateTime(2026, 8, 8),
+        resultDate: DateTime(2026, 8, 8),
+        clinicName: 'Hiraal Clinic Laboratory',
+        reviewedBy: 'Dr. Ali Hassan',
+        doctorNote:
+            'Cholesterol slightly high. Continue Amlodipine. Reduce oily food and repeat in 3 months.',
+        watchCount: 2,
+        items: const [
+          LabAnalyte(
+            name: 'Creatinine',
+            value: '0.9 mg/dL',
+            normalRange: '0.6–1.2',
+            status: 'Normal',
+          ),
+          LabAnalyte(
+            name: 'Total cholesterol',
+            value: '215 mg/dL',
+            normalRange: 'Below 200',
+            status: 'Watch',
+          ),
+          LabAnalyte(
+            name: 'LDL cholesterol',
+            value: '142 mg/dL',
+            normalRange: 'Below 100',
+            status: 'Watch',
+          ),
+          LabAnalyte(
+            name: 'HDL cholesterol',
+            value: '48 mg/dL',
+            normalRange: 'Above 40',
+            status: 'Normal',
+          ),
+          LabAnalyte(
+            name: 'Potassium',
+            value: '4.2 mmol/L',
+            normalRange: '3.5–5.0',
+            status: 'Normal',
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Future<Result<Map<String, dynamic>>> updateMyProfile({
+    String? fullName,
+    String? sex,
+    int? age,
+    String? mobile,
+  }) async {
+    await Future.delayed(const Duration(milliseconds: 250));
+    return Success({
+      if (fullName != null) 'patient_name': fullName,
+      if (sex != null) 'sex': sex,
+      if (mobile != null) 'mobile': mobile,
+      if (age != null) 'dob': '${DateTime.now().year - age}-01-01',
+    });
   }
 
   @override

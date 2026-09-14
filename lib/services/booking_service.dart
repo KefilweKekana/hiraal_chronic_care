@@ -42,6 +42,7 @@ class LabTestInfo {
   final String status;
   final DateTime? created;
   final DateTime? resultDate;
+  final int watchCount;
 
   const LabTestInfo({
     required this.id,
@@ -49,6 +50,7 @@ class LabTestInfo {
     this.status = '',
     this.created,
     this.resultDate,
+    this.watchCount = 0,
   });
 
   factory LabTestInfo.fromJson(Map<String, dynamic> j) => LabTestInfo(
@@ -57,6 +59,127 @@ class LabTestInfo {
         status: (j['status'] ?? '').toString(),
         created: DateTime.tryParse('${j['creation'] ?? ''}'),
         resultDate: DateTime.tryParse('${j['result_date'] ?? ''}'),
+        watchCount: int.tryParse('${j['watch_count'] ?? 0}') ?? 0,
+      );
+}
+
+class NurseNoteInfo {
+  final String id;
+  final String taskType;
+  final String note;
+  final DateTime? completedAt;
+  final String nurseName;
+
+  const NurseNoteInfo({
+    required this.id,
+    required this.note,
+    this.taskType = '',
+    this.completedAt,
+    this.nurseName = '',
+  });
+
+  factory NurseNoteInfo.fromJson(Map<String, dynamic> j) => NurseNoteInfo(
+        id: (j['name'] ?? '').toString(),
+        taskType: (j['task_type'] ?? '').toString(),
+        note: (j['note'] ?? j['completion_note'] ?? '').toString(),
+        completedAt: DateTime.tryParse('${j['completed_at'] ?? ''}'),
+        nurseName: (j['nurse_name'] ?? '').toString(),
+      );
+}
+
+class MedicalRecordsBundle {
+  final List<LabTestInfo> labs;
+  final List<NurseNoteInfo> nurseNotes;
+  final String clinicName;
+
+  const MedicalRecordsBundle({
+    required this.labs,
+    required this.nurseNotes,
+    this.clinicName = 'Hiraal Clinic Laboratory',
+  });
+
+  factory MedicalRecordsBundle.fromJson(Map<String, dynamic> j) {
+    final labs = (j['labs'] as List? ?? [])
+        .whereType<Map>()
+        .map((e) => LabTestInfo.fromJson(Map<String, dynamic>.from(e)))
+        .toList();
+    final notes = (j['nurse_notes'] as List? ?? [])
+        .whereType<Map>()
+        .map((e) => NurseNoteInfo.fromJson(Map<String, dynamic>.from(e)))
+        .toList();
+    return MedicalRecordsBundle(
+      labs: labs,
+      nurseNotes: notes,
+      clinicName: (j['clinic_name'] ?? 'Hiraal Clinic Laboratory').toString(),
+    );
+  }
+}
+
+class LabAnalyte {
+  final String name;
+  final String value;
+  final String unit;
+  final String normalRange;
+  final String status;
+
+  const LabAnalyte({
+    required this.name,
+    required this.value,
+    this.unit = '',
+    this.normalRange = '',
+    this.status = 'Normal',
+  });
+
+  factory LabAnalyte.fromJson(Map<String, dynamic> j) => LabAnalyte(
+        name: (j['name'] ?? '').toString(),
+        value: (j['value'] ?? '').toString(),
+        unit: (j['unit'] ?? '').toString(),
+        normalRange: (j['normal_range'] ?? '').toString(),
+        status: (j['status'] ?? 'Normal').toString(),
+      );
+
+  bool get isWatch => status.toLowerCase() == 'watch';
+}
+
+class LabTestDetail {
+  final String id;
+  final String template;
+  final String status;
+  final DateTime? created;
+  final DateTime? resultDate;
+  final String clinicName;
+  final String reviewedBy;
+  final String doctorNote;
+  final int watchCount;
+  final List<LabAnalyte> items;
+
+  const LabTestDetail({
+    required this.id,
+    required this.template,
+    this.status = '',
+    this.created,
+    this.resultDate,
+    this.clinicName = 'Hiraal Clinic Laboratory',
+    this.reviewedBy = '',
+    this.doctorNote = '',
+    this.watchCount = 0,
+    this.items = const [],
+  });
+
+  factory LabTestDetail.fromJson(Map<String, dynamic> j) => LabTestDetail(
+        id: (j['name'] ?? '').toString(),
+        template: (j['template'] ?? '').toString(),
+        status: (j['status'] ?? '').toString(),
+        created: DateTime.tryParse('${j['creation'] ?? ''}'),
+        resultDate: DateTime.tryParse('${j['result_date'] ?? ''}'),
+        clinicName: (j['clinic_name'] ?? 'Hiraal Clinic Laboratory').toString(),
+        reviewedBy: (j['reviewed_by'] ?? '').toString(),
+        doctorNote: (j['doctor_note'] ?? '').toString(),
+        watchCount: int.tryParse('${j['watch_count'] ?? 0}') ?? 0,
+        items: (j['items'] as List? ?? [])
+            .whereType<Map>()
+            .map((e) => LabAnalyte.fromJson(Map<String, dynamic>.from(e)))
+            .toList(),
       );
 }
 
@@ -108,6 +231,20 @@ abstract class BookingService {
 
   /// The logged-in patient's lab tests, newest first.
   Future<Result<List<LabTestInfo>>> getMyLabTests();
+
+  /// Labs + nurse notes for the Medical Records hub (PIN-gated in the UI).
+  Future<Result<MedicalRecordsBundle>> getMyMedicalRecords();
+
+  /// Full analyte list + doctor note for one lab test.
+  Future<Result<LabTestDetail>> getMyLabTestDetail(String labTestId);
+
+  /// Update basic profile fields from Personal Information.
+  Future<Result<Map<String, dynamic>>> updateMyProfile({
+    String? fullName,
+    String? sex,
+    int? age,
+    String? mobile,
+  });
 
   /// Cancel one of the patient's own lab tests (before sample collection).
   Future<Result<void>> cancelMyLabTest(String labTestId);

@@ -310,6 +310,9 @@ class _ForgotHealthPinScreenState extends State<ForgotHealthPinScreen> {
   @override
   void dispose() {
     _ticker?.cancel();
+    _otpController.dispose();
+    _pinController.dispose();
+    _confirmController.dispose();
     super.dispose();
   }
 
@@ -318,6 +321,28 @@ class _ForgotHealthPinScreenState extends State<ForgotHealthPinScreen> {
     final fromPatient = p.patient?.phone.trim() ?? '';
     if (fromPatient.isNotEmpty) return fromPatient;
     return p.phoneNumber.trim();
+  }
+
+  bool get _otpComplete => _otp.length == AppConstants.otpLength;
+
+  bool get _canSavePin =>
+      _otpComplete &&
+      _pin.length == AppConstants.healthPinLength &&
+      _confirm.length == AppConstants.healthPinLength &&
+      _pin == _confirm &&
+      !_busy;
+
+  void _onOtpChanged(String value) {
+    setState(() {
+      _otp = value;
+      // Hide + clear PIN fields if the code is no longer complete.
+      if (value.length != AppConstants.otpLength) {
+        _pin = '';
+        _confirm = '';
+        _pinController.clear();
+        _confirmController.clear();
+      }
+    });
   }
 
   @override
@@ -444,71 +469,74 @@ class _ForgotHealthPinScreenState extends State<ForgotHealthPinScreen> {
                     inactiveColor: AppColors.of(context).inputBorder,
                     selectedColor: AppColors.primary,
                   ),
-                  onChanged: (v) => setState(() => _otp = v),
+                  onChanged: _onOtpChanged,
                 ),
                 if (_resend > 0)
                   Text(l10n.pleaseWaitBeforeAnotherCode(formatOtpCountdown(_resend)))
                 else
                   TextButton(onPressed: _busy ? null : _sendCode, child: Text(l10n.resend)),
-                const SizedBox(height: 12),
-                Text(l10n.createHealthPinTitle, style: TextStyle(fontWeight: FontWeight.w600)),
-                PinCodeTextField(
-                  appContext: context,
-                  controller: _pinController,
-                  length: AppConstants.healthPinLength,
-                  obscureText: true,
-                  keyboardType: TextInputType.number,
-                  enableActiveFill: true,
-                  pinTheme: PinTheme(
-                    shape: PinCodeFieldShape.box,
-                    borderRadius: BorderRadius.circular(10),
-                    fieldHeight: 52,
-                    fieldWidth: 52,
-                    activeFillColor: AppColors.of(context).card,
-                    inactiveFillColor: AppColors.of(context).inputFill,
-                    selectedFillColor: AppColors.of(context).primarySoft,
-                    activeColor: AppColors.primary,
-                    inactiveColor: AppColors.of(context).inputBorder,
-                    selectedColor: AppColors.primary,
+                if (_otpComplete) ...[
+                  const SizedBox(height: 20),
+                  Text(l10n.createHealthPinTitle, style: TextStyle(fontWeight: FontWeight.w600)),
+                  PinCodeTextField(
+                    appContext: context,
+                    controller: _pinController,
+                    length: AppConstants.healthPinLength,
+                    obscureText: true,
+                    keyboardType: TextInputType.number,
+                    enableActiveFill: true,
+                    autoFocus: true,
+                    pinTheme: PinTheme(
+                      shape: PinCodeFieldShape.box,
+                      borderRadius: BorderRadius.circular(10),
+                      fieldHeight: 52,
+                      fieldWidth: 52,
+                      activeFillColor: AppColors.of(context).card,
+                      inactiveFillColor: AppColors.of(context).inputFill,
+                      selectedFillColor: AppColors.of(context).primarySoft,
+                      activeColor: AppColors.primary,
+                      inactiveColor: AppColors.of(context).inputBorder,
+                      selectedColor: AppColors.primary,
+                    ),
+                    onChanged: (v) => setState(() => _pin = v),
                   ),
-                  onChanged: (v) => setState(() => _pin = v),
-                ),
-                Text(l10n.confirmHealthPinTitle, style: TextStyle(fontWeight: FontWeight.w600)),
-                PinCodeTextField(
-                  appContext: context,
-                  controller: _confirmController,
-                  length: AppConstants.healthPinLength,
-                  obscureText: true,
-                  keyboardType: TextInputType.number,
-                  enableActiveFill: true,
-                  pinTheme: PinTheme(
-                    shape: PinCodeFieldShape.box,
-                    borderRadius: BorderRadius.circular(10),
-                    fieldHeight: 52,
-                    fieldWidth: 52,
-                    activeFillColor: AppColors.of(context).card,
-                    inactiveFillColor: AppColors.of(context).inputFill,
-                    selectedFillColor: AppColors.of(context).primarySoft,
-                    activeColor: AppColors.primary,
-                    inactiveColor: AppColors.of(context).inputBorder,
-                    selectedColor: AppColors.primary,
+                  Text(l10n.confirmHealthPinTitle, style: TextStyle(fontWeight: FontWeight.w600)),
+                  PinCodeTextField(
+                    appContext: context,
+                    controller: _confirmController,
+                    length: AppConstants.healthPinLength,
+                    obscureText: true,
+                    keyboardType: TextInputType.number,
+                    enableActiveFill: true,
+                    pinTheme: PinTheme(
+                      shape: PinCodeFieldShape.box,
+                      borderRadius: BorderRadius.circular(10),
+                      fieldHeight: 52,
+                      fieldWidth: 52,
+                      activeFillColor: AppColors.of(context).card,
+                      inactiveFillColor: AppColors.of(context).inputFill,
+                      selectedFillColor: AppColors.of(context).primarySoft,
+                      activeColor: AppColors.primary,
+                      inactiveColor: AppColors.of(context).inputBorder,
+                      selectedColor: AppColors.primary,
+                    ),
+                    onChanged: (v) => setState(() => _confirm = v),
                   ),
-                  onChanged: (v) => setState(() => _confirm = v),
-                ),
-                const SizedBox(height: 8),
-                SizedBox(
-                  height: 52,
-                  child: ElevatedButton(
-                    onPressed: _busy ? null : _submit,
-                    child: _busy
-                        ? const SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
-                          )
-                        : Text(l10n.healthPinSave),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    height: 52,
+                    child: ElevatedButton(
+                      onPressed: _canSavePin ? _submit : null,
+                      child: _busy
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+                            )
+                          : Text(l10n.healthPinSave),
+                    ),
                   ),
-                ),
+                ],
               ],
             ],
           ),

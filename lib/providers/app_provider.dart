@@ -19,7 +19,6 @@ import '../models/otp_delivery.dart';
 import '../models/patient.dart';
 import '../models/vital_reading.dart';
 import '../services/ble_protocol_registry.dart';
-import '../services/biometric_service.dart';
 import '../services/device_auto_submit_service.dart';
 import '../services/push_notification_service.dart';
 import '../services/service_locator.dart';
@@ -354,7 +353,7 @@ class AppProvider extends ChangeNotifier {
       _services.updatePatientId(patient.id, sex: patient.sex);
     }
     await _patientDao.save(patient);
-    await _enableBiometricAfterLogin();
+    // Returning unlock uses the health PIN (not fingerprint).
     final gated = await _maybeGateHealthPinSetup(route);
     _state = gated;
     if (gated == AppState.home) {
@@ -666,6 +665,13 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
+  /// Apply a profile edit from Personal Information without a full re-login.
+  Future<void> applyLocalPatient(Patient updated) async {
+    _patient = updated;
+    await _patientDao.save(updated);
+    notifyListeners();
+  }
+
   /// Re-check the subscription gate from the server and route accordingly.
   /// Called after a payment completes on the paywall, and on session restore.
   Future<void> refreshSubscriptionGate() async {
@@ -814,11 +820,31 @@ class AppProvider extends ChangeNotifier {
   }
 
   /// Whether this device has a remembered login. OTP is a one-time step per
-  /// device — once done, the patient stays remembered (biometric-gated) until
-  /// they explicitly log out. Used on launch to decide whether to prompt for
-  /// biometric unlock instead of OTP.
+  /// device — once done, the patient stays remembered (health-PIN-gated) until
+  /// they explicitly log out.
   Future<bool> hasPersistedSession() async {
     return (await _patientDao.get()) != null;
+  }
+
+  /// Local patient row without marking the session as logged in.
+  Future<Patient?> peekPersistedPatient() => _patientDao.get();
+
+  /// Attach stored API keys so health-PIN verify can call the server, without
+  /// entering the home shell yet.
+  Future<bool> attachPersistedApiAuth() async {
+    final patient = await _patientDao.get();
+    if (patient == null) return false;
+    _patient = patient;
+    _phoneNumber = patient.phone;
+    _services.updatePatientId(patient.id, sex: patient.sex);
+    final prefs = await _prefs;
+    final apiKey = prefs.getString(_patientApiKeyKey);
+    final apiSecret = prefs.getString(_patientApiSecretKey);
+    if (apiKey == null || apiSecret == null || apiKey.isEmpty || apiSecret.isEmpty) {
+      return false;
+    }
+    _services.apiClient?.setPatientAuth(apiKey, apiSecret);
+    return true;
   }
 
   Future<bool> tryRestoreSession() async {
@@ -980,17 +1006,6 @@ class AppProvider extends ChangeNotifier {
     unawaited(_registerPushToken());
     // Push any readings that queued while offline/backgrounded.
     unawaited(SyncManager().syncAll());
-  }
-
-  /// After the one-time OTP login on a device, enable biometric unlock so
-  /// future launches use Face ID / fingerprint instead of another OTP.
-  Future<void> _enableBiometricAfterLogin() async {
-    try {
-      if (await BiometricService.instance.isDeviceSupported) {
-        final prefs = await _prefs;
-        await prefs.setBool('pref_biometric', true);
-      }
-    } catch (_) {}
   }
 
   Future<void> _clearSessionPersistence() async {
