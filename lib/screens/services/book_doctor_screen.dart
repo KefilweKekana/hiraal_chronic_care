@@ -538,7 +538,12 @@ class _BookDoctorScreenState extends State<BookDoctorScreen> {
         else if (_slotError != null)
           Text(_slotError!, style: TextStyle(color: AppColors.error))
         else if (_slots == null || _slots!.empty)
-          Text(l10n.noSlotsYet, style: TextStyle(color: AppColors.textMuted(context), fontSize: 15))
+          Text(
+            (_slots?.message != null && _slots!.message!.trim().isNotEmpty)
+                ? _slots!.message!
+                : l10n.noSlotsYet,
+            style: TextStyle(color: AppColors.textMuted(context), fontSize: 15),
+          )
         else ...[
           SizedBox(
             height: 72,
