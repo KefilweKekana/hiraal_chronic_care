@@ -291,11 +291,16 @@ def _slots_from_practitioner_schedule(practitioner: str, date) -> list[dict]:
 			end = _as_time_str(
 				time_slot.get("to_time") if hasattr(time_slot, "get") else getattr(time_slot, "to_time", None)
 			)
-			duration = _slot_duration_minutes(time_slot, sch)
 			cursor = _parse_time(start)
 			end_t = _parse_time(end)
-			if not cursor or not end_t or duration <= 0:
+			if not cursor or not end_t:
 				continue
+			window_mins = max(1, int((end_t - cursor).total_seconds() // 60))
+			duration = _slot_duration_minutes(time_slot, sch)
+			# Desk often stores each 15-min row as From→To with blank duration.
+			# Defaulting to 30 then skips the row (09:00+30 > 09:15). Cap to window.
+			if duration <= 0 or duration > window_mins:
+				duration = window_mins
 			# Allow a slot that ends exactly on to_time.
 			while cursor + timedelta(minutes=duration) <= end_t + timedelta(seconds=1):
 				time_str = cursor.strftime("%H:%M:%S")
