@@ -50,6 +50,109 @@ def feature_list(raw):
 	return [ln.strip() for ln in str(raw).splitlines() if ln.strip()]
 
 
+def _plan_label(row):
+	return (row.get("plan_name") or row.get("name") or "").strip()
+
+
+def _is_free_label(label):
+	"""True for catalog names that mean $0, not a paid tier."""
+	key = (label or "").strip().lower()
+	return key in {"free", "free care", "free plan", "free tier"}
+
+
+def _is_contradictory_free_plan(row):
+	"""Named Free (or similar) but still priced — never show this in the app."""
+	return _is_free_label(_plan_label(row)) and flt(row.get("monthly_fee")) > 0
+
+
+def repair_contradictory_free_plans():
+	"""Deactivate Desk rows named Free that still charge a fee.
+
+	Keeps Standard / Premium as the paid catalog. Safe to call from patches
+	and once after empty-catalog seeding.
+	"""
+	if not frappe.db.exists("DocType", "Subscription Plan"):
+		return 0
+	fixed = 0
+	try:
+		rows = frappe.get_all(
+			"Subscription Plan",
+			filters={"is_active": 1},
+			fields=["name", "plan_name", "monthly_fee"],
+			limit_page_length=100,
+			ignore_permissions=True,
+		)
+	except Exception:
+		frappe.logger("hiraal_sub").exception("repair free plans: list failed")
+		return 0
+
+	for row in rows or []:
+		if not _is_contradictory_free_plan(row):
+			continue
+		try:
+			frappe.db.set_value(
+				"Subscription Plan",
+				row["name"],
+				"is_active",
+				0,
+				update_modified=True,
+			)
+			fixed += 1
+			frappe.logger("hiraal_sub").info(
+				"Deactivated contradictory Free plan %s (fee=%s)",
+				row["name"],
+				row.get("monthly_fee"),
+			)
+		except Exception:
+			frappe.logger("hiraal_sub").exception(
+				"Could not deactivate Free plan %s", row.get("name")
+			)
+
+	if fixed:
+		# Ensure patients still see a $5 option after removing Free@$5.
+		_ensure_named_plan(
+			"Standard Care",
+			{
+				"plan_name": "Standard Care",
+				"category": "General",
+				"monthly_fee": 5,
+				"allows_trial": 1,
+				"is_featured": 0,
+				"display_order": 1,
+				"features": "\n".join(_FALLBACK_PLANS[0]["features"]),
+			},
+		)
+		frappe.db.commit()
+	return fixed
+
+
+def _ensure_named_plan(plan_name, defaults):
+	"""Insert one plan if missing (by name or plan_name)."""
+	if frappe.db.exists("Subscription Plan", plan_name):
+		# Reactivate if it was turned off.
+		frappe.db.set_value("Subscription Plan", plan_name, "is_active", 1, update_modified=False)
+		return
+	found = frappe.db.get_value("Subscription Plan", {"plan_name": plan_name}, "name")
+	if found:
+		frappe.db.set_value("Subscription Plan", found, "is_active", 1, update_modified=False)
+		return
+	doc = frappe.get_doc({"doctype": "Subscription Plan", "is_active": 1, **defaults})
+	doc.insert(ignore_permissions=True)
+
+
+def _serialize_plan_row(r):
+	return {
+		"name": r.get("name") or r.get("plan_name"),
+		"plan_name": r.get("plan_name") or r.get("name"),
+		"category": r.get("category") or "General",
+		"monthly_fee": flt(r.get("monthly_fee")),
+		"description": r.get("description") or "",
+		"allows_trial": 1 if int(r.get("allows_trial") or 0) else 0,
+		"is_featured": 1 if int(r.get("is_featured") or 0) else 0,
+		"features": feature_list(r.get("features")),
+	}
+
+
 def subscription_plans_catalog():
 	"""Active Subscription Plan rows for the app, or the hardcoded fallback."""
 	if frappe.db.exists("DocType", "Subscription Plan"):
@@ -76,19 +179,18 @@ def subscription_plans_catalog():
 			frappe.logger("hiraal_sub").exception("subscription plan catalog failed")
 			rows = []
 		if rows:
-			return [
-				{
-					"name": r.get("name") or r.get("plan_name"),
-					"plan_name": r.get("plan_name") or r.get("name"),
-					"category": r.get("category") or "General",
-					"monthly_fee": flt(r.get("monthly_fee")),
-					"description": r.get("description") or "",
-					"allows_trial": 1 if int(r.get("allows_trial") or 0) else 0,
-					"is_featured": 1 if int(r.get("is_featured") or 0) else 0,
-					"features": feature_list(r.get("features")),
-				}
-				for r in rows
-			]
+			out = []
+			for r in rows:
+				row = _serialize_plan_row(r)
+				# Never surface Free@$5 (or similar) even if Desk still has it active.
+				if _is_contradictory_free_plan(row):
+					continue
+				# True free tier: keep name Free, force fee display/charge to 0.
+				if _is_free_label(_plan_label(row)):
+					row["monthly_fee"] = 0.0
+				out.append(row)
+			if out:
+				return out
 	return [dict(p) for p in _FALLBACK_PLANS]
 
 
@@ -230,7 +332,34 @@ def ensure_default_plans():
 	"""Create starter Subscription Plan rows if the catalog is empty."""
 	if not frappe.db.exists("DocType", "Subscription Plan"):
 		return
+	repair_contradictory_free_plans()
 	if frappe.db.count("Subscription Plan") > 0:
+		# Still guarantee Standard + Premium exist for General category.
+		_ensure_named_plan(
+			"Standard Care",
+			{
+				"plan_name": "Standard Care",
+				"category": "General",
+				"monthly_fee": 5,
+				"allows_trial": 1,
+				"is_featured": 0,
+				"display_order": 1,
+				"features": "\n".join(_FALLBACK_PLANS[0]["features"]),
+			},
+		)
+		_ensure_named_plan(
+			"Premium Care",
+			{
+				"plan_name": "Premium Care",
+				"category": "General",
+				"monthly_fee": 10,
+				"allows_trial": 1,
+				"is_featured": 1,
+				"display_order": 2,
+				"features": "\n".join(_FALLBACK_PLANS[1]["features"]),
+			},
+		)
+		frappe.db.commit()
 		return
 	defaults = [
 		{

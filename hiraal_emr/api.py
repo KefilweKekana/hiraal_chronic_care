@@ -5,7 +5,7 @@ and document event hooks.
 
 import frappe
 from frappe import _
-from frappe.utils import add_days, add_months, add_to_date, flt, get_datetime, getdate, now_datetime, today
+from frappe.utils import add_days, add_months, add_to_date, cstr, flt, get_datetime, getdate, now_datetime, today
 import json
 
 from hiraal_emr.services.otp_service import (
@@ -1369,6 +1369,291 @@ def get_my_lab_tests(limit=20):
     )
 
 
+def _parse_normal_range(raw):
+    """Parse '0.6-1.2' / '0.6–1.2' style ranges into (low, high) floats."""
+    text = (raw or "").replace("–", "-").replace("—", "-").strip()
+    if not text:
+        return None, None
+    import re
+
+    m = re.search(r"(-?\d+(?:\.\d+)?)\s*-\s*(-?\d+(?:\.\d+)?)", text)
+    if not m:
+        return None, None
+    try:
+        return float(m.group(1)), float(m.group(2))
+    except Exception:
+        return None, None
+
+
+def _lab_item_status(result_value, normal_range, result_flag=None):
+    """Classify a single analyte as Normal / Watch / Pending."""
+    flag = (result_flag or "").strip().lower()
+    if flag in {"abnormal", "high", "low", "positive", "critical"} or "abnormal" in flag:
+        return "Watch"
+    val_raw = (result_value or "").strip()
+    if not val_raw:
+        return "Pending"
+    try:
+        value = float(
+            "".join(c for c in val_raw.replace(",", ".") if c.isdigit() or c in ".-")
+        )
+    except Exception:
+        return "Normal"
+    low, high = _parse_normal_range(normal_range)
+    if low is not None and high is not None and (value < low or value > high):
+        return "Watch"
+    return "Normal"
+
+
+def _lab_result_rows(doc):
+    """Normal Test Result rows from a Lab Test doc (Healthcare)."""
+    rows = []
+    for row in doc.get("normal_test_items") or []:
+        name = (
+            getattr(row, "lab_test_name", None)
+            or getattr(row, "lab_test_event", None)
+            or getattr(row, "test_name", None)
+            or "Result"
+        )
+        value = getattr(row, "result_value", None) or ""
+        rng = getattr(row, "normal_range", None) or ""
+        flag = getattr(row, "result", None) or ""
+        status = _lab_item_status(value, rng, flag)
+        unit = ""
+        # Keep unit in the display value when already present (e.g. "0.9 mg/dL").
+        display = f"{value}".strip()
+        rows.append(
+            {
+                "name": cstr(name),
+                "value": display,
+                "unit": unit,
+                "normal_range": cstr(rng),
+                "status": status,
+            }
+        )
+    return rows
+
+
+def _lab_doctor_note(patient, lab_name):
+    """Prefer a nurse completion note tied to this lab, else latest doctor plan."""
+    try:
+        rows = frappe.get_all(
+            "Nurse Task",
+            filters={
+                "patient": patient,
+                "related_lab_test": lab_name,
+                "status": "Completed",
+            },
+            fields=["completion_note"],
+            order_by="completed_at desc",
+            limit=1,
+        )
+        if rows and (rows[0].get("completion_note") or "").strip():
+            return rows[0]["completion_note"]
+    except Exception:
+        pass
+    try:
+        reviews = frappe.get_all(
+            "Doctor Review",
+            filters={"patient": patient},
+            fields=["plan_notes", "assessment"],
+            order_by="creation desc",
+            limit=1,
+        )
+        if reviews:
+            return reviews[0].get("plan_notes") or reviews[0].get("assessment") or ""
+    except Exception:
+        pass
+    return ""
+
+
+@frappe.whitelist()
+def get_my_medical_records(limit=30):
+    """Labs + nurse notes for the Medical Records screen (PIN-gated in the app)."""
+    patient = _my_patient_name()
+    labs_out = []
+    try:
+        labs = frappe.get_all(
+            "Lab Test",
+            filters={"patient": patient},
+            fields=["name", "template", "status", "creation", "result_date", "employee", "employee_name", "lab_test_name"],
+            order_by="creation desc",
+            limit_page_length=int(limit or 30),
+        )
+    except Exception:
+        labs = _safe_get_all(
+            "Lab Test",
+            filters={"patient": patient},
+            fields=["name", "template", "status", "creation", "result_date"],
+            order_by="creation desc",
+            limit_page_length=int(limit or 30),
+        )
+
+    for lab in labs or []:
+        watch = 0
+        try:
+            doc = frappe.get_doc("Lab Test", lab["name"])
+            for row in _lab_result_rows(doc):
+                if row["status"] == "Watch":
+                    watch += 1
+        except Exception:
+            pass
+        title = lab.get("template") or lab.get("lab_test_name") or lab.get("name")
+        labs_out.append(
+            {
+                "name": lab.get("name"),
+                "template": title,
+                "status": lab.get("status") or "",
+                "creation": lab.get("creation"),
+                "result_date": lab.get("result_date"),
+                "watch_count": watch,
+            }
+        )
+
+    nurse_notes = []
+    try:
+        rows = frappe.get_all(
+            "Nurse Task",
+            filters={"patient": patient, "status": "Completed"},
+            fields=[
+                "name",
+                "task_type",
+                "completion_note",
+                "completed_at",
+                "assigned_to_name",
+            ],
+            order_by="completed_at desc",
+            limit_page_length=20,
+        )
+        for r in rows or []:
+            note = (r.get("completion_note") or "").strip()
+            if not note:
+                continue
+            nurse_notes.append(
+                {
+                    "name": r.get("name"),
+                    "task_type": r.get("task_type") or "",
+                    "note": note,
+                    "completed_at": r.get("completed_at"),
+                    "nurse_name": r.get("assigned_to_name") or "",
+                }
+            )
+    except Exception:
+        pass
+
+    clinic = ""
+    try:
+        clinic = frappe.db.get_value("Patient", patient, "company") or ""
+    except Exception:
+        pass
+
+    return {
+        "labs": labs_out,
+        "nurse_notes": nurse_notes,
+        "clinic_name": clinic or "Hiraal Clinic Laboratory",
+    }
+
+
+@frappe.whitelist()
+def get_my_lab_test_detail(name):
+    """Full lab result for the Lab Result detail screen (analytes + doctor note)."""
+    if not name:
+        frappe.throw(_("Lab test is required"))
+    patient = _my_patient_name()
+    owner = frappe.db.get_value("Lab Test", name, "patient")
+    if owner != patient:
+        frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+    doc = frappe.get_doc("Lab Test", name)
+    items = _lab_result_rows(doc)
+    watch = sum(1 for i in items if i["status"] == "Watch")
+    title = (
+        getattr(doc, "template", None)
+        or getattr(doc, "lab_test_name", None)
+        or doc.name
+    )
+    reviewed_by = (
+        getattr(doc, "employee_name", None)
+        or getattr(doc, "practitioner_name", None)
+        or ""
+    )
+    if not reviewed_by:
+        try:
+            reviews = frappe.get_all(
+                "Doctor Review",
+                filters={"patient": patient},
+                fields=["doctor_name"],
+                order_by="creation desc",
+                limit=1,
+            )
+            if reviews:
+                reviewed_by = reviews[0].get("doctor_name") or ""
+        except Exception:
+            reviewed_by = ""
+
+    return {
+        "name": doc.name,
+        "template": title,
+        "status": getattr(doc, "status", None) or "",
+        "creation": getattr(doc, "creation", None),
+        "result_date": getattr(doc, "result_date", None),
+        "clinic_name": "Hiraal Clinic Laboratory",
+        "reviewed_by": reviewed_by,
+        "doctor_note": _lab_doctor_note(patient, doc.name),
+        "watch_count": watch,
+        "items": items,
+    }
+
+
+@frappe.whitelist()
+def update_my_profile(patient_name=None, sex=None, age=None, mobile=None):
+    """Update the logged-in patient's basic profile fields from Personal Information."""
+    patient = _my_patient_name()
+    doc = frappe.get_doc("Patient", patient)
+
+    if patient_name is not None:
+        name = cstr(patient_name).strip()
+        if len(name) < 2:
+            frappe.throw(_("Full name is required"))
+        doc.patient_name = name
+
+    if sex is not None:
+        sex_val = cstr(sex).strip()
+        if sex_val and sex_val not in {"Male", "Female", "Other"}:
+            frappe.throw(_("Invalid gender"))
+        if sex_val:
+            doc.sex = sex_val
+
+    if age is not None and cstr(age).strip() != "":
+        try:
+            years = int(age)
+        except Exception:
+            frappe.throw(_("Age must be a whole number"))
+        if years < 1 or years > 120:
+            frappe.throw(_("Age must be between 1 and 120"))
+        from datetime import date
+
+        doc.dob = date(date.today().year - years, 1, 1)
+
+    if mobile is not None:
+        digits = "".join(c for c in cstr(mobile) if c.isdigit())
+        if len(digits) < 6:
+            frappe.throw(_("Valid mobile number is required"))
+        # Keep existing formatting style when possible.
+        doc.mobile = cstr(mobile).strip()
+
+    doc.save(ignore_permissions=True)
+    frappe.db.commit()
+    audit_log("Update", "Patient", patient, "Patient updated profile via app")
+    data = doc.as_dict()
+    data["subscription_active"] = _has_active_subscription(patient)
+    from hiraal_emr.services.health_pin_service import patient_has_pin, strip_pin_fields
+
+    data["has_health_pin"] = patient_has_pin(patient)
+    strip_pin_fields(data)
+    return data
+
+
 # Lab tests a patient may still cancel themselves — once the sample is
 # collected (or the test is done/cancelled), only the lab can touch it.
 _LAB_TEST_CANCELLABLE = {"Draft", "Approved", "Printed"}
@@ -2686,11 +2971,18 @@ def get_my_subscription():
     category list, free-trial settings, and payment history."""
     from hiraal_emr.services.subscription_catalog import (
         patient_trial_eligible,
+        repair_contradictory_free_plans,
         subscription_plans_catalog,
         trial_config,
         trial_is_active,
         has_active_subscription,
     )
+
+    # Auto-heal Free@$5 Desk rows so the paywall stays consistent even before migrate.
+    try:
+        repair_contradictory_free_plans()
+    except Exception:
+        frappe.logger("hiraal_sub").exception("repair_contradictory_free_plans failed")
 
     patient = _my_patient_name()
     fields = [
